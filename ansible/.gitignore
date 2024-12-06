@@ -1,0 +1,26 @@
+# Ignore everything by default
+*
+!**/
+*.md
+*.deb
+*key_*
+*.pem
+
+# Whitelist specific file types
+!*.tf
+!*.j2
+!*.py
+!*.yaml
+!*.yml
+!*.zip
+!*.html
+!*.txt
+!Dockerfile
+!*.cfg
+!**/*.cfg
+!ansible/p1_ansible/ansible.cfg
+
+
+
+# Whitelist the .gitignore file itself
+!.gitignore

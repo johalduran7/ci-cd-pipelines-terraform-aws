@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  jenkins:
+    #image: jenkinsci/blueocean:latest #
+    image: jenkins/jenkins:2.0
+    container_name: jenkins2
+    restart: on-failure
+    ports:
+      - "8080:8080"  # Exposes Jenkins on port 8080
+      - "50000:50000"  # Port for Jenkins agent connections
+      - "2376:2376"  # to be able to add Cloud docker nodes
+    privileged: true # not to have problems with root
+    volumes:
+      - jenkins_home:/var/jenkins_home  # Persistent volume for Jenkins data
+    #networks:
+    #  - learn_jenkins_default # when runnin the Dockerfile, Jenkins image creates a network according to the name of the folder where the Dockerfile is stored
+volumes:
+  jenkins_home:
+    driver: local
+
+

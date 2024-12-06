@@ -1,0 +1,80 @@
+---
+
+- name: Install lighttpd web server
+  become: yes
+  apt:
+    name: lighttpd
+    state: latest
+    update_cache: yes
+
+- name: Generate configuration file
+  template:
+    src: myconfig.j2
+    dest: /etc/lighttpd/lighttpd.conf
+    owner: root
+    group: root
+    mode: '0644'
+  vars:
+    server_port: 81
+
+- name: Generate configuration file test
+  template:
+    src: testconfig.j2
+    dest: /home/john/testconfig.j2
+    owner: root
+    group: root
+    mode: '0644'
+  vars:
+    my_var_in_file: 81
+
+
+- name: Generate configuration file test error on purpose
+  template:
+    src: testconfig.j22
+    dest: /home/john/testconfig.j2
+    owner: root
+    group: root
+    mode: '0644'
+  vars:
+    my_var_in_file: 81
+  register: output_error
+  ignore_errors: true
+
+- name: print error
+  debug:
+    var: output_error.msg
+
+- name: Generate configuration file test error IF
+  template:
+    src: testconfig.j22
+    dest: /home/john/testconfig.j2
+    owner: root
+    group: root
+    mode: '0644'
+  vars:
+    my_var_in_file: 81
+  register: output_error2
+  failed_when:
+    - '"Could not find or access" in output_error2.msg'
+    - output_error2.failed == true
+  any_errors_fatal: true
+  ignore_errors: true
+
+- name: check if a file exists
+  stat:
+    path: /home/john/filedoesntexist.txt
+  register: file_check
+
+- name: create file if it doesn't exist
+  command: echo "something" >> /home/john/filedoesntexist.txt
+  changed_when: not file_check.stat.exists
+
+- name: print file_check
+  debug:
+    var: file_check
+
+- name: Start lighttpd service
+  become: yes
+  service:
+    name: lighttpd
+    state: started

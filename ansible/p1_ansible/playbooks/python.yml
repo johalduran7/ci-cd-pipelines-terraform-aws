@@ -1,0 +1,4 @@
+---
+- hosts: ubuntu-agent1
+  roles:
+    - python

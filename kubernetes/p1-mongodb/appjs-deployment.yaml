@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appjs-deployment
+  labels:
+    app: appjs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appjs
+  template:
+    metadata:
+      labels:
+        app: appjs
+    spec:
+      containers:
+      - name: appjs
+        image: 948586925757.dkr.ecr.us-east-1.amazonaws.com/p1-docker-app-local-2:1.2 # AWS ECR path 
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+      - name: ecr-secret
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appjs-service
+  labels:
+    app: appjs
+spec:
+  selector:
+    app: appjs
+  ports:
+    - protocol: TCP
+      port: 3000 # arbitrary port where the application is listening at  
+      targetPort: 3000 # the port where the requests will be sent out
+      #nodePort: 30000 # it must be between 30000-32767. If I remove it, it'll assign a random port when running "minikube service <service name>"
+  type: LoadBalancer # accept external requests

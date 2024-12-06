@@ -1,0 +1,5 @@
+app/node_modules
+app/package*
+app/public/uploads/*jpg
+.terraform*
+terraform*
