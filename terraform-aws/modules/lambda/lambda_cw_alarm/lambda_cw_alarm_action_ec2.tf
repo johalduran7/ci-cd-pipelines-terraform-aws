@@ -1,3 +1,4 @@
+# this module is called from cw/cw_metrics_alarm.tf
 variable instance_id {
   type        = string
   default     = ""

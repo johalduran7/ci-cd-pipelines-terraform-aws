@@ -198,9 +198,9 @@ variable "aws_iam_instance_profile" {
 # ###############################################
 # # ECS (fargate and ec2 tasks)
 
-module "ecs" {
-  source = "./modules/ecs"
-}
+# module "ecs" {
+#   source = "./modules/ecs"
+# }
 
 
 # ################################################
@@ -242,9 +242,6 @@ module "ecs" {
 # aws ssm get-parameters --names /my-app/dev/db-url /my-app/dev/db-password --outpu=json --with-decryption
 # aws ssm get-parameters-by-path --path /my-app/ --recursive --output=json
 
-
-
-# ################################################
 # #  Lambda using SSM parameter store above
 
 # module "lambda" {
@@ -404,3 +401,50 @@ module "ecs" {
 
 
 
+
+# ################################################
+# LAMBDA SECTION
+
+# Dollar Rate personal automation, DO NOT disable
+module "lambda_sns_dollar" {
+  source = "./modules/lambda/lambda_sns_dollar"
+}
+
+# module "lambda_alb" {
+#   source = "./modules/lambda/lambda_alb"
+# }
+
+# module "lambda_dlq" {
+#   source = "./modules/lambda/lambda_dlq"
+# }
+
+# module "lambda_eventbridge" {
+#   source = "./modules/lambda/lambda_eventbridge"
+# }
+
+# output eventbridge_rules {
+#   value       = module.lambda_eventbridge.eventbridge_rules
+# }
+
+
+# module "lambda_s3" {
+#   source = "./modules/lambda/lambda_s3"
+# }
+
+# be careful with leaving this one running for a long time because lambda can keep polling from sqs increasing cost
+# module "lambda_sqs_mapper" {
+#   source = "./modules/lambda/lambda_sqs_mapper"
+# }
+
+# lambda_vpc module may take up to 6 minutes to destroy.
+# module "lambda_vpc" {
+#   source = "./modules/lambda/lambda_vpc"
+# }
+# output private_route_table_ids {
+#   value       = module.lambda_vpc.private_route_table_ids
+# }
+
+
+# module "lambda_layer" {
+#   source = "./modules/lambda/lambda_layer"
+# }

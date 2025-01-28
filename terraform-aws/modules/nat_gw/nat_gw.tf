@@ -2,7 +2,7 @@
 # module "nat_gw" {
 #   source="./modules/nat_gw"
 #   subnet_id= module.vpc.public_subnet_a_id # optional, if not provided it will use the AZ a in the current region
-#   private_route_table=module.vpc.private_route_table # Madatory
+#   private_route_table=module.vpc.private_route_table # Mandatory
 # }
 
 

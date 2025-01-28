@@ -1,4 +1,8 @@
-# This is just a lambda example for SSM. It requieres the module ssm to display parameters 
+# This example is just to show how alb can invoke the lambda function.
+# running the following, we get the response including the event (parameters translated from HTTP to json)
+# http://alb-lambda-1750844358.us-east-1.elb.amazonaws.com/?parameter1=something&parameter2=somethingelse
+# the dns alb can change of course.
+
 resource "aws_iam_role" "lambda_role" {
   name = "lambda_ssm_role"
   assume_role_policy = jsonencode({
@@ -48,20 +52,29 @@ resource "aws_iam_role_policy_attachment" "attach_policy" {
   role       = aws_iam_role.lambda_role.name
 }
 
-resource "aws_lambda_function" "hello_world" {
-  function_name = "HelloWorldFunction"
-  handler       = "modules/lambda/lambda_function.lambda_handler" # Python handler
+resource "aws_lambda_function" "lambda_alb" {
+  function_name = "lambda_alb"
+  handler       = "modules/lambda/lambda_alb/lambda_function.lambda_handler" # Python handler
   runtime       = "python3.9"                                     # Specify the Python runtime version
   role          = aws_iam_role.lambda_role.arn
   timeout       = 10
 
-  source_code_hash = filebase64sha256("modules/lambda/lambda_function.zip")
+  source_code_hash = filebase64sha256("modules/lambda/lambda_alb/lambda_function.zip")
 
   # Specify the S3 bucket and object if you upload the ZIP file to S3, or use the `filename` attribute for local deployment
-  filename = "modules/lambda/lambda_function.zip" # Path to your ZIP file
+  filename = "modules/lambda/lambda_alb/lambda_function.zip" # Path to your ZIP file
 }
 
 
 # Ensure that you have a ZIP file created with your Lambda function code
 
-# zip modules/lambda/lambda_function.zip modules/lambda/lambda_function.py
+# zip modules/lambda/lambda_alb/lambda_function.zip modules/lambda/lambda_alb/lambda_function.py
+
+# add permission to allow alb to invoke lambda
+resource "aws_lambda_permission" "allow_alb_invoke" {
+  statement_id  = "AllowExecutionFromALB"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_alb.arn
+  principal     = "elasticloadbalancing.amazonaws.com"
+  source_arn    = aws_lb_target_group.lambda_tg.arn
+}
