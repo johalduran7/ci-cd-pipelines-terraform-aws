@@ -25,4 +25,5 @@ CoPilot/**/*
 !*/
 .terraform/
 modules/lambda/lambda_layer/my-layer/*
+modules/beanstalk/sample-application/*
 
