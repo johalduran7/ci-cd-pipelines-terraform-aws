@@ -1,11 +1,11 @@
-terraform { 
-  cloud { 
-    
-    organization = "john-organization" 
-    workspaces { 
-      name = "app-portfolio" 
-    } 
-  } 
+terraform {
+  cloud {
+
+    organization = "john-organization"
+    workspaces {
+      name = "app-portfolio"
+    }
+  }
 }
 
 terraform {
