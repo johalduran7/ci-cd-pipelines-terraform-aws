@@ -32,6 +32,5 @@ data "aws_subnets" "available_subnets" {
 }
 
 
-
 #since I had to add the ssh-key as an environment variable. to run this, you have to run: 
 #terraform apply  -auto-approve -var 'ssh_public_key=$TF_VAR_ssh_public_key'
