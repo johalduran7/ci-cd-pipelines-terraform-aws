@@ -5,3 +5,22 @@
     - app
 
 # run the playbook: ansible-playbook -i inventories/development/aws_ec2.yml playbooks/deploy.yml --extra-vars "ansible_ssh_private_key_file=/home/john/portfolio_John_Duran/app/terraform/key_saa"
+# run with vault: 
+# ansible-playbook -v -i inventories/development/aws_ec2.yml playbooks/deploy.yml  \
+# --vault-password-file=inventories/development/group_vars/pass-ansible-vault_do_not_push_to_repo.pass \
+# --extra-vars "ansible_ssh_private_key_file=/home/john/portfolio_John_Duran/app/terraform/key_saa" \
+# -e "@inventories/development/group_vars/vault.yml"
+
+
+# encrypt vault.yml
+# ansible-vault encrypt inventories/development/group_vars/vault.yml  \
+#--vault-password-file=inventories/development/group_vars/pass-ansible-vault_do_not_push_to_repo.pass 
+
+
+# view vault.yml
+# ansible-vault view inventories/development/group_vars/vault.yml  \
+#--vault-password-file=inventories/development/group_vars/pass-ansible-vault_do_not_push_to_repo.pass 
+
+# decrypt vault.yml
+# ansible-vault decrypt inventories/development/group_vars/vault.yml  \
+#--vault-password-file=inventories/development/group_vars/pass-ansible-vault_do_not_push_to_repo.pass 
