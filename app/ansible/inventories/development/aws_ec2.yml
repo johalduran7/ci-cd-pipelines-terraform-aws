@@ -4,7 +4,8 @@ regions:
   - us-east-1  # Replace with your AWS region
 filters:
   instance-state-name: running
-  tag:aws:autoscaling:groupName: app
+  tag:aws:autoscaling:groupName: app_asg
 keyed_groups:
   - key: tags.Name
     prefix: "app"
+aws_profile: "default"

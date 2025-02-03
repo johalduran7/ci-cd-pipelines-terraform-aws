@@ -1,4 +1,10 @@
 ---
+- name: Install curl on Amazon Linux
+  become: yes
+  yum:
+    name: curl
+    state: present
+
 - name: Install NVM (Node Version Manager) on Amazon Linux
   become: yes
   shell: |
@@ -11,25 +17,36 @@
   args:
     executable: /bin/bash
 
-- name: Clone the repository
-  git:
-    repo: "{{ repo_url }}"
-    dest: "{{ app_dir }}"
-    version: "master"  # Specify the branch or tag
-    force: yes
-
-- name: Move to the subdirectory (if applicable)
-  command: "mv {{ app_dir }}/{{ repo_subdir }}/* {{ app_dir }}/"
-  when: repo_subdir is defined
-
-- name: Install app dependencies using npm
+- name: Install Git on Amazon Linux
   become: yes
-  npm:
-    path: "{{ app_dir }}"
+  yum:
+    name: git
     state: present
+
+- name: Clone a private GitHub repository
+  git:
+    repo: "https://{{ github_username }}:{{ github_token }}@github.com/johalduran7/portfolio_John_Duran.git"
+    dest: "/home/ec2-user/repo"
+    version: "master"
+
+- name: Check if repo_subdir exists
+  stat:
+    path: "/home/ec2-user/repo"
+  register: repo_subdir_stat
+
+- name: Move files from the subdirectory (if applicable) and remove the repo
+  # command: "mv {{ app_dir }}/{{ repo_subdir }}/* {{ app_dir }}/" the wildecard doesn't work with command
+  shell: |
+    mkdir {{ app_dir }}
+    mv /home/ec2-user/repo/{{ repo_subdir }}/* {{ app_dir }}/
+    rm -rf /home/ec2-user/repo
+  when:
+    repo_subdir_stat.stat.exists and repo_subdir is defined
+
 
 - name: Start the Node.js app
   become: yes
+  become_user: ec2-user
   command: "node {{ app_dir }}/app.js"
   args:
     chdir: "{{ app_dir }}"

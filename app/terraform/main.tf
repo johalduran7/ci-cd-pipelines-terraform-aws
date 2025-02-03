@@ -19,6 +19,7 @@ module "asg" {
   alb_dns_name    = module.alb.alb_dns_name
   public_subnets  = module.vpc.public_subnets
   private_subnets = module.vpc.private_subnets
+  env             = var.env
 }
 
 

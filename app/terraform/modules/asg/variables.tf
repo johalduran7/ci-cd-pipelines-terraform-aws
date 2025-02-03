@@ -28,5 +28,10 @@ variable "private_subnets" {
 
 variable "asg_name" {
   type    = string
-  default = "app"
+  default = "app_asg"
+}
+
+variable "env" {
+  type    = string
+  default = "Dev"
 }

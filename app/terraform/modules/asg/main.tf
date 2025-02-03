@@ -196,6 +196,7 @@ resource "aws_launch_template" "amazon_linux_template" {
       Name      = "app"
       Terraform = "yes"
       asg       = var.asg_name
+      Env       = var.env
     }
   }
 }
@@ -219,7 +220,7 @@ resource "aws_autoscaling_group" "app_asg" {
 
   tag {
     key                 = "Name"
-    value               = "app"
+    value               = var.asg_name
     propagate_at_launch = true
 
   }
