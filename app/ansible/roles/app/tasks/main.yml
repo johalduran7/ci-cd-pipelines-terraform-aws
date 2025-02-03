@@ -1,24 +1,24 @@
 ---
-- name: Install Node.js from Nodesource
+- name: Install NVM (Node Version Manager) on Amazon Linux
   become: yes
   shell: |
-    curl -sL https://deb.nodesource.com/setup_{{ nodejs_version }} | sudo -E bash -
-    sudo apt-get install -y nodejs
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+    . ~/.nvm/nvm.sh
+    nvm install 16.0.0
+    npm install express
+  environment:
+    HOME: "/home/ec2-user"  # Make sure the script works in the user's home directory
+  args:
+    executable: /bin/bash
 
-- name: Install pm2 (Process Manager for Node.js)
-  become: yes
-  npm:
-    name: pm2
-    global: yes
-
-- name: Clone the entire repository
+- name: Clone the repository
   git:
     repo: "{{ repo_url }}"
     dest: "{{ app_dir }}"
     version: "master"  # Specify the branch or tag
     force: yes
 
-- name: Move to the subdirectory
+- name: Move to the subdirectory (if applicable)
   command: "mv {{ app_dir }}/{{ repo_subdir }}/* {{ app_dir }}/"
   when: repo_subdir is defined
 
@@ -28,10 +28,11 @@
     path: "{{ app_dir }}"
     state: present
 
-- name: Ensure app is running using pm2
+- name: Start the Node.js app
   become: yes
-  command: "pm2 start {{ app_dir }}/app.js --name node-app"
+  command: "node {{ app_dir }}/app.js"
   args:
     chdir: "{{ app_dir }}"
-  notify:
-    - Restart app
+  async: 600  # Allows the task to run in the background for up to 10 minutes
+  poll: 0  # Doesn't wait for the task to complete
+

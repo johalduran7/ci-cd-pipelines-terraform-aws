@@ -4,6 +4,6 @@ variable "vpc_id" {
 
 }
 
-variable public_subnets {
-  default        = ""
+variable "public_subnets" {
+  default = ""
 }

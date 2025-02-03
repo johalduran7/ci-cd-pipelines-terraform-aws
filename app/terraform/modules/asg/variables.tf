@@ -9,24 +9,24 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable app_tg_arn {
-  default       = ""
+variable "app_tg_arn" {
+  default = ""
 }
 
 variable "alb_dns_name" {
-  default       = ""
+  default = ""
 
 }
 
-variable public_subnets {
-  default        = ""
+variable "public_subnets" {
+  default = ""
 }
 
-variable private_subnets {
-  default        = ""
+variable "private_subnets" {
+  default = ""
 }
 
-variable asg_name {
-  type        = string
-  default     = "app"
+variable "asg_name" {
+  type    = string
+  default = "app"
 }

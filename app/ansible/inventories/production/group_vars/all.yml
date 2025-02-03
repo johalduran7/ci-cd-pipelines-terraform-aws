@@ -1,4 +1,4 @@
-nodejs_version: "9.2.0"  # Choose the version of Node.js
+nodejs_version: "18.x"  # Choose the version of Node.js
 app_dir: "/home/ec2-user/node-app"  # The directory where your app will be deployed
 repo_url: "https://github.com/johalduran7/portfolio_John_Duran.git"  # Your app's GitHub repo
 repo_subdir: "app/src"

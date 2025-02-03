@@ -14,10 +14,10 @@ output "private_route_table" {
 
 }
 
-output public_subnets {
-  value       = local.public_subnets
+output "public_subnets" {
+  value = local.public_subnets
 }
 
-output private_subnets {
-  value       = local.public_subnets
+output "private_subnets" {
+  value = local.public_subnets
 }
