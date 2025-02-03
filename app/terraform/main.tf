@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1" 
+  region = "us-east-1"
 }
 
 # Create VPC
@@ -28,7 +28,6 @@ module "asg" {
 }
 
 data "aws_subnets" "available_subnets" {
-  
 }
 
 
