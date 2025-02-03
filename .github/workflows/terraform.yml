@@ -46,13 +46,11 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
-
+          TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
         run: |
           cd app/terraform
           terraform init
-          terraform plan -out=tfplan
-        env:
-          TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
+          terraform plan -out=tfplan          
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4
         with:
