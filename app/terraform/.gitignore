@@ -1,0 +1,26 @@
+# Ignore everything by default
+*
+!**/
+*.md
+*.deb
+*key_*
+*.pem
+
+# Whitelist specific file types
+!*.tf
+!*.py
+!*.yaml
+!*.yml
+!*.zip
+!*.html
+!*.txt
+!Dockerfile
+
+# Whitelist the .gitignore file itself
+!.gitignore
+
+# Optional: Whitelist directories (to allow file inclusion in them)
+!*/
+.terraform/
+modules/lambda/lambda_layer/my-layer/*
+
