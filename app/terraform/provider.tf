@@ -1,3 +1,13 @@
+terraform { 
+  cloud { 
+    
+    organization = "john-organization" 
+    workspaces { 
+      name = "app-portfolio" 
+    } 
+  } 
+}
+
 terraform {
   required_providers {
     aws = {
