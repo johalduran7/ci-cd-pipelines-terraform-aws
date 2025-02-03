@@ -24,6 +24,5 @@ module "asg" {
 
 
 data "aws_subnets" "available_subnets" {
-
 }
 
