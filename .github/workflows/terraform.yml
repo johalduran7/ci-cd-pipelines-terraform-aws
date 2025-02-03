@@ -5,12 +5,12 @@ on:
     branches:
       - main
     paths:
-      - 'terraform/**'  # Only trigger if files inside terraform/ change
+      - 'app/terraform/**'  # Trigger only if Terraform files change
   pull_request:
     branches:
       - main
     paths:
-      - 'terraform/**'
+      - 'app/terraform/**'
 
 jobs:
   validate:
@@ -25,6 +25,7 @@ jobs:
           terraform_version: 1.4.6
       - name: Terraform Init & Validate
         run: |
+          cd app/terraform
           terraform init
           terraform fmt -check
           terraform validate
@@ -42,13 +43,14 @@ jobs:
           terraform_version: 1.4.6
       - name: Terraform Init & Plan
         run: |
+          cd app/terraform
           terraform init
           terraform plan -out=tfplan
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v3
         with:
           name: tfplan
-          path: tfplan
+          path: app/terraform/tfplan
 
   apply:
     name: Terraform Apply
@@ -65,6 +67,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: tfplan
+          path: app/terraform/
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: |
+          cd app/terraform
+          terraform apply -auto-approve tfplan
         if: github.event_name == 'push'
