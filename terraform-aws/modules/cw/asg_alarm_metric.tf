@@ -158,9 +158,9 @@ resource "aws_launch_template" "amazon_linux_template" {
   }
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_instance_profile.name
-  }  
+  }
   # only for the launch template this should be encoded
-  user_data = base64encode( <<-EOF
+  user_data = base64encode(<<-EOF
     #!/bin/bash
     yum update -y
     yum install -y amazon-cloudwatch-agent

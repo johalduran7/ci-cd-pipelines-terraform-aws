@@ -23,17 +23,17 @@ resource "aws_iam_role" "lambda_role" {
 resource "aws_iam_role_policy_attachment" "lambda_execution_policy" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
-  
+
 }
 
 resource "aws_lambda_function" "lambda_dlq" {
   function_name = "lambda_dlq"
   handler       = "modules/lambda/lambda_dlq/lambda_function.lambda_handler" # Python handler
-  runtime       = "python3.9"                                     # Specify the Python runtime version
+  runtime       = "python3.9"                                                # Specify the Python runtime version
   role          = aws_iam_role.lambda_role.arn
   timeout       = 10
   dead_letter_config {
-    target_arn="${aws_sqs_queue.dlq_queue.arn}"
+    target_arn = aws_sqs_queue.dlq_queue.arn
   }
   source_code_hash = filebase64sha256("modules/lambda/lambda_dlq/lambda_function.zip")
 
@@ -52,7 +52,7 @@ resource "aws_lambda_function" "lambda_dlq" {
 # Step 1: Create the SQS Queue
 resource "aws_sqs_queue" "dlq_queue" {
   #name = "DemoS3Notification"
-  name       = "dlq_sqs_lambda"
+  name = "dlq_sqs_lambda"
 
   tags = {
     Name      = "DLQ_SQS_LAMBDA"

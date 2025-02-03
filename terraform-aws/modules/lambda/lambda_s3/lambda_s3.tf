@@ -74,7 +74,7 @@ resource "aws_iam_role" "lambda_role" {
 resource "aws_iam_role_policy_attachment" "lambda_execution_policy_invoke" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-  
+
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_execution_policy_AWSLambdaBasic_forCW" {
@@ -88,12 +88,12 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_policy_AWSLambdaBasi
 resource "aws_lambda_function" "lambda_s3" {
   function_name = "lambda_s3"
   handler       = "modules/lambda/lambda_s3/lambda_function.lambda_handler" # Python handler
-  runtime       = "python3.9"                                     # Specify the Python runtime version
+  runtime       = "python3.9"                                               # Specify the Python runtime version
   role          = aws_iam_role.lambda_role.arn
   timeout       = 10
-#   dead_letter_config {
-#     target_arn="${aws_sqs_queue.dlq_queue.arn}"
-#   }
+  #   dead_letter_config {
+  #     target_arn="${aws_sqs_queue.dlq_queue.arn}"
+  #   }
   source_code_hash = filebase64sha256("modules/lambda/lambda_s3/lambda_function.zip")
 
   # Specify the S3 bucket and object if you upload the ZIP file to S3, or use the `filename` attribute for local deployment

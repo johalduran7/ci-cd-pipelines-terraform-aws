@@ -20,7 +20,7 @@ module "asg" {
   public_subnets  = module.vpc.public_subnets
   private_subnets = module.vpc.private_subnets
   env             = var.env
-  ssh_public_key  = var.ssh_public_key
+  ssh_public_key  = var.ssh_public_key # provided in the environment variable TF_VAR_ssh_public_key
 }
 
 data "aws_subnets" "available_subnets" {

@@ -80,12 +80,12 @@ resource "aws_iam_policy_attachment" "ecs_task_role_policy_attachment" {
 resource "aws_iam_policy" "xray_permissions" {
   name        = "XRayTaskPermissions"
   description = "Permissions for ECS tasks to send X-Ray traces"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "xray:PutTraceSegments",
           "xray:PutTelemetryRecords"
         ]
@@ -105,37 +105,37 @@ resource "aws_iam_policy_attachment" "ecs_task_role_policy_attachment_xray" {
 resource "aws_iam_policy" "execute_command_policy" {
   name        = "ExecuteCommandPermissions"
   description = "Permissions for ECS tasks to use ExecuteCommand"
-  policy      = jsonencode({
-      "Version": "2012-10-17",
-      "Statement": [
-          {
-              "Effect": "Allow",
-              "Action": [
-                  "ssmmessages:CreateControlChannel",
-                  "ssmmessages:CreateDataChannel",
-                  "ssmmessages:OpenControlChannel",
-                  "ssmmessages:OpenDataChannel"
-              ],
-              "Resource": "*"
-          },
-          {
-              "Effect": "Allow",
-              "Action": [
-                  "logs:DescribeLogGroups"
-              ],
-              "Resource": "*"
-          },
-          {
-              "Effect": "Allow",
-              "Action": [
-                  "logs:DescribeLogGroups",
-                  "logs:CreateLogStream",
-                  "logs:DescribeLogStreams",
-                  "logs:PutLogEvents"
-              ],
-              "Resource": aws_cloudwatch_log_group.ecs_cluster_cloudwatch.arn
-          }
-      ]
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ],
+        "Resource" : "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "logs:DescribeLogGroups"
+        ],
+        "Resource" : "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "logs:DescribeLogGroups",
+          "logs:CreateLogStream",
+          "logs:DescribeLogStreams",
+          "logs:PutLogEvents"
+        ],
+        "Resource" : aws_cloudwatch_log_group.ecs_cluster_cloudwatch.arn
+      }
+    ]
   })
 }
 

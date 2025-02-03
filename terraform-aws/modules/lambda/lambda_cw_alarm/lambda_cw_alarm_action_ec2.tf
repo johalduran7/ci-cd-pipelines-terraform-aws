@@ -1,16 +1,16 @@
 # this module is called from cw/cw_metrics_alarm.tf
-variable instance_id {
-  type        = string
-  default     = ""
+variable "instance_id" {
+  type    = string
+  default = ""
 }
 
-variable log_group {
-  type        = string
-  default     = ""
+variable "log_group" {
+  type    = string
+  default = ""
 }
-variable log_stream {
-  type        = string
-  default     = ""
+variable "log_stream" {
+  type    = string
+  default = ""
 }
 
 # IAM Role for Lambda and Firehose
@@ -39,16 +39,16 @@ resource "aws_iam_policy" "lambda_for_cloudwatch_role_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "ec2:TerminateInstances",
           "ec2:DescribeInstances" # Optional: Useful for logging or debugging
         ],
         Resource = "arn:aws:ec2:*:*:instance/*" # Allows termination of all EC2 instances in the account
       },
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "logs:CreateLogGroup",
           "logs:DescribeLogStreams",
           "logs:CreateLogStream",
@@ -81,16 +81,16 @@ resource "aws_lambda_function" "cloudwatch_terminate_ec2_function" {
   environment {
     variables = {
       instance_id = var.instance_id
-      log_group = var.log_group
-      log_stream = var.log_stream
+      log_group   = var.log_group
+      log_stream  = var.log_stream
     }
   }
 }
 
-output lambda_arn {
-  value       = aws_lambda_function.cloudwatch_terminate_ec2_function.arn
+output "lambda_arn" {
+  value = aws_lambda_function.cloudwatch_terminate_ec2_function.arn
 }
 
-output lambda_function_name {
-  value       = aws_lambda_function.cloudwatch_terminate_ec2_function.function_name
+output "lambda_function_name" {
+  value = aws_lambda_function.cloudwatch_terminate_ec2_function.function_name
 }

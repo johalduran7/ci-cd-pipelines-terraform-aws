@@ -29,8 +29,8 @@ resource "aws_s3_bucket_versioning" "cf_templates_versioning" {
 #   acl    = "private"
 # }
 
-variable template_filename {
-  default     = "eb-java-scorekeep-xray-simplified.yaml"
+variable "template_filename" {
+  default = "eb-java-scorekeep-xray-simplified.yaml"
 }
 
 

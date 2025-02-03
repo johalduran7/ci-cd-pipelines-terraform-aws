@@ -6,8 +6,8 @@ variable "cluster_name" {
 }
 
 # this is needed for aws ecs execute-command
-resource "aws_cloudwatch_log_group" "ecs_cluster_cloudwatch" { 
-  name = "/ecs/exec"
+resource "aws_cloudwatch_log_group" "ecs_cluster_cloudwatch" {
+  name              = "/ecs/exec"
   retention_in_days = 1 # Retain logs for 7 days
 }
 
@@ -19,7 +19,7 @@ resource "aws_ecs_cluster" "demo_cluster" {
 
   configuration {
     execute_command_configuration {
-      logging    = "OVERRIDE"
+      logging = "OVERRIDE"
 
       log_configuration {
         cloud_watch_encryption_enabled = false
@@ -140,12 +140,12 @@ resource "aws_ecs_task_definition" "fargate_task" {
 
 # 5. Optional: ECS Service to run the Fargate Task
 resource "aws_ecs_service" "fargate_service" {
-  name            = "demo_fargate_service"
-  cluster         = aws_ecs_cluster.demo_cluster.id
-  task_definition = aws_ecs_task_definition.fargate_task.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
-  enable_execute_command = true  # this is needed to run $ aws ecs execute-command
+  name                   = "demo_fargate_service"
+  cluster                = aws_ecs_cluster.demo_cluster.id
+  task_definition        = aws_ecs_task_definition.fargate_task.arn
+  desired_count          = 1
+  launch_type            = "FARGATE"
+  enable_execute_command = true # this is needed to run $ aws ecs execute-command
 
   network_configuration {
     subnets          = toset(data.aws_subnets.subnets_example.ids)
@@ -187,23 +187,23 @@ resource "aws_ecs_task_definition" "ec2_task" {
     #   }
     # ]
     links = ["xray-daemon"]
-  },
-  # this installs the Daemon, however, my app doesn't have SDK and code to leverage xray. That's for programmers
-  {
-    "name": "xray-daemon",  
-    "image": "public.ecr.aws/xray/aws-xray-daemon",
-    "memory": 128,
-    "cpu": 64,
-    "essential": false,
-    "portMappings": [
-      {
-        "containerPort": 2000,
-        "hostPort": 2000,
-        "protocol": "udp"
-      }
-    ]
-  }
-  
+    },
+    # this installs the Daemon, however, my app doesn't have SDK and code to leverage xray. That's for programmers
+    {
+      "name" : "xray-daemon",
+      "image" : "public.ecr.aws/xray/aws-xray-daemon",
+      "memory" : 128,
+      "cpu" : 64,
+      "essential" : false,
+      "portMappings" : [
+        {
+          "containerPort" : 2000,
+          "hostPort" : 2000,
+          "protocol" : "udp"
+        }
+      ]
+    }
+
   ])
 
 
@@ -222,7 +222,7 @@ resource "aws_ecs_service" "ec2_service" {
   desired_count   = 1 # Number of tasks you want to run
   launch_type     = "EC2"
 
-  enable_execute_command = true  # this is needed to run $ aws ecs execute-command
+  enable_execute_command = true # this is needed to run $ aws ecs execute-command
 
   ordered_placement_strategy {
     type  = "binpack" # Binpack strategy

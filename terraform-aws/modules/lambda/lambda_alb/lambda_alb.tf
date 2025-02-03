@@ -55,7 +55,7 @@ resource "aws_iam_role_policy_attachment" "attach_policy" {
 resource "aws_lambda_function" "lambda_alb" {
   function_name = "lambda_alb"
   handler       = "modules/lambda/lambda_alb/lambda_function.lambda_handler" # Python handler
-  runtime       = "python3.9"                                     # Specify the Python runtime version
+  runtime       = "python3.9"                                                # Specify the Python runtime version
   role          = aws_iam_role.lambda_role.arn
   timeout       = 10
 

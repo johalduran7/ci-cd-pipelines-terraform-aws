@@ -74,16 +74,16 @@ resource "aws_lb" "alb_lambda" {
   idle_timeout               = 60 # Time (in seconds) before idle connections are closed
 
   tags = {
-    Name      = "alb_lambda"
-    Terraform = "yes"
-    aws_dva_c02   = "yes"
+    Name        = "alb_lambda"
+    Terraform   = "yes"
+    aws_dva_c02 = "yes"
   }
 
 }
 
 # 3. Target Group
 resource "aws_lb_target_group" "lambda_tg" {
-  name     = "lambda-target-group"
+  name        = "lambda-target-group"
   target_type = "lambda"
 
 

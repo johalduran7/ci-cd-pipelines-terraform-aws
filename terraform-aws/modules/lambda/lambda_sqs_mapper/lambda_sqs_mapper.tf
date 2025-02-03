@@ -25,8 +25,8 @@ resource "aws_iam_policy" "sqs_access_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = [
+        Effect = "Allow"
+        Action = [
           "sqs:ReceiveMessage",
           "sqs:DeleteMessage",
           "sqs:GetQueueAttributes"
@@ -53,11 +53,11 @@ resource "aws_iam_role_policy_attachment" "lambda_CW_execution_policy" {
 
 
 resource "aws_lambda_function" "lambda_sqs_mapper" {
-  function_name = "lambda_sqs_mapper"
-  handler       = "modules/lambda/lambda_sqs_mapper/lambda_function.lambda_handler" # Python handler
-  runtime       = "python3.9"                                     # Specify the Python runtime version
-  role          = aws_iam_role.lambda_execution_role.arn
-  timeout       = 10
+  function_name    = "lambda_sqs_mapper"
+  handler          = "modules/lambda/lambda_sqs_mapper/lambda_function.lambda_handler" # Python handler
+  runtime          = "python3.9"                                                       # Specify the Python runtime version
+  role             = aws_iam_role.lambda_execution_role.arn
+  timeout          = 10
   source_code_hash = filebase64sha256("modules/lambda/lambda_sqs_mapper/lambda_function.zip")
 
   # Specify the S3 bucket and object if you upload the ZIP file to S3, or use the `filename` attribute for local deployment
@@ -65,7 +65,7 @@ resource "aws_lambda_function" "lambda_sqs_mapper" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
-  name              = "/aws/lambda/${aws_lambda_function.lambda_sqs_mapper.function_name}"  # Use the log group name of your Lambda function
+  name              = "/aws/lambda/${aws_lambda_function.lambda_sqs_mapper.function_name}" # Use the log group name of your Lambda function
   retention_in_days = 1
 }
 
@@ -80,7 +80,7 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
 # Step 1: Create the SQS Queue
 resource "aws_sqs_queue" "sqs_mapper_lambda" {
   #name = "DemoS3Notification"
-  name       = "sqs_mapper_lambda"
+  name = "sqs_mapper_lambda"
 
   tags = {
     Name      = "sqs_mapper_lambda"

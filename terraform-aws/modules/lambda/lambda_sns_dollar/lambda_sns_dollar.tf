@@ -19,7 +19,7 @@ resource "aws_iam_role" "lambda_execution_role" {
 resource "aws_iam_policy" "lambda_logs_policy" {
   name        = "lambda_logs_policy"
   description = "Policy to allow Lambda to filter and query log events"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
@@ -48,7 +48,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs_policy_attachment" {
 resource "aws_iam_role_policy_attachment" "lambda_SNS_execution_policy" {
   role       = aws_iam_role.lambda_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkRoleSNS"
-  
+
 }
 
 # Allow Lambda to write to CW
@@ -63,12 +63,12 @@ resource "aws_iam_role_policy_attachment" "lambda_CW_execution_policy" {
 resource "aws_lambda_function" "lambda_sns_dollar" {
   function_name = "lambda_sns_dollar"
   handler       = "modules/lambda/lambda_sns_dollar/lambda_function.lambda_handler" # Python handler
-  runtime       = "python3.9"                                     # Specify the Python runtime version
+  runtime       = "python3.9"                                                       # Specify the Python runtime version
   role          = aws_iam_role.lambda_execution_role.arn
   timeout       = 10
-#   dead_letter_config {
-#     target_arn="${aws_sqs_queue.dlq_queue.arn}"
-#   }
+  #   dead_letter_config {
+  #     target_arn="${aws_sqs_queue.dlq_queue.arn}"
+  #   }
   source_code_hash = filebase64sha256("modules/lambda/lambda_sns_dollar/lambda_function.zip")
 
   # Specify the S3 bucket and object if you upload the ZIP file to S3, or use the `filename` attribute for local deployment
@@ -76,7 +76,7 @@ resource "aws_lambda_function" "lambda_sns_dollar" {
 
   environment {
     variables = {
-      url = "https://script.google.com/macros/s/AKfycbxoDsLKnhaaQ8kcFz7DApoi7E9VEIZEHcqeMZRAVRPGxi1YNdcI0izmHdzxOIGgbbM/exec"
+      url     = "https://script.google.com/macros/s/AKfycbxoDsLKnhaaQ8kcFz7DApoi7E9VEIZEHcqeMZRAVRPGxi1YNdcI0izmHdzxOIGgbbM/exec"
       sns_arn = "${aws_sns_topic.lambda_dollar_notifications.arn}"
     }
   }
@@ -86,7 +86,7 @@ resource "aws_lambda_function" "lambda_sns_dollar" {
 # zip modules/lambda/lambda_sns_dollar/lambda_function.zip modules/lambda/lambda_sns_dollar/lambda_function.py
 
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
-  name              = "/aws/lambda/${aws_lambda_function.lambda_sns_dollar.function_name}"  # Use the log group name of your Lambda function
+  name              = "/aws/lambda/${aws_lambda_function.lambda_sns_dollar.function_name}" # Use the log group name of your Lambda function
   retention_in_days = 1
 }
 
@@ -110,18 +110,18 @@ module "eventbridge" {
       {
         name  = "lambda-loves-cron"
         arn   = "${aws_lambda_function.lambda_sns_dollar.arn}"
-        input = jsonencode({"job": "cron-by-rate"})
+        input = jsonencode({ "job" : "cron-by-rate" })
       }
     ]
   }
   tags = {
-    Name = "lambda_rule"
+    Name      = "lambda_rule"
     Terraform = "yes"
   }
 }
 
-output eventbridge_rules {
-  value       = module.eventbridge.eventbridge_rule_arns
+output "eventbridge_rules" {
+  value = module.eventbridge.eventbridge_rule_arns
 }
 
 
@@ -152,12 +152,12 @@ resource "aws_sns_topic_policy" "lambda_dollar_notifications_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect    = "Allow",
+        Effect = "Allow",
         Principal = {
           Service = "lambda.amazonaws.com"
         },
-        Action    = "SNS:Publish",
-        Resource  = aws_sns_topic.lambda_dollar_notifications.arn,
+        Action   = "SNS:Publish",
+        Resource = aws_sns_topic.lambda_dollar_notifications.arn,
         Condition = {
           ArnLike = {
             "aws:SourceArn" = "${aws_lambda_function.lambda_sns_dollar.arn}"
@@ -201,9 +201,9 @@ resource "aws_lambda_function_event_invoke_config" "lambda_sns_destination" {
 
 
 resource "aws_dynamodb_table" "price_dollar" {
-  name           = "price_dollar"
-  billing_mode   = "PAY_PER_REQUEST" # On-demand billing mode
-  hash_key       = "id"
+  name         = "price_dollar"
+  billing_mode = "PAY_PER_REQUEST" # On-demand billing mode
+  hash_key     = "id"
 
   attribute {
     name = "id"
@@ -236,7 +236,7 @@ resource "aws_dynamodb_table" "price_dollar" {
 resource "aws_iam_policy" "lambda_dynamodb_policy" {
   name        = "lambda_dynamodb_policy"
   description = "DynamoDB policy for lambda"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {

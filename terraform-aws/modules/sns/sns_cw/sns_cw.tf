@@ -15,12 +15,12 @@ resource "aws_sns_topic_policy" "cloudwatch_alarm_notifications_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect    = "Allow",
+        Effect = "Allow",
         Principal = {
           Service = "cloudwatch.amazonaws.com"
         },
-        Action    = "SNS:Publish",
-        Resource  = aws_sns_topic.cloudwatch_alarm_notifications.arn,
+        Action   = "SNS:Publish",
+        Resource = aws_sns_topic.cloudwatch_alarm_notifications.arn,
         Condition = {
           ArnLike = {
             "aws:SourceArn" = "arn:aws:cloudwatch:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:alarm:*"

@@ -26,13 +26,13 @@ module "vpc" {
 
 
   tags = {
-    Terraform = "yes"
+    Terraform   = "yes"
     Environment = "dev"
   }
 }
 
-output private_route_table_ids {
-  value       = module.vpc.private_route_table_ids
+output "private_route_table_ids" {
+  value = module.vpc.private_route_table_ids
 }
 
 # resource "aws_route" "add_route_to_table" {
@@ -73,7 +73,7 @@ resource "aws_iam_role_policy_attachment" "lambda_VPC_execution_policy" {
 resource "aws_lambda_function" "lambda_vpc" {
   function_name = "lambda_vpc"
   handler       = "modules/lambda/lambda_vpc/lambda_function.lambda_handler" # Python handler
-  runtime       = "python3.9"                                     # Specify the Python runtime version
+  runtime       = "python3.9"                                                # Specify the Python runtime version
   role          = aws_iam_role.lambda_execution_role.arn
   timeout       = 5
 
@@ -82,7 +82,7 @@ resource "aws_lambda_function" "lambda_vpc" {
     subnet_ids         = module.vpc.private_subnets
     security_group_ids = [module.vpc.default_security_group_id]
   }
-  
+
   source_code_hash = filebase64sha256("modules/lambda/lambda_vpc/lambda_function.zip")
 
   # Specify the S3 bucket and object if you upload the ZIP file to S3, or use the `filename` attribute for local deployment

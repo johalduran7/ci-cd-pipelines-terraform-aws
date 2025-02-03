@@ -38,32 +38,32 @@ variable "metric_apache" {
 
 # when creating custom metric filter, we cannot take action on EC2 instances because they only work with EC2 Per-Instance Metrics. We have to use a lambda function instead. We do can run an action on ASG, we don't need a lambda function for it
 resource "aws_cloudwatch_log_metric_filter" "apache_4xx_filter" {
-  name           = "${var.metric_apache}"
+  name           = var.metric_apache
   log_group_name = aws_cloudwatch_log_group.ec2_log_group.name
   pattern        = "{ $.status = \"4*\" }"
 
   metric_transformation {
-    name           = var.metric_apache
-    namespace      = var.namespace_apache
-    value          = "1"
+    name          = var.metric_apache
+    namespace     = var.namespace_apache
+    value         = "1"
     default_value = "0"
-    unit="Count"
+    unit          = "Count"
   }
 }
 
 
 
 module "sns_cw" {
-  source     = "../sns/sns_cw"
+  source = "../sns/sns_cw"
 
 }
 
 module "lambda_cw_alarm" {
-  source     = "../lambda/lambda_cw_alarm"
+  source      = "../lambda/lambda_cw_alarm"
   instance_id = aws_instance.ec2_cw_agent.id
-  log_group = "${aws_cloudwatch_log_group.ec2_log_group.name}"
-  log_stream = "${aws_cloudwatch_log_stream.ec2_log_stream.name}" 
-} 
+  log_group   = aws_cloudwatch_log_group.ec2_log_group.name
+  log_stream  = aws_cloudwatch_log_stream.ec2_log_stream.name
+}
 
 # create an alarm and send an SNS notification to my email     whenever   the limit is breached. it also triggers a lambda function
 resource "aws_cloudwatch_metric_alarm" "apache_4xx_alarm" {
@@ -76,7 +76,7 @@ resource "aws_cloudwatch_metric_alarm" "apache_4xx_alarm" {
   statistic           = "Sum"
   threshold           = 4
 
-  alarm_actions = [module.sns_cw.sns_topic_arn,module.lambda_cw_alarm.lambda_arn]
+  alarm_actions = [module.sns_cw.sns_topic_arn, module.lambda_cw_alarm.lambda_arn]
   tags = {
     Terraform   = "yes"
     aws_dva_c02 = "yes"
@@ -101,16 +101,16 @@ variable "metric_apache_asg" {
 }
 
 resource "aws_cloudwatch_log_metric_filter" "apache_4xx_filter_asg" {
-  name           = "${var.metric_apache_asg}"
+  name           = var.metric_apache_asg
   log_group_name = aws_cloudwatch_log_group.asg_log_group.name
   pattern        = "{ $.status = \"4*\" }"
 
   metric_transformation {
-    name           = var.metric_apache_asg
-    namespace      = var.namespace_apache
-    value          = "1"
+    name          = var.metric_apache_asg
+    namespace     = var.namespace_apache
+    value         = "1"
     default_value = "0"
-    unit="Count"
+    unit          = "Count"
   }
 }
 
@@ -125,7 +125,7 @@ resource "aws_cloudwatch_metric_alarm" "apache_4xx_alarm_asg" {
   statistic           = "Sum"
   threshold           = 4
 
-  alarm_actions = [module.sns_cw.sns_topic_arn,aws_autoscaling_policy.scale_out.arn]
+  alarm_actions = [module.sns_cw.sns_topic_arn, aws_autoscaling_policy.scale_out.arn]
   tags = {
     Terraform   = "yes"
     aws_dva_c02 = "yes"
