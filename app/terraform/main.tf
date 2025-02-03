@@ -22,7 +22,6 @@ module "asg" {
   env             = var.env
 }
 
-
 data "aws_subnets" "available_subnets" {
 }
 
