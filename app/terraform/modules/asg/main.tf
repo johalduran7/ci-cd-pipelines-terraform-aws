@@ -205,9 +205,9 @@ resource "aws_launch_template" "amazon_linux_template" {
 
 resource "aws_autoscaling_group" "app_asg" {
   name                = var.asg_name
-  desired_capacity    = 1
-  max_size            = 1
-  min_size            = 1
+  desired_capacity    = 0
+  max_size            = 0
+  min_size            = 0
   vpc_zone_identifier = var.public_subnets
   #vpc_zone_identifier=toset(local.az_subnet_map)
 
