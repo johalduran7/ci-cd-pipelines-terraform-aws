@@ -41,12 +41,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.4.6
+          terraform_version: 1.9.5
       - name: Terraform Init & Plan
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: "us-east-1" #${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
         run: |
           cd app/terraform
@@ -62,13 +62,14 @@ jobs:
   #   name: Terraform Apply
   #   runs-on: ubuntu-latest
   #   needs: plan
+  #   environment: AWS
   #   steps:
   #     - name: Checkout Repository
   #       uses: actions/checkout@v3
   #     - name: Setup Terraform
   #       uses: hashicorp/setup-terraform@v2
   #       with:
-  #         terraform_version: 1.4.6
+  #         terraform_version: 1.9.5
   #     - name: Download Plan Artifact
   #       uses: actions/download-artifact@v4
   #       with:
@@ -79,5 +80,8 @@ jobs:
   #         cd app/terraform
   #         terraform apply -auto-approve tfplan
   #       env:
+  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
   #         TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
   #       if: github.event_name == 'push'
