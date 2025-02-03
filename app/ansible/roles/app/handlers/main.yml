@@ -1,0 +1,4 @@
+---
+- name: Restart app
+  become: yes
+  command: "pm2 restart node-app"

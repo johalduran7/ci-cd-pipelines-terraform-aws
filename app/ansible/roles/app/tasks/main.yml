@@ -1,0 +1,37 @@
+---
+- name: Install Node.js from Nodesource
+  become: yes
+  shell: |
+    curl -sL https://deb.nodesource.com/setup_{{ nodejs_version }} | sudo -E bash -
+    sudo apt-get install -y nodejs
+
+- name: Install pm2 (Process Manager for Node.js)
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+
+- name: Clone the entire repository
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ app_dir }}"
+    version: "master"  # Specify the branch or tag
+    force: yes
+
+- name: Move to the subdirectory
+  command: "mv {{ app_dir }}/{{ repo_subdir }}/* {{ app_dir }}/"
+  when: repo_subdir is defined
+
+- name: Install app dependencies using npm
+  become: yes
+  npm:
+    path: "{{ app_dir }}"
+    state: present
+
+- name: Ensure app is running using pm2
+  become: yes
+  command: "pm2 start {{ app_dir }}/app.js --name node-app"
+  args:
+    chdir: "{{ app_dir }}"
+  notify:
+    - Restart app

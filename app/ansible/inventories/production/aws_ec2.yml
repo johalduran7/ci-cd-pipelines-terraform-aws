@@ -1,0 +1,10 @@
+# install plugin: pip install boto3 botocore
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1  # Replace with your AWS region
+filters:
+  instance-state-name: running
+  tag:aws:autoscaling:groupName: app
+keyed_groups:
+  - key: tags.Name
+    prefix: "app"

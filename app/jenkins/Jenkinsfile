@@ -1,102 +1,34 @@
-Primary navigation
-Homepage
-
-Project
-L
-learn_jenkins
-
-Pinned
-Issues
-0
-Merge requests
-0
-
-Manage
-
-Plan
-
-Code
-
-Build
-
-Secure
-
-Deploy
-
-Operate
-
-Monitor
-
-Analyze
-
-Settings
-Your account is authenticated with SSO or SAML. To push and pull over HTTPS with Git using this account, you must set a password or set up a personal access token to use instead of a password.
-
-Auto DevOps
-Automatically build, test, and deploy your application based on a predefined CI/CD configuration. Learn more in the Auto DevOps documentation.
-
-John Durán
-learn_jenkins
-learn_jenkins
-python_pipeline
-Jenkinsfile
-Jenkinsfile
-user avatar
-adding comment from VSCode
-John Duran authored 4 months ago
-84ad798d
-Jenkinsfile
-1.67 KiB
 pipeline {
-    agent {
-        label 'ubuntu-agent1'
-        //any agent changes
+    agent any
+    environment {
+        AWS_REGION = 'us-east-1'
+        ANSIBLE_INVENTORY = 'aws_ec2.yml'
+        APP_REPO = 'https://github.com/your-repo/your-node-app.git'
     }
-    //triggers {
-    //    cron('H/5 * * * *') // Runs the pipeline every 5 minutes
-    //}
     stages {
-        stage('Build') {
-            steps {
-                echo 'Building...'
-                // Add build steps here, e.g., compile code, install dependencies, etc.
-                sh '''
-                #cd python_pipeline
-                sudo apt-get update
-                sudo apt-get install python3 python3-pip python3-venv -y
-                #pip install --break-system-packages -r requirements.txt
-                python3 -m venv venv
-                source venv/bin/activate
-                pip3 install -r python_pipeline/requirements.txt
-                deactivate
-                '''
-                
-            }
-        }
-        stage('Test') {
-            steps {
-                echo 'Testing...'
-                // Add test steps here, e.g., running unit tests, integration tests, etc.
-                sh '''
-                #cd python_pipeline
-                source venv/bin/activate
-                python3 python_pipeline/portfolio_worth.py
-                deactivate
-                '''
-                
-            }
-        }
-       stage('Clean Workspace') {
+        stage('Provision Infrastructure') {
             steps {
                 script {
-                    deleteDir() // Clears the workspace
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve'
                 }
             }
-        }        
-        stage('Deliver') {
+        }
+        
+        stage('Configure with Ansible') {
             steps {
-                echo 'Delivering... after changes with no triggers. another change'
-                // Adding Comment Add delivery steps here, e.g., deploy to environment, upload to server, etc.
+                script {
+                    sh 'ansible-playbook -i $ANSIBLE_INVENTORY playbook.yml'
+                }
+            }
+        }
+
+        stage('Deploy App') {
+            steps {
+                script {
+                    // You can trigger additional steps here if needed, such as pulling new code or restarting the app
+                    echo 'App deployed!'
+                }
             }
         }
     }

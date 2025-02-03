@@ -25,3 +25,8 @@ variable public_subnets {
 variable private_subnets {
   default        = ""
 }
+
+variable asg_name {
+  type        = string
+  default     = "app"
+}

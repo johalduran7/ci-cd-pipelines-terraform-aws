@@ -42,7 +42,7 @@ resource "aws_iam_policy" "cloudwatch_log_policy_agent" {
 }
 
 # Attach IAM Policy to Role
-resource "aws_iam_role_policy_attachment" "attach_policy_cw_sagent" {
+resource "aws_iam_role_policy_attachment" "attach_policy_cw_agent" {
   role       = aws_iam_role.ec2_cloudwatch_role.name
   policy_arn = aws_iam_policy.cloudwatch_log_policy_agent.arn
 }

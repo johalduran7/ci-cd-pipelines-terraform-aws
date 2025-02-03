@@ -195,12 +195,13 @@ resource "aws_launch_template" "amazon_linux_template" {
     tags = {
       Name      = "app"
       Terraform = "yes"
+      asg       = var.asg_name
     }
   }
 }
 
 resource "aws_autoscaling_group" "app_asg" {
-  name                = "app"
+  name                = var.asg_name
   desired_capacity    = 1
   max_size            = 1
   min_size            = 1
