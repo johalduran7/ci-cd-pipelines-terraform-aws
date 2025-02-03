@@ -6,10 +6,12 @@
 
 
 # generating key: $ ssh-keygen -t rsa -b 4096 -f key_saa -N ""
+# in order for this to be run via gitops, I have to add an environment variable
 resource "aws_key_pair" "deployer" {
   key_name   = "deployer-key"
-  public_key = file("key_saa.pub")
+  public_key = var.ssh_public_key
 }
+
 
 resource "aws_security_group" "sg_ssh" {
   name   = "sg_ssh"

@@ -8,3 +8,8 @@ variable "env" {
   type    = string
   default = "Dev"
 }
+
+variable "ssh_public_key" {
+  description = "Public SSH key for EC2 instances"
+  type        = string
+}
