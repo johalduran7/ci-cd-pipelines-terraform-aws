@@ -32,6 +32,9 @@ jobs:
           aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           aws configure set region "${{ secrets.AWS_DEFAULT_REGION }}"
           aws configure set output "json"
+      - name: check AWS configure
+        run: |
+          aws configure list
 
       - name: Set up SSH Key for EC2
         run: |
@@ -52,14 +55,15 @@ jobs:
           ansible-galaxy collection install amazon.aws
 
       - name: check the ec2_aws.yml file
-        run: ls ${{ github.workspace }}/app/ansible/inventories/development/aws_ec2.yml
+        run: |
+          ls ${{ github.workspace }}/app/ansible/inventories/development/aws_ec2.yml
+          python3 -m pip show boto3 botocore || echo "boto3 or botocore not installed"
 
       - name: Check inventory
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
         run: |
-          apt install python3-boto3 python3-botocore
           cd ${{ github.workspace }}/app/ansible/
           ansible-inventory -vvv -i inventories/development/aws_ec2.yml --list
 
