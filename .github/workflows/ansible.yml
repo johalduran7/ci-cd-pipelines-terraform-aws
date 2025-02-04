@@ -18,7 +18,6 @@ jobs:
 
       - name: Install Ansible
         run: |
-          cd ${{ github.workspace }}/app/ansible/
           sudo apt update && sudo apt install -y ansible
           
       - name: Install AWS CLI
@@ -51,6 +50,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --user boto3 botocore
+          pipx install --user boto3 botocore
 
 
       - name: Install amazon.aws collection
