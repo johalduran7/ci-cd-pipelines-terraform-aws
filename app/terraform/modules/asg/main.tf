@@ -82,7 +82,8 @@ data "aws_ami" "amazon_linux" {
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"] # Amazon Linux 2 AMI
+    #values = ["amzn2-ami-hvm-*-x86_64-gp2"] # Amazon Linux 2 AMI
+    values = ["Amazon Linux 2023 AMI"]
   }
 
   filter {
