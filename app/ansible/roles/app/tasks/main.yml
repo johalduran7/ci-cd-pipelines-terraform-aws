@@ -1,9 +1,9 @@
 ---
-- name: Install curl on Amazon Linux
-  become: yes
-  yum:
-    name: curl
-    state: present
+# - name: Install curl on Amazon Linux
+#   become: yes
+#   yum:
+#     name: curl
+#     state: present
 
 - name: Install NVM (Node Version Manager) on Amazon Linux
   become: yes
