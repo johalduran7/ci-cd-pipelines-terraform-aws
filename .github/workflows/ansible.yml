@@ -49,19 +49,19 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --user boto3 botocore
+          /opt/pipx/venvs/ansible-core/bin/pip install boto3 botocore
+
 
       - name: Install amazon.aws collection
         run: |
           ansible-galaxy collection install amazon.aws
 
       - name: check the ec2_aws.yml file
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"      
         run: |
           ls ${{ github.workspace }}/app/ansible/inventories/development/aws_ec2.yml
           python3 -m pip show boto3 botocore || echo "boto3 or botocore not installed"
           ls ~/.ssh/id_rsa
+          ansible --version
 
       - name: Check inventory
         env:
