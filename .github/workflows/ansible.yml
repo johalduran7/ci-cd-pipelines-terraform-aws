@@ -1,4 +1,4 @@
-name: Configure EC2 Instances and Deploy App
+name: Ansible Configure EC2 Instances
 
 on:
   push:
