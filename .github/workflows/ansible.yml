@@ -68,7 +68,7 @@ jobs:
           ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
         run: |
           cd ${{ github.workspace }}/app/ansible/
-          ansible-inventory -vvv -i inventories/development/aws_ec2.yml --list
+          ANSIBLE_PYTHON_INTERPRETER="/usr/bin/python3" ansible-inventory -vvv -i inventories/development/aws_ec2.yml --list
 
       - name: Run Ansible Playbook for EC2 Configuration
         env:
