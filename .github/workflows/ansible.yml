@@ -1,0 +1,42 @@
+name: Configure EC2 Instances and Deploy App
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual execution
+
+jobs:
+  configure-ec2:
+    runs-on: ubuntu-latest
+    environment: AWS
+    steps:
+      - name: Checkout Ansible Repository
+        uses: actions/checkout@v3
+        with:
+          path: ansible
+
+      - name: Install Dependencies (Ansible, AWS CLI)
+        run: |
+          sudo apt update && sudo apt install -y ansible awscli
+
+      - name: Set up AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Set up SSH Key for EC2
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Run Ansible Playbook for EC2 Configuration
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          ansible-playbook -v \
+            -i ansible/inventories/development/aws_ec2.yml \
+            ansible/playbooks/deploy.yml \
+            --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}" 
