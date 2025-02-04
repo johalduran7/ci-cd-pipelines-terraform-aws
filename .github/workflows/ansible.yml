@@ -52,9 +52,9 @@ jobs:
       - name: Check Inventory
         run: |
           cd ${{ github.workspace }}/app/ansible/
-          ansible-inventory -vvv -i inventories/development/aws_ec2.yml --list \
+          ansible-inventory  -i inventories/development/aws_ec2.yml --list \
           | jq -r ._meta.hostvars[].instance_id
-          
+
       - name: Run Ansible Playbook for EC2 Configuration
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
