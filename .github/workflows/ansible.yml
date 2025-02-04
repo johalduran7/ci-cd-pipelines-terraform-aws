@@ -29,10 +29,6 @@ jobs:
           aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           aws configure set region "${{ secrets.AWS_DEFAULT_REGION }}"
           aws configure set output "json"
-      - name: check AWS configure
-        run: |
-          aws configure list
-
       - name: Set up SSH Key for EC2
         run: |
           mkdir -p ~/.ssh
@@ -43,13 +39,29 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.3'  # Specify the Python version you need
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install --user ansible boto3 botocore
 
-      - name: Run Ansible playbook
+      - name: Check Inventory
         run: |
           cd ${{ github.workspace }}/app/ansible/
-          ansible-inventory -vvv -i inventories/development/aws_ec2.yml --list
+          ansible-inventory -vvv -i inventories/development/aws_ec2.yml --list \
+          | jq -r ._meta.hostvars[].instance_id
+          
+      - name: Run Ansible Playbook for EC2 Configuration
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
+        run: |
+          cd ${{ github.workspace }}/app/ansible/
+          ansible-playbook -vvv \
+            -i inventories/development/aws_ec2.yml \
+            playbooks/deploy.yml \
+            --extra-vars "ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}"
