@@ -16,10 +16,6 @@ jobs:
       - name: Checkout Ansible Repository
         uses: actions/checkout@v3
 
-      - name: Install Ansible
-        run: |
-          sudo apt update && sudo apt install -y ansible
-          
       - name: Install AWS CLI
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -43,46 +39,17 @@ jobs:
           echo "${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: List directory contents
-        run: ls -R ${{ github.workspace }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.3'  # Specify the Python version you need
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
-          pip install --user boto3 botocore
-          source /opt/pipx/venvs/ansible-core/bin/activate
-          pip install --user boto3 botocore
+          python -m pip install --upgrade pip
+          pip install --user ansible boto3 botocore
 
-      - name: Install amazon.aws collection
+      - name: Run Ansible playbook
         run: |
-          ansible-galaxy collection install amazon.aws
-
-      - name: check the ec2_aws.yml file
-        run: |
-          ls ${{ github.workspace }}/app/ansible/inventories/development/aws_ec2.yml
-          python3 -m pip show boto3 botocore || echo "boto3 or botocore not installed"
-          ls ~/.ssh/id_rsa
-          ls /opt/pipx/venvs/ansible-core/lib/python3.12/site-packages/ansible_collections/amazon/aws/plugins/module_utils/
-          ansible --version
-
-      - name: Check inventory
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
-        shell: bash
-        run: |
-          source /opt/pipx/venvs/ansible-core/bin/activate
-          pip install --user boto3 botocore
           cd ${{ github.workspace }}/app/ansible/
           ansible-inventory -vvv -i inventories/development/aws_ec2.yml --list
-
-      - name: Run Ansible Playbook for EC2 Configuration
-        env:
-          ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
-        run: |
-          cd ${{ github.workspace }}/app/ansible/
-          ansible-playbook -vvv \
-            -i inventories/development/aws_ec2.yml \
-            playbooks/deploy.yml \
-            --extra-vars "ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}"
