@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: AWS
     steps:
-
+      - name: Checkout Ansible Repository
+        uses: actions/checkout@v3
 
       - name: Install Ansible
         run: sudo apt update && sudo apt install -y ansible
@@ -53,7 +54,6 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
           ansible-playbook -v \
-            -i ./app/ansible/inventories/development/aws_ec2.yml \
-            ./app/ansible/playbooks/deploy.yml \
+            -i ${{ github.workspace }}//app/ansible/inventories/development/aws_ec2.yml \
+            ${{ github.workspace }}/app/ansible/playbooks/deploy.yml \
             --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}" 
-        working-directory: ${{ github.workspace }}
