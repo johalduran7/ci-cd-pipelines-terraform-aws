@@ -50,8 +50,8 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --user boto3 botocore
-          pipx install boto3 botocore
-
+          source /opt/pipx/venvs/ansible-core/bin/activate
+          pip install --user boto3 botocore
 
       - name: Install amazon.aws collection
         run: |
