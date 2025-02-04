@@ -49,6 +49,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install --user ansible boto3 botocore
 
+      - name: Python interpreter
+        run: |
+          which python
+          which python3
+
       - name: Check Inventory
         run: |
           cd ${{ github.workspace }}/app/ansible/
@@ -63,5 +68,4 @@ jobs:
           ansible-playbook -vvv \
             -i inventories/development/aws_ec2.yml \
             playbooks/deploy.yml \
-            --extra-vars "ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}" \
-            -e 'ansible_python_interpreter=/opt/hostedtoolcache/Python/3.12.3/x64/bin/python'
+            --extra-vars "ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}" 
