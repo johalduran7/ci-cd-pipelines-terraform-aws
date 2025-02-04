@@ -24,4 +24,3 @@
 # decrypt vault.yml
 # ansible-vault decrypt inventories/development/group_vars/vault.yml  \
 #--vault-password-file=inventories/development/group_vars/pass-ansible-vault_do_not_push_to_repo.pass 
-
