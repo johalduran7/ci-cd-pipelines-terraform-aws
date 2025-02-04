@@ -76,28 +76,28 @@ data "aws_subnets" "subnets" {
 
 
 # Fetch the latest Amazon Linux 2 AMI available in the region
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-  owners      = ["amazon"] # Amazon's official AMI owner ID
+# data "aws_ami" "amazon_linux" {
+#   most_recent = true
+#   owners      = ["amazon"] # Amazon's official AMI owner ID
 
-  filter {
-    name   = "name"
-    #values = ["amzn2-ami-hvm-*-x86_64-gp2"] # Amazon Linux 2 AMI
-    values = ["Amazon Linux 2023 AMI"]
-  }
+#   filter {
+#     name   = "name"
+#     #values = ["al2023-ami-2023.6.20250128.0-kernel-6.1-x86_64"] # Amazon Linux 2 AMI
+#     values = ["Amazon Linux 2023 AMI"]
+#   }
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
+#   filter {
+#     name   = "virtualization-type"
+#     values = ["hvm"]
+#   }
+# }
 
 
 ###### ASG CREATION
 
 resource "aws_launch_template" "amazon_linux_template" {
   name_prefix   = "app-launch-template"
-  image_id      = data.aws_ami.amazon_linux.id # Update with your AMI ID
+  image_id      = "ami-0c614dee691cbbf37" #  Amazon Linux 2023 AMI #data.aws_ami.amazon_linux.id # Update with your AMI ID
   instance_type = "t2.micro"
 
   key_name = aws_key_pair.deployer.key_name # SSH Key for accessing the instance
