@@ -41,6 +41,12 @@ jobs:
           echo "${{ secrets.ANSIBLE_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install boto3 botocore
+        
       - name: Run Ansible Playbook for EC2 Configuration
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
