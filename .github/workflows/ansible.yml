@@ -58,7 +58,6 @@ jobs:
       - name: Run Ansible Playbook for EC2 Configuration
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
         run: |
           cd ${{ github.workspace }}/app/ansible/
           ansible-playbook -vvv \
