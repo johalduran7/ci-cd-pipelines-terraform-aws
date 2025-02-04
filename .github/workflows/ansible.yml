@@ -13,8 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: AWS
     steps:
-      - name: Checkout Ansible Repository
-        uses: actions/checkout@v3
+
 
       - name: Install Ansible
         run: sudo apt update && sudo apt install -y ansible
