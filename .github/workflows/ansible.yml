@@ -62,6 +62,7 @@ jobs:
           ls ${{ github.workspace }}/app/ansible/inventories/development/aws_ec2.yml
           python3 -m pip show boto3 botocore || echo "boto3 or botocore not installed"
           ls ~/.ssh/id_rsa
+          ls /opt/pipx/venvs/ansible-core/lib/python3.12/site-packages/ansible_collections
           ansible --version
 
       - name: Check inventory
