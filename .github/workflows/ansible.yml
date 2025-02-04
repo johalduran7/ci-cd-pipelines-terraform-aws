@@ -3,7 +3,9 @@ name: Configure EC2 Instances and Deploy App
 on:
   push:
     branches:
-      - main
+      - master
+    paths:
+    - 'app/ansible/**'  
   workflow_dispatch:  # Allow manual execution
 
 jobs:
