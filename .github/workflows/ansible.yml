@@ -56,7 +56,7 @@ jobs:
           ANSIBLE_HOST_KEY_CHECKING: "False"
           ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
         run: |
-          ansible-playbook -v \
+          ansible-playbook -vvv \
             -i ${{ github.workspace }}/app/ansible/inventories/development/aws_ec2.yml \
             ${{ github.workspace }}/app/ansible/playbooks/deploy.yml \
             --extra-vars "ansible_ssh_private_key_file=/home/runner/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}"
