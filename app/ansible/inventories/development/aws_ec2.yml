@@ -8,4 +8,4 @@ filters:
 keyed_groups:
   - key: tags.Name
     prefix: "app"
-aws_profile: "default"
+#aws_profile: "default"
