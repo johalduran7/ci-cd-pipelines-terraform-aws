@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-    - 'app/ansible/**'  
+      - 'app/ansible/**'  
   workflow_dispatch:  # Allow manual execution
 
 jobs:
@@ -18,22 +18,20 @@ jobs:
 
       - name: Install Ansible
         run: sudo apt update && sudo apt install -y ansible
-            
+
       - name: Install AWS CLI
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip -o awscliv2.zip
           sudo ./aws/install --update
           aws --version
-      
-        
+
       - name: Configure AWS CLI
         run: |
           aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
           aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           aws configure set region "${{ secrets.AWS_DEFAULT_REGION }}"
           aws configure set output "json"
-        
 
       - name: Set up SSH Key for EC2
         run: |
@@ -43,17 +41,18 @@ jobs:
 
       - name: List directory contents
         run: ls -R ${{ github.workspace }}
-        
+
       - name: Install Python dependencies
         run: |
           python3 -m pip install --upgrade pip
-          pip install boto3 botocore
-        
+          pip install boto3 botocore ansible[aws]
+
       - name: Run Ansible Playbook for EC2 Configuration
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
+          ANSIBLE_PYTHON_INTERPRETER: "/usr/bin/python3"
         run: |
           ansible-playbook -v \
-            -i ${{ github.workspace }}//app/ansible/inventories/development/aws_ec2.yml \
+            -i ${{ github.workspace }}/app/ansible/inventories/development/aws_ec2.yml \
             ${{ github.workspace }}/app/ansible/playbooks/deploy.yml \
-            --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}" 
+            --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa github_token={{ secrets.GH_TOKEN_ANSIBLE }}"
