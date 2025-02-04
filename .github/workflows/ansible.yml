@@ -50,7 +50,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install --user boto3 botocore
-          pipx install --user boto3 botocore
+          pipx install boto3 botocore
 
 
       - name: Install amazon.aws collection
