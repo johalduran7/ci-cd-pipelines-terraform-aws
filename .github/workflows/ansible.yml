@@ -50,6 +50,10 @@ jobs:
       - name: Install amazon.aws collection
         run: |
           ansible-galaxy collection install amazon.aws
+
+      - name: check the ec2_aws.yml file
+        run: ls ${{ github.workspace }}/app/ansible/inventories/production/aws_ec2.yml
+
       - name: Check inventory
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
