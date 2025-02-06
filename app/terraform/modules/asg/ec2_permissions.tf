@@ -1,6 +1,6 @@
 # IAM Role for EC2 to Access CloudWatch
 resource "aws_iam_role" "ec2_execution_role" {
-  name = "ec2-cloudwatch-role"
+  name = "ec2-app-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
