@@ -11,7 +11,10 @@ on:
       - master
     paths:
       - 'app/terraform/**'
-
+permissions:
+  actions: write  # Required to trigger workflows
+  contents: read  # Required to checkout the repository
+  
 jobs:
   validate:
     name: Validate Terraform
