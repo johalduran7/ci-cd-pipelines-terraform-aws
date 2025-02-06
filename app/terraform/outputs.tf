@@ -30,9 +30,9 @@ output "public_subnets" {
 #   sensitive = false
 # }
 
-output "desired_asg" {
-  value     = module.asg.desired_asg
-  sensitive = true
-}
+# output "desired_asg" {
+#   value     = module.asg.desired_asg
+#   sensitive = true
+# }
 
 

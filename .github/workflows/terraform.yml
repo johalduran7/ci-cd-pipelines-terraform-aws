@@ -6,11 +6,11 @@ on:
       - master
     paths:
       - 'app/terraform/**'  # Trigger only if Terraform files change
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'app/terraform/**'
+  # pull_request:
+  #   branches:
+  #     - master
+  #   paths:
+  #     - 'app/terraform/**'
 permissions:
   actions: write  # Required to trigger workflows
   contents: read  # Required to checkout the repository

@@ -218,11 +218,14 @@ resource "aws_launch_template" "amazon_linux_template" {
 
 resource "aws_autoscaling_group" "app_asg" {
   name                = var.asg_name
-  desired_capacity    = aws_ssm_parameter.desired_asg.value
-  max_size            = aws_ssm_parameter.max_asg.value
-  min_size            = aws_ssm_parameter.min_asg.value
+  desired_capacity    = 0 #aws_ssm_parameter.desired_asg.value
+  max_size            = 1 #aws_ssm_parameter.max_asg.value
+  min_size            = 0 #aws_ssm_parameter.min_asg.value
   vpc_zone_identifier = var.public_subnets
-  #vpc_zone_identifier=toset(local.az_subnet_map)
+
+  lifecycle {
+    ignore_changes = [desired_capacity, max_size, min_size] # it prevents the value from being updated after the first run of Terraform.
+  }
 
   # Attach the Launch Template
   launch_template {

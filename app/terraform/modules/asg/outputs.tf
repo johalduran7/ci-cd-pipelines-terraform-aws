@@ -10,6 +10,6 @@
 #   value       = aws_ssm_parameter.max_asg.value
 # }
 
-output "desired_asg" {
-  value = aws_autoscaling_group.app_asg.desired_capacity
-}
+# output "desired_asg" {
+#   value = aws_autoscaling_group.app_asg.desired_capacity
+# }
