@@ -47,6 +47,12 @@ resource "aws_iam_role_policy_attachment" "attach_policy_cw_agent" {
   policy_arn = aws_iam_policy.cloudwatch_log_policy_agent.arn
 }
 
+resource "aws_iam_role_policy_attachment" "attach_policy_ecr" {
+  role       = aws_iam_role.ec2_cloudwatch_role.name
+  policy_arn = "arn:aws:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds"
+}
+
+
 # EC2 Instance Profile for IAM Role
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = "ec2-instance-profile"

@@ -119,22 +119,24 @@ resource "aws_launch_template" "amazon_linux_template" {
     systemctl start docker
     systemctl enable docker
 
+    AccountId=$(curl -s http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | jq -r .AccountId)
+    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $AccountId.dkr.ecr.us-east-1.amazonaws.com
+    sudo chmod 666 /var/run/docker.sock
+    docker pull $AccountId.dkr.ecr.us-east-1.amazonaws.com/nodejs-app:latest
+    docker run -t -d -p 3000:3000 --name nodejs-app $AccountId.dkr.ecr.us-east-1.amazonaws.com/nodejs-app:latest
+
     yum update -y
     yum install -y amazon-cloudwatch-agent
-
     yum install -y amazon-cloudwatch-agent httpd
+
     # Start Apache Server
     systemctl start httpd
     systemctl enable httpd
     echo "Hello World from Apache running on $(curl http://169.254.169.254/latest/meta-data/instance-id) " > /var/www/html/index.html
 
     # Configure Apache to log in JSON format
-
-
     echo 'LogFormat "{   \"LogType\": \"access\",   \"time\": \"%%{%Y-%m-%dT%H:%M:%S%z}t\",   \"remote_ip\": \"%a\",   \"host\": \"%v\",   \"method\": \"%m\",   \"url\": \"%U\",   \"query\": \"%q\",   \"protocol\": \"%H\",   \"status\": \"%>s\",   \"bytes_sent\": \"%B\",   \"referer\": \"%%{Referer}i\",   \"user_agent\": \"%%{User-Agent}i\",   \"response_time_microseconds\": \"%D\",   \"forwarded_for\": \"%%{X-Forwarded-For}i\",   \"http_version\": \"%H\",   \"request\": \"%r\" }" json' > /etc/httpd/conf.d/custom_log_format.conf
     echo 'CustomLog /var/log/httpd/access_log json' >> /etc/httpd/conf.d/custom_log_format.conf
-
-
     systemctl restart httpd
 
   
