@@ -21,11 +21,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-1" # Change to your AWS region
+          aws-region: "${{ secrets.AWS_DEFAULT_REGION }}" # Change to your AWS region
 
       - name: Get ECR Repository URL from SSM
         run: |
-          ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository" --query "Parameter.Value" --output text)
+          ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository_name" --query "Parameter.Value" --output text)
           echo "ECR_REPO_NAME=$ECR_REPO_NAME" >> $GITHUB_ENV
 
       - name: Login to Amazon ECR
