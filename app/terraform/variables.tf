@@ -9,6 +9,7 @@ variable "env" {
   default = "Dev"
 }
 
+# Remember to export the TF_VAR_ssh_public_key variable in your environement
 variable "ssh_public_key" {
   description = "Public SSH key for EC2 instances"
   type        = string

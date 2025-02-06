@@ -1,12 +1,3 @@
-# module asg {
-#   source= "./modules/asg"
-#   vpc_id=module.vpc.vpc_id #optional
-#   aws_region = var.aws_region
-#   app_tg_arn = module.alb.app_tg_arn
-#   alb_dns_name = module.alb.alb_dns_name
-# }
-
-
 # output app_tg_arn {
 #   value       = module.alb.app_tg_arn
 # }
@@ -23,4 +14,25 @@ output "subnets" {
 output "public_subnets" {
   value = module.vpc.public_subnets
 }
+
+# output desired_asg {
+#   value       = module.asg.desired_asg
+#   sensitive = false
+# }
+
+# output min_asg {
+#   value       = module.asg.min_asg
+#   sensitive = false
+# }
+
+# output max_asg {
+#   value       = module.asg.max_asg
+#   sensitive = false
+# }
+
+output "desired_asg" {
+  value     = module.asg.desired_asg
+  sensitive = true
+}
+
 

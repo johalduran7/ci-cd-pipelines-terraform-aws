@@ -63,7 +63,7 @@ jobs:
       - name: Run Ansible Playbook for EC2 Configuration
         env:
           ANSIBLE_HOST_KEY_CHECKING: "False"
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ANSIBLE }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_ANSIBLE }} #creating an env variable to add the token in the quotes of the ansible-playbook command
         run: |
           cd ${{ github.workspace }}/app/ansible/
           ansible-playbook -vvv \

@@ -106,9 +106,19 @@ resource "aws_launch_template" "amazon_linux_template" {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.sg_ssh.id, aws_security_group.sg_web.id]
   }
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "optional" # Allows both IMDSv1 and IMDSv2, set to required if you want only IMDSv2
+  }
+
   # only for the launch template this should be encoded
   user_data = base64encode(<<-EOF
     #!/bin/bash
+    dnf update -y
+    dnf install -y docker
+    systemctl start docker
+    systemctl enable docker
+
     yum update -y
     yum install -y amazon-cloudwatch-agent
 
@@ -206,9 +216,9 @@ resource "aws_launch_template" "amazon_linux_template" {
 
 resource "aws_autoscaling_group" "app_asg" {
   name                = var.asg_name
-  desired_capacity    = 1
-  max_size            = 1
-  min_size            = 1
+  desired_capacity    = aws_ssm_parameter.desired_asg.value
+  max_size            = aws_ssm_parameter.max_asg.value
+  min_size            = aws_ssm_parameter.min_asg.value
   vpc_zone_identifier = var.public_subnets
   #vpc_zone_identifier=toset(local.az_subnet_map)
 
@@ -230,4 +240,12 @@ resource "aws_autoscaling_group" "app_asg" {
 
   health_check_type         = "EC2"
   health_check_grace_period = 5
+}
+
+resource "aws_autoscaling_lifecycle_hook" "instance_launch" {
+  name                   = "instance-launch-lifecycle"
+  autoscaling_group_name = aws_autoscaling_group.app_asg.name
+  lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
+  heartbeat_timeout      = 30 #change to 300 in prod
+  default_result         = "CONTINUE"
 }

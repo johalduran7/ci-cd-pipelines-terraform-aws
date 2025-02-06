@@ -1,0 +1,46 @@
+name: Deployer Pipeline
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+    - 'app/src/**'  
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }} # Change to your AWS region
+
+      - name: Get ECR Repository URL from SSM
+        run: |
+          ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository" --query "Parameter.Value" --output text)
+          echo "ECR_REPO_NAME=$ECR_REPO_NAME" >> $GITHUB_ENV
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: |
+          cd ${{ github.workspace }}/app/src/
+          docker build -t $ECR_REPO_NAME .
+
+      - name: Tag Docker image
+        run: |
+          docker tag $ECR_REPO_NAME:latest ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO_NAME:latest
+
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO_NAME:latest

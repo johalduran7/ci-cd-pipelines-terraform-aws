@@ -40,3 +40,15 @@ variable "ssh_public_key" {
   description = "Public SSH key for EC2 instances"
   type        = string
 }
+
+variable "desired_asg" {
+  default = "0"
+}
+
+variable "min_asg" {
+  default = "0"
+}
+
+variable "max_asg" {
+  default = "1"
+}
