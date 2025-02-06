@@ -4,7 +4,7 @@ const port = 3000;
 
 // Simple route to respond with "Hello World"
 app.get('/', (req, res) => {
-    res.send('Boquerosos');
+    res.send('New Version');
 });
 
 // Start the server
