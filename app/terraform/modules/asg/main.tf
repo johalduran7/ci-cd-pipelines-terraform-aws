@@ -248,6 +248,6 @@ resource "aws_autoscaling_lifecycle_hook" "instance_launch" {
   name                   = "instance-launch-lifecycle"
   autoscaling_group_name = aws_autoscaling_group.app_asg.name
   lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
-  heartbeat_timeout      = 30 #change to 300 in prod
+  heartbeat_timeout      = 31 #change to 300 in prod
   default_result         = "CONTINUE"
 }
