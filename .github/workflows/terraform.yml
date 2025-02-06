@@ -14,7 +14,7 @@ on:
 permissions:
   actions: write  # Required to trigger workflows
   contents: read  # Required to checkout the repository
-  
+
 jobs:
   validate:
     name: Validate Terraform
@@ -110,6 +110,6 @@ jobs:
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'src.yml',  
+              workflow_id: 'deployer.yml',  
               ref: 'master',  
             });
