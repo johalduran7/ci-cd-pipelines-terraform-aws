@@ -3,7 +3,7 @@ name: Deployer Pipeline
 on:
   push:
     branches:
-      - master
+      - dev
     paths:
     - 'app/src/**'  
   workflow_dispatch: # Allows manual triggering

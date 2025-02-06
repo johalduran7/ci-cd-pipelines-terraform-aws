@@ -3,7 +3,7 @@ name: Ansible Configure EC2 Instances
 on:
   push:
     branches:
-      - master
+      - dev
     paths:
       - 'app/ansible/**'  
   workflow_dispatch:  # Allow manual execution
