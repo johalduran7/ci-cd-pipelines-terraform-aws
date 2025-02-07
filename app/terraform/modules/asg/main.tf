@@ -111,7 +111,7 @@ resource "aws_launch_template" "amazon_linux_template" {
   #   echo "Testing built-in user_data"
   #   EOF
   # )
-  user_data = filebase64("${path.module}/user_data.sh")
+  user_data = filebase64("./modules/asg/user_data.sh")
 
   lifecycle {
     create_before_destroy = true
