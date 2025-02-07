@@ -43,6 +43,8 @@ jobs:
           if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
             echo "Error: No matching tag '${TAG}' found."
             exit 1
+          else
+            echo "Tag '${TAG}' exists!"
           fi
 
 
