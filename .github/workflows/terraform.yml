@@ -39,7 +39,6 @@ jobs:
       - name: Check if Tag Exists
         run: |
           TAG="dev-infra-${VERSION}"
-          git checkout dev
           git tag
           if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
             echo "Error: No matching tag '${TAG}' found."
@@ -55,6 +54,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
+          fetch-depth: 0 # Ensure full history is fetched
           fetch-tags: true  # Fetch all tags so we can check out the correct one
 
       - name: Read Version from version.txt
@@ -64,7 +64,6 @@ jobs:
       - name: Checkout Matching Tag
         run: |
           TAG="dev-infra-${VERSION}"
-          git checkout dev
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
@@ -89,6 +88,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
+          fetch-depth: 0 # Ensure full history is fetched
           fetch-tags: true  # Fetch all tags so we can check out the correct one
 
       - name: Read Version from version.txt
@@ -98,7 +98,6 @@ jobs:
       - name: Checkout Matching Tag
         run: |
           TAG="dev-infra-${VERSION}"
-          git checkout dev
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
@@ -133,6 +132,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
+          fetch-depth: 0 # Ensure full history is fetched
           fetch-tags: true  # Fetch all tags so we can check out the correct one
 
       - name: Read Version from version.txt
@@ -142,7 +142,6 @@ jobs:
       - name: Checkout Matching Tag
         run: |
           TAG="dev-infra-${VERSION}"
-          git checkout dev
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
