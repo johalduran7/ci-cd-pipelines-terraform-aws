@@ -5,7 +5,7 @@ on:
     branches:
       - dev
     paths:
-      - 'app/terraform/**'  # Trigger only if Terraform files change
+      - 'app/terraform/version.txt'  # Trigger only if Terraform files change
   # pull_request:
   #   branches:
   #     - master
@@ -16,12 +16,49 @@ permissions:
   contents: read  # Required to checkout the repository
 
 jobs:
-  validate:
-    name: Validate Terraform
+
+  validate_version:
+    name: Validate Version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-tags: true  # Ensure we fetch all tags
+
+      - name: Read Version from version.txt
+        id: read_version
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
+
+      - name: Check if Tag Exists
+        run: |
+          TAG="dev-infra-${VERSION}"
+          if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
+            echo "Error: No matching tag '${TAG}' found."
+            exit 1
+          fi
+
+
+  validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    needs: validate_version
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-tags: true  # Fetch all tags so we can check out the correct one
+
+      - name: Read Version from version.txt
+        id: read_version
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
+
+      - name: Checkout Matching Tag
+        run: |
+          TAG="dev-infra-${VERSION}"
+          echo "Checking out tag: ${TAG}"
+          git checkout "${TAG}"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -42,6 +79,19 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-tags: true  # Fetch all tags so we can check out the correct one
+
+      - name: Read Version from version.txt
+        id: read_version
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
+
+      - name: Checkout Matching Tag
+        run: |
+          TAG="dev-infra-${VERSION}"
+          echo "Checking out tag: ${TAG}"
+          git checkout "${TAG}"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -72,6 +122,19 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-tags: true  # Fetch all tags so we can check out the correct one
+
+      - name: Read Version from version.txt
+        id: read_version
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
+
+      - name: Checkout Matching Tag
+        run: |
+          TAG="dev-infra-${VERSION}"
+          echo "Checking out tag: ${TAG}"
+          git checkout "${TAG}"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:

@@ -1,9 +1,3 @@
-#to use:
-# module asg {
-#   source= "./modules/asg"
-#   vpc_id="" #optional
-# }
-
 
 # generating key: $ ssh-keygen -t rsa -b 4096 -f key_saa -N ""
 # in order for this to be run via gitops, I have to add an environment variable
@@ -208,7 +202,7 @@ resource "aws_launch_template" "amazon_linux_template" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name      = "app"
+      Name      = "app-tag-v1.0.0"
       Terraform = "yes"
       asg       = var.asg_name
       Env       = var.env
