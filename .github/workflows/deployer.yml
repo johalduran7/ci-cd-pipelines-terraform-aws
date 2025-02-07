@@ -73,18 +73,24 @@ jobs:
       - name: Check if version exists on ECR
         run: |
           tags=$(aws ecr list-images --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
-          echo tags: $tags
+          echo "tags: $tags"
+
           if echo "$tags" | jq -e --arg VERSION "$VERSION" '.[] | select(. == $VERSION)' >/dev/null; then
               echo "Tag ${VERSION} exists on ${ECR_REPO_NAME}"
-              echo "tag_exists=true" >> $GITHUB_ENV
-              echo "tag_exists=true" >> $GITHUB_OUTPUT
+              tag_exists=true
           else
-              echo "Tag ${VERSION} does not exist on ${ECR_REPO_NAME}."     
-              echo "tag_exists=false" >> $GITHUB_ENV
-              echo "tag_exists=false" >> $GITHUB_OUTPUT 
+              echo "Tag ${VERSION} does not exist on ${ECR_REPO_NAME}."
+              tag_exists=false
           fi
-          echo tag_exists: ${tag_exists}
 
+          echo "tag_exists: ${tag_exists}"
+
+          if [ -n "$GITHUB_ENV" ]; then
+              echo "tag_exists=${tag_exists}" >> $GITHUB_ENV
+          fi
+          if [ -n "$GITHUB_OUTPUT" ]; then
+              echo "tag_exists=${tag_exists}" >> $GITHUB_OUTPUT
+          fi
 
   build-and-push:
     runs-on: ubuntu-latest
