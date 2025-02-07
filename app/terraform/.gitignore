@@ -15,6 +15,7 @@
 !*.html
 !*.txt
 !Dockerfile
+!*.sh
 
 # Whitelist the .gitignore file itself
 !.gitignore
