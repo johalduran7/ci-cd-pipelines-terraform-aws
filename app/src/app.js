@@ -4,7 +4,7 @@ const port = 3000;
 
 // Simple route to respond with "Hello World"
 app.get('/', (req, res) => {
-    res.send('New Version');
+    res.send('New Version to test tag v1.0.1');
 });
 
 // Start the server
