@@ -43,9 +43,8 @@ resource "aws_iam_policy" "cloudwatch_log_policy_agent" {
 
 
 # IAM Policy for SSM Access
-resource "aws_iam_role_policy" "ssm_read_policy" {
+resource "aws_iam_policy" "ssm_read_policy" {
   name = "ssm-read-policy"
-  role = aws_iam_role.ec2_app_execution_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -56,7 +55,7 @@ resource "aws_iam_role_policy" "ssm_read_policy" {
           "ssm:GetParameters"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:ssm:us-east-1:948586925757:parameter/app/dev/app_version"
+        Resource = "arn:aws:ssm:us-east-1:948586925757:parameter/app/dev/*"
       }
     ]
   })
