@@ -5,16 +5,58 @@ on:
     branches:
       - dev
     paths:
-    - 'app/src/**'  
+    - 'app/src/version.txt'  # app/src/** for any file and subdirectory
   workflow_dispatch: # Allows manual triggering
 
 jobs:
+  validate_version:
+    name: Validate Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensure full history is fetched
+          fetch-tags: true  # Ensure we fetch all tags
+      - name: Debug Git Info
+        run: |
+          echo "Current branch:"
+          git branch --show-current
+          echo "Available tags:"
+          git tag
+      - name: Read Version from version.txt
+        id: read_version
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
+      - name: Check if Tag Exists
+        run: |
+          TAG="dev-app-v${VERSION}"
+          git tag
+          if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
+            echo "Error: No matching tag '${TAG}' found."
+            exit 1
+          else
+            echo "Tag '${TAG}' exists!"
+          fi
+
   build-and-push:
     runs-on: ubuntu-latest
+    needs: validate_version
     environment: AWS
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensure full history is fetched
+          fetch-tags: true  # Ensure we fetch all tags
+      - name: Read Version from version.txt
+        id: read_version
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
+
+      - name: Checkout Matching Tag
+        run: |
+          TAG="dev-app-v${VERSION}"
+          echo "Checking out tag: ${TAG}"
+          git checkout "${TAG}"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -39,8 +81,9 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag $ECR_REPO_NAME:latest ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO_NAME:latest
+          docker tag $ECR_REPO_NAME:$VERSION ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO_NAME:$VERSION
+
 
       - name: Push Docker image to ECR
         run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO_NAME:latest
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO_NAME:$VERSION
