@@ -24,3 +24,7 @@ variable "app_version" {
   type    = string
   default = "dev-app-v1.0.0"
 }
+
+variable "path_user_data" {
+  default = "./modules/asg/user_data.sh"
+}

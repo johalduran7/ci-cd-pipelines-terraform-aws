@@ -33,7 +33,7 @@ variable "asg_name" {
 
 variable "env" {
   type    = string
-  default = "Dev"
+  default = "dev"
 }
 
 variable "ssh_public_key" {
@@ -51,4 +51,7 @@ variable "min_asg" {
 
 variable "max_asg" {
   default = "1"
+}
+variable "path_user_data" {
+  default = "./modules/asg/user_data.sh"
 }
