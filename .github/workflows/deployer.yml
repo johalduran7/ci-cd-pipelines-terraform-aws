@@ -116,10 +116,10 @@ jobs:
           aws-region: "us-east-1" # Change to your AWS region 
 
 
-      - name: update app_version in Parameter Store
+      - name: update app_version SSM
         run: |
           aws ssm put-parameter \
               --name "/app/dev/app_version" \
-              --value "$TAG" \
+              --value "${TAG}" \
               --type "String" \
               --overwrite
