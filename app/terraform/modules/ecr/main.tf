@@ -12,8 +12,8 @@ resource "aws_ssm_parameter" "ecr_repository" {
   value = aws_ecr_repository.nodejs-app.name
 
   tags = {
-    Environment = "dev"
-    Terraform   = "yes"
+    Env       = "${var.env}"
+    Terraform = "yes"
   }
 }
 

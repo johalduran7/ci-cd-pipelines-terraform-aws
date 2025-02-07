@@ -1,5 +1,5 @@
 # resource "aws_ssm_parameter" "desired_asg" {
-#   name  = "/app/dev/desired_asg"
+#   name  = "/app/${var.env}/desired_asg"
 #   type  = "String" # For standard parameters
 #   value = var.desired_asg
 
@@ -8,13 +8,13 @@
 #   }
 
 #   tags = {
-#     Environment = "dev"
+#     Env = "${var.env}"
 #     Terraform   = "yes"
 #   }
 # }
 
 # resource "aws_ssm_parameter" "min_asg" {
-#   name  = "/app/dev/min_asg"
+#   name  = "/app/${var.env}/min_asg"
 #   type  = "String" # For standard parameters
 #   value = var.min_asg
 
@@ -23,13 +23,13 @@
 #   }
 
 #   tags = {
-#     Environment = "dev"
+#     Env = "${var.env}"
 #     Terraform   = "yes"
 #   }
 # }
 
 # resource "aws_ssm_parameter" "max_asg" {
-#   name  = "/app/dev/max_asg"
+#   name  = "/app/${var.env}/max_asg"
 #   type  = "String" # For standard parameters
 #   value = var.max_asg
 
@@ -38,7 +38,7 @@
 #   }
 
 #   tags = {
-#     Environment = "dev"
+#     Env = "${var.env}"
 #     Terraform   = "yes"
 #   }
 # }
