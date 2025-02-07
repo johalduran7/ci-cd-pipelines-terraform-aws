@@ -52,7 +52,8 @@ resource "aws_iam_policy" "ssm_read_policy" {
       {
         Action = [
           "ssm:GetParameter",
-          "ssm:GetParameters"
+          "ssm:GetParameters",
+          "ssm:PutParameter"
         ]
         Effect   = "Allow"
         Resource = "arn:aws:ssm:us-east-1:948586925757:parameter/app/dev/*"

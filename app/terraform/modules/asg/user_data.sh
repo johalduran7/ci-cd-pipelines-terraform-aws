@@ -1,4 +1,5 @@
 #!/bin/bash
+START_TIME=$(date +%s) 
 dnf update -y
 dnf install -y docker
 systemctl start docker
@@ -23,7 +24,7 @@ systemctl enable httpd
 echo "Hello World from Apache running on $(curl http://169.254.169.254/latest/meta-data/instance-id) " > /var/www/html/index.html
 
 # Configure Apache to log in JSON format
-echo 'LogFormat "{   \"LogType\": \"access\",   \"time\": \"%%{%Y-%m-%dT%H:%M:%S%z}t\",   \"remote_ip\": \"%a\",   \"host\": \"%v\",   \"method\": \"%m\",   \"url\": \"%U\",   \"query\": \"%q\",   \"protocol\": \"%H\",   \"status\": \"%>s\",   \"bytes_sent\": \"%B\",   \"referer\": \"%%{Referer}i\",   \"user_agent\": \"%%{User-Agent}i\",   \"response_time_microseconds\": \"%D\",   \"forwarded_for\": \"%%{X-Forwarded-For}i\",   \"http_version\": \"%H\",   \"request\": \"%r\" }" json' > /etc/httpd/conf.d/custom_log_format.conf
+echo 'LogFormat "{   \"LogType\": \"access\",   \"time\": \"%{%Y-%m-%dT%H:%M:%S%z}t\",   \"remote_ip\": \"%a\",   \"host\": \"%v\",   \"method\": \"%m\",   \"url\": \"%U\",   \"query\": \"%q\",   \"protocol\": \"%H\",   \"status\": \"%>s\",   \"bytes_sent\": \"%B\",   \"referer\": \"%{Referer}i\",   \"user_agent\": \"%{User-Agent}i\",   \"response_time_microseconds\": \"%D\",   \"forwarded_for\": \"%{X-Forwarded-For}i\",   \"http_version\": \"%H\",   \"request\": \"%r\" }" json' > /etc/httpd/conf.d/custom_log_format.conf
 echo 'CustomLog /var/log/httpd/access_log json' >> /etc/httpd/conf.d/custom_log_format.conf
 systemctl restart httpd
 
@@ -34,15 +35,21 @@ if [ ! -f /var/log/httpd/access_log ]; then
 fi
 
 
+# Not working on this amaon linux image. This is for old version of CW agent
 # Set the region in the CloudWatch Agent configuration file
-sed -i 's/region = .*/region = ${var.aws_region}/' /etc/awslogs/awscli.conf
+#sed -i 's/region = .*/region = ${var.aws_region}/' /etc/awslogs/awscli.conf
 
+# Not working on this amaon linux image
 # Generate Logs Every Minute
+sudo yum install -y cronie
+sudo systemctl enable crond
+sudo systemctl start crond
 echo "* * * * * root echo '{\"LogType\": \"sample_logs\", \"message\": \"Sample log generated at $(date --iso-8601=seconds)\"} frommm AWS CloudWatch Agent' >> /var/log/sample_logs" >> /etc/cron.d/generate_logs
 chmod 0644 /etc/cron.d/generate_logs
 
-# Start CloudWatch Agent
 
+# Start CloudWatch Agent
+# /var/log/message is not available in the newest version of Amazon Linux AMI, so, journalctl is used instead but the logs are not persistent
 # Create CloudWatch Agent Configuration File in the correct directory
 cat <<EOT > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 {
@@ -82,3 +89,14 @@ EOT
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a start -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+
+
+END_TIME=$(date +%s)
+RUNNING_TIME=$((END_TIME - START_TIME))
+echo "User_data procesing elapsed time: $RUNNING_TIME" 
+echo "User_data procesing elapsed time: $RUNNING_TIME" > /home/ec2-user/running_time.txt
+aws ssm put-parameter \
+    --name "/app/dev/running_time_user_data" \
+    --value "${RUNNING_TIME} seconds" \
+    --type "String" \
+    --overwrite

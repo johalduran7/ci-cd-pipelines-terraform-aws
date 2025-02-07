@@ -6,7 +6,7 @@ variable "aws_region" {
 
 variable "env" {
   type    = string
-  default = "Dev"
+  default = "dev"
 }
 
 # Remember to export the TF_VAR_ssh_public_key variable in your environement
