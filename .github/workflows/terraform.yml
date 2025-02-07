@@ -34,6 +34,7 @@ jobs:
         run: |
           TAG="dev-infra-${VERSION}"
           git checkout dev
+          git tag
           if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
             echo "Error: No matching tag '${TAG}' found."
             exit 1
