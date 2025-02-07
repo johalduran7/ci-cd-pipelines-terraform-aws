@@ -83,7 +83,7 @@ jobs:
               echo "tag_exists=false" >> $GITHUB_ENV
               echo "tag_exists=false" >> $GITHUB_OUTPUT 
           fi
-          echo tag_exists: $tag_exists
+          echo tag_exists: ${tag_exists}
 
 
   build-and-push:
@@ -142,7 +142,8 @@ jobs:
     needs: 
       - validate_existing_ecr_tags
       - build-and-push
-    if: success() || needs.validate_existing_ecr_tags.outputs.tag_exists == 'true'
+    if: always() && (needs.build-and-push.result == 'success' || needs.validate_existing_ecr_tags.outputs.tag_exists == 'true')
+
     environment: AWS
     steps:
       - name: Checkout Repository
