@@ -77,7 +77,7 @@ jobs:
       - name: Build Docker image
         run: |
           cd ${{ github.workspace }}/app/src/
-          docker build -t $ECR_REPO_NAME .
+          docker build -t $ECR_REPO_NAME:$VERSION .
 
       - name: Tag Docker image
         run: |
