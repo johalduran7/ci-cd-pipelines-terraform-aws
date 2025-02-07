@@ -25,22 +25,9 @@ resource "aws_ecr_lifecycle_policy" "ecr_policy" {
   "rules": [
     {
       "rulePriority": 1,
-      "description": "Expire untagged images",
+      "description": "Keep only the latest two images",
       "selection": {
-        "tagStatus": "untagged",
-        "countType": "sinceImagePushed",
-        "countUnit": "days",
-        "countNumber": 1
-      },
-      "action": {
-        "type": "expire"
-      }
-    },
-    {
-      "rulePriority": 2,
-      "description": "Keep only the latest two tagged images",
-      "selection": {
-        "tagStatus": "tagged",
+        "tagStatus": "any",
         "countType": "imageCountMoreThan",
         "countNumber": 2
       },
