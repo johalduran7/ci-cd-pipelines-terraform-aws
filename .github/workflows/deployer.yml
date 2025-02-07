@@ -74,7 +74,7 @@ jobs:
         run: |
           tags=$(aws ecr list-images --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
           echo tags: $tags
-          if echo "$tags" | jq -e '.[] | select(. == "${VERSION}")' >/dev/null; then
+          if echo "$tags" | jq -e --arg VERSION "$VERSION" '.[] | select(. == $VERSION)' >/dev/null; then
               echo "Tag ${VERSION} exists on ${ECR_REPO_NAME}"
               echo "tag_exists=true" >> $GITHUB_ENV
               echo "tag_exists=true" >> $GITHUB_OUTPUT
@@ -83,6 +83,7 @@ jobs:
               echo "tag_exists=false" >> $GITHUB_ENV
               echo "tag_exists=false" >> $GITHUB_OUTPUT 
           fi
+          echo tag_exists: $tag_exists
 
 
   build-and-push:
