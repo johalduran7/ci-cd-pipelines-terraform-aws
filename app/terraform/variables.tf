@@ -19,3 +19,8 @@ variable "infrastructure_version" {
   type    = string
   default = "dev-infra-v1.0.0"
 }
+
+variable "app_version" {
+  type    = string
+  default = "dev-app-v1.0.0"
+}
