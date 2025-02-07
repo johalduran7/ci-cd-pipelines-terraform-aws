@@ -15,7 +15,7 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable infrastructure_version {
-  type        = string
-  default     = "dev-infra-v1.0.0"
+variable "infrastructure_version" {
+  type    = string
+  default = "dev-infra-v1.0.0"
 }

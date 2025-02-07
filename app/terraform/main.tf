@@ -42,7 +42,7 @@ resource "aws_ssm_parameter" "infrastructure_version" {
   value = var.infrastructure_version
 
   tags = {
-    Env = "${var.env}"
-    Terraform   = "yes"
+    Env       = "${var.env}"
+    Terraform = "yes"
   }
 }
