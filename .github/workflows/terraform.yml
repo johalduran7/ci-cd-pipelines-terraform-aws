@@ -38,7 +38,7 @@ jobs:
 
       - name: Check if Tag Exists
         run: |
-          TAG="dev-infra-${VERSION}"
+          TAG="dev-infra-v${VERSION}"
           git tag
           if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
             echo "Error: No matching tag '${TAG}' found."
@@ -65,7 +65,7 @@ jobs:
 
       - name: Checkout Matching Tag
         run: |
-          TAG="dev-infra-${VERSION}"
+          TAG="dev-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
@@ -99,7 +99,7 @@ jobs:
 
       - name: Checkout Matching Tag
         run: |
-          TAG="dev-infra-${VERSION}"
+          TAG="dev-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
@@ -143,7 +143,7 @@ jobs:
 
       - name: Checkout Matching Tag
         run: |
-          TAG="dev-infra-${VERSION}"
+          TAG="dev-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
