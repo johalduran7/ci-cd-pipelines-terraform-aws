@@ -35,3 +35,14 @@ module "ecr" {
   source = "./modules/ecr"
 }
 
+
+resource "aws_ssm_parameter" "infrastructure_version" {
+  name  = "/app/${var.env}/infrastructure_version"
+  type  = "String" # For standard parameters
+  value = var.infrastructure_version
+
+  tags = {
+    Env = "${var.env}"
+    Terraform   = "yes"
+  }
+}

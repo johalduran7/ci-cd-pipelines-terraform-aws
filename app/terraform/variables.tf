@@ -14,3 +14,8 @@ variable "ssh_public_key" {
   description = "Public SSH key for EC2 instances"
   type        = string
 }
+
+variable infrastructure_version {
+  type        = string
+  default     = "dev-infra-v1.0.0"
+}

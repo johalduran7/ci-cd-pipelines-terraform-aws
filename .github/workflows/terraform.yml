@@ -115,6 +115,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
+          TF_VAR_infrastructure_version: "dev-infra-v${VERSION}"
         run: |
           cd app/terraform
           terraform init
@@ -171,6 +172,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
+          TF_VAR_infrastructure_version: "dev-infra-v${VERSION}"
         if: github.event_name == 'push'
 
   trigger_deployer:

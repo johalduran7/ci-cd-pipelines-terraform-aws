@@ -202,7 +202,7 @@ resource "aws_launch_template" "amazon_linux_template" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name      = "app-tag-v1.0.1"
+      Name      = "app"
       Terraform = "yes"
       asg       = var.asg_name
       Env       = var.env
