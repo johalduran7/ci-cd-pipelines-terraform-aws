@@ -71,6 +71,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Check if version exists on ECR
+        id: check_tag
         run: |
           tags=$(aws ecr list-images --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
           echo "tags: $tags"
