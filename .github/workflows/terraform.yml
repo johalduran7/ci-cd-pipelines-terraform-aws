@@ -190,5 +190,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'deployer.yml',  
-              ref: 'master',  
+              ref: 'dev',  
             });

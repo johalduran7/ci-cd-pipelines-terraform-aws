@@ -37,43 +37,42 @@ jobs:
           else
             echo "Tag '${TAG}' exists!"
           fi
-  # validate_existing_ecr_tags:
-  #   name: Validate Version
-  #   runs-on: ubuntu-latest
-  #   needs: validate_version
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0 # Ensure full history is fetched
-  #         fetch-tags: true  # Ensure we fetch all tags
-  #     - name: Read Version from version.txt
-  #       id: read_version
-  #       run: echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
+  validate_existing_ecr_tags:
+    name: Validate Version
+    runs-on: ubuntu-latest
+    needs: validate_version
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensure full history is fetched
+          fetch-tags: true  # Ensure we fetch all tags
+      - name: Read Version from version.txt
+        id: read_version
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
 
-  #     - name: Get ECR Repository URL from SSM
-  #       run: |
-  #         ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository_name" --query "Parameter.Value" --output text)
-  #         echo "ECR_REPO_NAME=$ECR_REPO_NAME" >> $GITHUB_ENV  
+      - name: Get ECR Repository URL from SSM
+        run: |
+          ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository_name" --query "Parameter.Value" --output text)
+          echo "ECR_REPO_NAME=$ECR_REPO_NAME" >> $GITHUB_ENV  
 
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-  #     - name: Check if version exists on ECR
-  #       run: |
-  #         TAG="dev-app-v${VERSION}"
-  #         git tag
-  #         if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
-  #           echo "Error: No matching tag '${TAG}' found."
-  #           exit 1
-  #         else
-  #           echo "Tag '${TAG}' exists!"
-  #         fi    
+      - name: Check if version exists on ECR
+        run: |
+          tags=$(aws ecr list-images --repository-name nodejs-app  --query 'imageIds[].imageTag' --output json)
+          if echo "$tags" | jq -e '.[] | select(. == "${VERSION}")' >/dev/null; then
+              echo "Tag ${VERSION} exists on ${ECR_REPO_NAME}"
+          else
+              echo "Tag ${VERSION} does not exist on ${ECR_REPO_NAME}."      
+          fi
+
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: validate_version
+    needs: validate_existing_ecr_tags
     environment: AWS
     steps:
       - name: Checkout Repository
