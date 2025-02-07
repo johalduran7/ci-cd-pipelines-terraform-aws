@@ -100,9 +100,7 @@ jobs:
           fetch-tags: true  # Ensure we fetch all tags
       - name: Read Version from version.txt and Push TAG to GITHUB_ENV
         id: read_version
-        run: |
-          echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
-          echo "TAG=$(echo dev-app-v${VERSION})" >> $GITHUB_ENV
+        run: echo "TAG=dev-app-v$(cat app/src/version.txt)" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
