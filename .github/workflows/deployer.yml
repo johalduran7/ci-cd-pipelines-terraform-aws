@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - dev
+      - stg
+      - prod
     paths:
     - 'app/src/version.txt'  # app/src/** for any file and subdirectory
   workflow_dispatch: # Allows manual triggering
