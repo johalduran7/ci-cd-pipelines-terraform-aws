@@ -85,3 +85,34 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   role = aws_iam_role.ec2_execution_role.name
 }
 
+
+# IAM Policy for TAGS Access
+resource "aws_iam_policy" "ec2_tags_policy" {
+  name = "${var.env}-ec2_tags_policy"
+
+  policy = jsonencode(
+    {
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "ec2:DescribeInstances",
+            "ec2:CreateTags"
+          ],
+          "Resource" : "*"
+        },
+        {
+          "Effect" : "Allow",
+          "Action" : "ec2:DescribeTags",
+          "Resource" : "*"
+        }
+      ]
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "attach_policy_ec2_tags_policy" {
+  role       = aws_iam_role.ec2_execution_role.name
+  policy_arn = aws_iam_policy.ec2_tags_policy.arn
+}

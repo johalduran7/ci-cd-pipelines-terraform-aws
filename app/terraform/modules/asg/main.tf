@@ -207,7 +207,7 @@ resource "aws_launch_template" "amazon_linux_template" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name      = "${var.env}-app"
+      Name      = "app-${var.env}"
       Terraform = "yes"
       asg       = "${var.env}-${var.asg_name}"
       Env       = var.env
@@ -235,12 +235,13 @@ resource "aws_autoscaling_group" "app_asg" {
   # Attach to the Target Group
   target_group_arns = [var.app_tg_arn, var.apache_tg_arn]
 
-  tag {
-    key                 = "Name"
-    value               = "${var.env}-${var.asg_name}"
-    propagate_at_launch = true
+  # this tag will overrride the tags in the launch template to be assigned for ec2s
+  # tag {
+  #   key                 = "Name"
+  #   value               = "app-${var.env}"
+  #   propagate_at_launch = true
 
-  }
+  # }
 
   health_check_type         = "EC2"
   health_check_grace_period = 5
