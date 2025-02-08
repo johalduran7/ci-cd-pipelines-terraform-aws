@@ -2,8 +2,8 @@ name: Terraform CI/CD
 
 on:
   push:
-    branches:
-      - dev
+    # branches:
+    #   - dev
     paths:
       - 'app/terraform/version.txt'  # Trigger only if Terraform files change
   # pull_request:
@@ -38,7 +38,7 @@ jobs:
 
       - name: Check if Tag Exists
         run: |
-          TAG="dev-infra-v${VERSION}"
+          TAG="${{ github.ref_name }}-infra-v${VERSION}"
           git tag
           if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
             echo "Error: No matching tag '${TAG}' found."
@@ -65,7 +65,7 @@ jobs:
 
       - name: Checkout Matching Tag
         run: |
-          TAG="dev-infra-v${VERSION}"
+          TAG="${{ github.ref_name }}-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
@@ -79,7 +79,7 @@ jobs:
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
           TF_VAR_path_user_data: ${{ github.workspace }}/app/terraform/modules/asg/user_data.sh
-          TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
+          TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
         run: |
           cd app/terraform
           terraform init
@@ -104,7 +104,7 @@ jobs:
 
       - name: Checkout Matching Tag
         run: |
-          TAG="dev-infra-v${VERSION}"
+          TAG="${{ github.ref_name }}-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
@@ -120,7 +120,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
-          TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
+          TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
         run: |
           cd app/terraform
           terraform init
@@ -149,7 +149,7 @@ jobs:
 
       - name: Checkout Matching Tag
         run: |
-          TAG="dev-infra-v${VERSION}"
+          TAG="${{ github.ref_name }}-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
@@ -195,5 +195,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'deployer.yml',  
-              ref: 'dev',  
+              ref: '${{ github.ref_name }}',  
             });
