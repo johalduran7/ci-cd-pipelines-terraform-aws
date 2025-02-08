@@ -46,6 +46,8 @@ jobs:
 
       - name: Check if Tag Exists
         run: |
+          echo "test_var: $test_var"
+          echo "test_var braces: ${test_var}"
           TAG="${{ github.ref_name }}-infra-v${VERSION}"
           git tag
           if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
