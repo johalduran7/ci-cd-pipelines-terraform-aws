@@ -34,7 +34,7 @@ jobs:
           git branch --show-current
           echo "Available tags:"
           git tag
-      - name: Load .env Variables into GITHUB_ENV
+      - name: Load .env Variables into GITHUB_ENV (They can only be used in thee next step)
         run: |
           sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
           set -o allexport  # Enable automatic exporting of variables
@@ -46,9 +46,6 @@ jobs:
         id: read_version
         run: |
           echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
-          echo "test_var1: $test_var1"
-          echo "test_var2: $test_var2"
-
       - name: Check if Tag Exists
         run: |
           TAG="${{ github.ref_name }}-infra-v${VERSION}"
