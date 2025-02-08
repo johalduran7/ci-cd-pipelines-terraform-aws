@@ -3,8 +3,9 @@ terraform {
 
     organization = "john-organization"
     workspaces {
-      name = "dev"
-      #tags =  true # it allows to select the workspace according to TF_WORKSPACE
+      #name = "app-portfolio"
+      #tags =  
+      # set TF_WORKSPACE instead
     }
   }
 }
