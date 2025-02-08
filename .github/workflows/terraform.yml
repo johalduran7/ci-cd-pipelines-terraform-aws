@@ -42,7 +42,7 @@ jobs:
           cat ${{ github.workspace }}/app/.env
           echo -e "\n"
           echo "test_var: $test_var"
-          echo "test_var braces: {$test_var}"
+          echo "test_var braces: ${test_var}"
 
       - name: Check if Tag Exists
         run: |
