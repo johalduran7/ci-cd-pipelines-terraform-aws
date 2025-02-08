@@ -39,7 +39,7 @@ jobs:
         run: |
           echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
           echo "var_test=$(cat ${{ github.workspace }}/app/.env)" >> $GITHUB_ENV
-          ls ${{ github.workspace }}/app/.env
+          cat ${{ github.workspace }}/app/.env
           echo "var_test: $var_test"
           echo "var_test: ${var_test}"
 
