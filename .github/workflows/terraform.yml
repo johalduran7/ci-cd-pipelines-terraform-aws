@@ -114,19 +114,20 @@ jobs:
         id: read_version
         run: echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
 
-      - name: Checkout Matching Tag
-        run: |
-          TAG="${{ github.ref_name }}-infra-v${VERSION}"
-          echo "Checking out tag: ${TAG}"
-          git checkout "${TAG}"
-
-      - name: Load .env Variables into GITHUB_ENV (They can only be used in thee next step)
+      - name: Load .env Variables into GITHUB_ENV
         run: |
           sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
           set -o allexport  # Enable automatic exporting of variables
           source ${{ github.workspace }}/app/.env  # Load variables
           set +o allexport  # Disable automatic exporting
           cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV
+
+
+      - name: Checkout Matching Tag
+        run: |
+          TAG="${{ github.ref_name }}-infra-v${VERSION}"
+          echo "Checking out tag: ${TAG}"
+          git checkout "${TAG}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -167,20 +168,18 @@ jobs:
       - name: Read Version from version.txt
         id: read_version
         run: echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
-
-      - name: Checkout Matching Tag
-        run: |
-          TAG="${{ github.ref_name }}-infra-v${VERSION}"
-          echo "Checking out tag: ${TAG}"
-          git checkout "${TAG}"
-
-      - name: Load .env Variables into GITHUB_ENV (They can only be used in thee next step)
+      - name: Load .env Variables into GITHUB_ENV #(They can only be used in thee next step). This has to be done before checking out to the tag
         run: |
           sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
           set -o allexport  # Enable automatic exporting of variables
           source ${{ github.workspace }}/app/.env  # Load variables
           set +o allexport  # Disable automatic exporting
           cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV
+      - name: Checkout Matching Tag
+        run: |
+          TAG="${{ github.ref_name }}-infra-v${VERSION}"
+          echo "Checking out tag: ${TAG}"
+          git checkout "${TAG}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
