@@ -13,6 +13,11 @@ variable "app_tg_arn" {
   default = ""
 }
 
+variable "apache_tg_arn" {
+  default = ""
+}
+
+
 variable "alb_dns_name" {
   default = ""
 

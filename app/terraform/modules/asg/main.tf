@@ -233,7 +233,7 @@ resource "aws_autoscaling_group" "app_asg" {
   }
 
   # Attach to the Target Group
-  target_group_arns = [var.app_tg_arn]
+  target_group_arns = [var.app_tg_arn, var.apache_tg_arn]
 
   tag {
     key                 = "Name"

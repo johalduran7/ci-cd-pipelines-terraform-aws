@@ -22,6 +22,14 @@ resource "aws_security_group" "sg_alb" {
     cidr_blocks = ["0.0.0.0/0"] # Allow from the internet
   }
 
+  # Allow inbound traffic on port 8080 (HTTPS)
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow from the internet
+  }
+
   # Allow all outbound traffic
   egress {
     from_port   = 0
@@ -81,8 +89,8 @@ resource "aws_lb_target_group" "app_tg" {
   }
 }
 
-# 4. Listener for ALB (HTTP on port 80)
-resource "aws_lb_listener" "alb_listener" {
+# 4. Listener for ALB 
+resource "aws_lb_listener" "alb_app_listener" {
   load_balancer_arn = aws_lb.alb.arn
   port              = "8080"
   protocol          = "HTTP"
@@ -90,6 +98,44 @@ resource "aws_lb_listener" "alb_listener" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.app_tg.arn
+  }
+}
+
+
+resource "aws_lb_target_group" "apache_tg" {
+  name     = "${var.env}-apache-target-group"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id # Replace with your VPC ID
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+  }
+
+  # Apply deregistration delay (in seconds)
+  deregistration_delay = 0 # Adjust this value (default is 300 seconds)
+
+
+
+  tags = {
+    Name = "${var.env}-app-tg"
+  }
+}
+
+
+resource "aws_lb_listener" "alb_apache_listener" {
+  load_balancer_arn = aws_lb.alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.apache_tg.arn
   }
 }
 

@@ -6,11 +6,13 @@ systemctl start docker
 systemctl enable docker
 
 AccountId=$(curl -s http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | jq -r .AccountId)
-aws_region=$(aws configure get region)
+aws_region=$(curl http://169.254.169.254/latest/meta-data/placement/region)
 aws ecr get-login-password | docker login --username AWS --password-stdin $AccountId.dkr.ecr.$aws_region.amazonaws.com
 APP_VERSION=$(aws ssm get-parameter --name "/app/dev/app_version" --query "Parameter.Value" --output text)
 APP_VERSION=$(echo $APP_VERSION | cut -d "v" -f3)
 ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository_name" --query "Parameter.Value" --output text)
+instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+public_hostname=$(curl http://169.254.169.254/latest/meta-data/public-hostname)
 sudo chmod 666 /var/run/docker.sock
 docker pull $AccountId.dkr.ecr.$aws_region.amazonaws.com/$ECR_REPO_NAME:$APP_VERSION
 docker run -t -d -p 3000:3000 --name $ECR_REPO_NAME $AccountId.dkr.ecr.$aws_region.amazonaws.com/$ECR_REPO_NAME:$APP_VERSION
@@ -22,7 +24,7 @@ yum install -y amazon-cloudwatch-agent httpd
 # Start Apache Server
 systemctl start httpd
 systemctl enable httpd
-echo "Hello World from Apache running on $(curl http://169.254.169.254/latest/meta-data/instance-id) " > /var/www/html/index.html
+echo -e "Apache running on: <br>$aws_region<br>App version: $APP_VERSION<br>$instance_id<br>$public_hostname" > /var/www/html/index.html
 
 # Configure Apache to log in JSON format
 echo 'LogFormat "{   \"LogType\": \"access\",   \"time\": \"%{%Y-%m-%dT%H:%M:%S%z}t\",   \"remote_ip\": \"%a\",   \"host\": \"%v\",   \"method\": \"%m\",   \"url\": \"%U\",   \"query\": \"%q\",   \"protocol\": \"%H\",   \"status\": \"%>s\",   \"bytes_sent\": \"%B\",   \"referer\": \"%{Referer}i\",   \"user_agent\": \"%{User-Agent}i\",   \"response_time_microseconds\": \"%D\",   \"forwarded_for\": \"%{X-Forwarded-For}i\",   \"http_version\": \"%H\",   \"request\": \"%r\" }" json' > /etc/httpd/conf.d/custom_log_format.conf

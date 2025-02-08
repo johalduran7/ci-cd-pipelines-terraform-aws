@@ -33,6 +33,7 @@ module "asg" {
   vpc_id          = module.vpc.vpc_id
   aws_region      = var.aws_region
   app_tg_arn      = module.alb.app_tg_arn
+  apache_tg_arn   = module.alb.apache_tg_arn
   alb_dns_name    = module.alb.alb_dns_name
   public_subnets  = module.vpc.public_subnets
   private_subnets = module.vpc.private_subnets
