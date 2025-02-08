@@ -39,7 +39,8 @@ jobs:
         run: |
           echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
           echo "var_test=$(cat ${{ github.workspace }}/app/.env)" >> $GITHUB_ENV
-          echo "var_test: $var_test - ${var_test}"
+          ls ${{ github.workspace }}/app/.env
+          echo "var_test: $var_test"
           echo "var_test: ${var_test}"
 
       - name: Check if Tag Exists
@@ -86,7 +87,7 @@ jobs:
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
           TF_VAR_path_user_data: ${{ github.workspace }}/app/terraform/modules/asg/user_data.sh
           TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}"
-          TF_WORKSPACE: ${{ github.ref_name }}
+          TF_WORKSPACE: "${{ github.ref_name }}"
         run: |
           cd app/terraform
           terraform init
@@ -128,7 +129,7 @@ jobs:
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
           TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
-          TF_WORKSPACE: ${{ github.ref_name }}
+          TF_WORKSPACE: "${{ github.ref_name }}"
         run: |
           cd app/terraform
           terraform init
@@ -186,7 +187,7 @@ jobs:
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
           TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
-          TF_WORKSPACE: ${{ github.ref_name }}
+          TF_WORKSPACE: "${{ github.ref_name }}"
         if: github.event_name == 'push'
 
   trigger_deployer:
