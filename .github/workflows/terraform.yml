@@ -34,20 +34,23 @@ jobs:
           git branch --show-current
           echo "Available tags:"
           git tag
+      - name: Load Environment Variables
+        run: |
+          echo "Loading environment variables from .env file"
+          while IFS= read -r line; do
+            if [[ ! -z "$line" ]] && [[ "$line" != \#* ]]; then
+              echo "$line" >> $GITHUB_ENV
+            fi
+          done < ${{ github.workspace }}/app/.env)
       - name: Read Version from version.txt
         id: read_version
         run: |
           echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
-          echo "$(cat ${{ github.workspace }}/app/.env)" >> $GITHUB_ENV
-          cat ${{ github.workspace }}/app/.env
-          echo -e "\n"
-          echo "test_var: $test_var"
-          echo "test_var braces: ${test_var}"
+          echo "test_var1: $test_var1"
+          echo "test_var2: ${test_var2}"
 
       - name: Check if Tag Exists
         run: |
-          echo "test_var: $test_var"
-          echo "test_var braces: ${test_var}"
           TAG="${{ github.ref_name }}-infra-v${VERSION}"
           git tag
           if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then
