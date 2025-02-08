@@ -119,6 +119,14 @@ jobs:
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
 
+      - name: Load .env Variables into GITHUB_ENV (They can only be used in thee next step)
+        run: |
+          sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
+          set -o allexport  # Enable automatic exporting of variables
+          source ${{ github.workspace }}/app/.env  # Load variables
+          set +o allexport  # Disable automatic exporting
+          cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
@@ -128,7 +136,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
+          AWS_DEFAULT_REGION: ${{ env.aws_region }} 
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
           TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
@@ -164,6 +172,14 @@ jobs:
           TAG="${{ github.ref_name }}-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
+          
+      - name: Load .env Variables into GITHUB_ENV (They can only be used in thee next step)
+        run: |
+          sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
+          set -o allexport  # Enable automatic exporting of variables
+          source ${{ github.workspace }}/app/.env  # Load variables
+          set +o allexport  # Disable automatic exporting
+          cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -177,7 +193,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
+          AWS_DEFAULT_REGION: ${{ env.aws_region }} 
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
           TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
@@ -194,7 +210,7 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }} # Optionally add this
+          AWS_DEFAULT_REGION: ${{ env.aws_region }} 
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
           TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
