@@ -46,6 +46,7 @@ jobs:
         id: read_version
         run: |
           echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
+          echo "aws_region: $aws_region"
       - name: Check if Tag Exists
         run: |
           TAG="${{ github.ref_name }}-infra-v${VERSION}"
@@ -172,7 +173,7 @@ jobs:
           TAG="${{ github.ref_name }}-infra-v${VERSION}"
           echo "Checking out tag: ${TAG}"
           git checkout "${TAG}"
-          
+
       - name: Load .env Variables into GITHUB_ENV (They can only be used in thee next step)
         run: |
           sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
