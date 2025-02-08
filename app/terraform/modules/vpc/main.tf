@@ -8,7 +8,7 @@ resource "aws_vpc" "app_vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Name      = var.vpc_name
+    Name      = "${var.env}-${var.vpc_name}"
     Terraform = "yes"
   }
 }

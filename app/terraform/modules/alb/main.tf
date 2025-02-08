@@ -10,7 +10,7 @@ data "aws_subnets" "subnets" {
 
 ### creating security group for ALB
 resource "aws_security_group" "sg_alb" {
-  name        = "sg_alb"
+  name        = "${var.env}-sg_alb"
   description = "Allow inbound HTTP listening on port 8080 traffic to ALB"
   vpc_id      = var.vpc_id # Replace with your VPC ID. Only one VPC unless using lambda or VPC peering
 
@@ -31,14 +31,14 @@ resource "aws_security_group" "sg_alb" {
   }
 
   tags = {
-    Name      = "app-alb-sg"
+    Name      = "${var.env}-app-alb-sg"
     Terraform = "yes"
   }
 }
 
 
 resource "aws_lb" "alb" {
-  name               = "app-alb"
+  name               = "${var.env}-app-alb"
   internal           = false # This makes the ALB internet-facing
   load_balancer_type = "application"
   security_groups    = [aws_security_group.sg_alb.id]
@@ -48,7 +48,7 @@ resource "aws_lb" "alb" {
   idle_timeout               = 60 # Time (in seconds) before idle connections are closed
 
   tags = {
-    Name      = "app-alb"
+    Name      = "${var.env}-app-alb"
     Terraform = "yes"
 
   }
@@ -57,7 +57,7 @@ resource "aws_lb" "alb" {
 
 # 3. Target Group
 resource "aws_lb_target_group" "app_tg" {
-  name     = "app-target-group"
+  name     = "${var.env}-app-target-group"
   port     = 3000
   protocol = "HTTP"
   vpc_id   = var.vpc_id # Replace with your VPC ID
@@ -77,7 +77,7 @@ resource "aws_lb_target_group" "app_tg" {
 
 
   tags = {
-    Name = "app-tg"
+    Name = "${var.env}-app-tg"
   }
 }
 

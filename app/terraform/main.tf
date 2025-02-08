@@ -1,15 +1,28 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 
 # Create VPC
 module "vpc" {
-  source     = "./modules/vpc"
-  aws_region = var.aws_region
+  env                   = var.env
+  vpc_name              = var.vpc_name
+  source                = "./modules/vpc"
+  aws_region            = var.aws_region
+  cidr_block            = var.cidr_block
+  public_subnet_a_cidr  = var.public_subnet_a_cidr
+  public_subnet_a_name  = var.public_subnet_a_name
+  public_subnet_b_cidr  = var.public_subnet_b_cidr
+  public_subnet_b_name  = var.public_subnet_b_name
+  private_subnet_a_cidr = var.private_subnet_a_cidr
+  private_subnet_a_name = var.private_subnet_a_name
+  private_subnet_b_cidr = var.private_subnet_b_cidr
+  private_subnet_b_name = var.private_subnet_b_name
+
 }
 
 module "alb" {
   source         = "./modules/alb"
+  env            = var.env
   vpc_id         = module.vpc.vpc_id
   public_subnets = module.vpc.public_subnets
 }
@@ -34,4 +47,6 @@ data "aws_subnets" "available_subnets" {
 
 module "ecr" {
   source = "./modules/ecr"
+  env    = var.env
 }
+

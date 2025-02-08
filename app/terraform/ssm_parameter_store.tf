@@ -1,7 +1,7 @@
 resource "aws_ssm_parameter" "infrastructure_version" {
   name  = "/app/${var.env}/infrastructure_version"
   type  = "String" # For standard parameters
-  value = var.infrastructure_version
+  value = "${var.env}-${var.infrastructure_version}"
 
   tags = {
     Env       = "${var.env}"
@@ -12,7 +12,7 @@ resource "aws_ssm_parameter" "infrastructure_version" {
 resource "aws_ssm_parameter" "app_version" {
   name  = "/app/${var.env}/app_version"
   type  = "String" # For standard parameters
-  value = var.app_version
+  value = "${var.env}-${var.app_version}"
 
   lifecycle {
     ignore_changes = [value] # it prevents the value from being updated after the first run of Terraform.

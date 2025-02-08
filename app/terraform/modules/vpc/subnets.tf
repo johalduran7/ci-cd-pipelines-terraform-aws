@@ -9,7 +9,7 @@ resource "aws_subnet" "public_subnet_a" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = var.public_subnet_a_name
+    Name = "${var.env}-${var.public_subnet_a_name}"
   }
 }
 
@@ -21,7 +21,7 @@ resource "aws_subnet" "public_subnet_b" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = var.public_subnet_b_name
+    Name = "${var.env}-${var.public_subnet_b_name}"
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_subnet" "private_subnet_a" {
   availability_zone = "${var.aws_region}a"
 
   tags = {
-    Name = var.private_subnet_a_name
+    Name = "${var.env}-${var.private_subnet_a_name}"
   }
 }
 
@@ -43,7 +43,7 @@ resource "aws_subnet" "private_subnet_b" {
   availability_zone = "${var.aws_region}b"
 
   tags = {
-    Name = var.private_subnet_b_name
+    Name = "${var.env}-${var.private_subnet_b_name}"
   }
 }
 

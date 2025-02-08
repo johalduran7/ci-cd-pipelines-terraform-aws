@@ -2,13 +2,13 @@
 # generating key: $ ssh-keygen -t rsa -b 4096 -f key_saa -N ""
 # in order for this to be run via gitops, I have to add an environment variable
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
+  key_name   = "${var.env}-deployer-key"
   public_key = var.ssh_public_key
 }
 
 
 resource "aws_security_group" "sg_ssh" {
-  name   = "sg_ssh"
+  name   = "${var.env}-sg_ssh"
   vpc_id = var.vpc_id
   ingress {
     from_port   = "22"
@@ -26,16 +26,17 @@ resource "aws_security_group" "sg_ssh" {
   tags = {
 
     Terraform = "yes"
+    Env       = "${var.env}"
 
   }
 }
 
 resource "aws_security_group" "sg_web" {
-  name        = "sg_web_app"
+  name        = "${var.env}-sg_web_app"
   vpc_id      = var.vpc_id
   description = "allow 3000"
   tags = {
-    Name      = "sg_web"
+    Name      = "${var.env}-sg_web"
     Terraform = "yes"
   }
 }
@@ -70,28 +71,28 @@ data "aws_subnets" "subnets" {
 
 
 # Fetch the latest Amazon Linux 2 AMI available in the region
-# data "aws_ami" "amazon_linux" {
-#   most_recent = true
-#   owners      = ["amazon"] # Amazon's official AMI owner ID
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"] # Amazon's official AMI owner ID
 
-#   filter {
-#     name   = "name"
-#     #values = ["al2023-ami-2023.6.20250128.0-kernel-6.1-x86_64"] # Amazon Linux 2 AMI
-#     values = ["Amazon Linux 2023 AMI"]
-#   }
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023.6.20250128.0-kernel-6.1-x86_64"] # Amazon Linux 2 AMI
+    #values = ["Amazon Linux 2023 AMI"]
+  }
 
-#   filter {
-#     name   = "virtualization-type"
-#     values = ["hvm"]
-#   }
-# }
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
 
 
 ###### ASG CREATION
 
 resource "aws_launch_template" "amazon_linux_template" {
-  name_prefix   = "app-launch-template"
-  image_id      = "ami-0c614dee691cbbf37" #  Amazon Linux 2023 AMI #data.aws_ami.amazon_linux.id # Update with your AMI ID
+  name_prefix   = "${var.env}-app-launch-template"
+  image_id      = data.aws_ami.amazon_linux.id #"ami-0c614dee691cbbf37" #  Amazon Linux 2023 AMI us-east-1#data.aws_ami.amazon_linux.id # Update with your AMI ID
   instance_type = "t2.micro"
 
   key_name = aws_key_pair.deployer.key_name # SSH Key for accessing the instance
@@ -206,16 +207,16 @@ resource "aws_launch_template" "amazon_linux_template" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name      = "app"
+      Name      = "${var.env}-app"
       Terraform = "yes"
-      asg       = var.asg_name
+      asg       = "${var.env}-${var.asg_name}"
       Env       = var.env
     }
   }
 }
 
 resource "aws_autoscaling_group" "app_asg" {
-  name                = var.asg_name
+  name                = "${var.env}-${var.asg_name}"
   desired_capacity    = 0 #aws_ssm_parameter.desired_asg.value
   max_size            = 1 #aws_ssm_parameter.max_asg.value
   min_size            = 0 #aws_ssm_parameter.min_asg.value
@@ -236,7 +237,7 @@ resource "aws_autoscaling_group" "app_asg" {
 
   tag {
     key                 = "Name"
-    value               = var.asg_name
+    value               = "${var.env}-${var.asg_name}"
     propagate_at_launch = true
 
   }
@@ -246,7 +247,7 @@ resource "aws_autoscaling_group" "app_asg" {
 }
 
 resource "aws_autoscaling_lifecycle_hook" "instance_launch" {
-  name                   = "instance-launch-lifecycle"
+  name                   = "${var.env}-instance-launch-lifecycle"
   autoscaling_group_name = aws_autoscaling_group.app_asg.name
   lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
   heartbeat_timeout      = 70 #change to 300 in prod

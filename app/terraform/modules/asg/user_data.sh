@@ -6,13 +6,14 @@ systemctl start docker
 systemctl enable docker
 
 AccountId=$(curl -s http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | jq -r .AccountId)
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $AccountId.dkr.ecr.us-east-1.amazonaws.com
+aws_region=$(aws configure get region)
+aws ecr get-login-password | docker login --username AWS --password-stdin $AccountId.dkr.ecr.$aws_region.amazonaws.com
 APP_VERSION=$(aws ssm get-parameter --name "/app/dev/app_version" --query "Parameter.Value" --output text)
 APP_VERSION=$(echo $APP_VERSION | cut -d "v" -f3)
 ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository_name" --query "Parameter.Value" --output text)
 sudo chmod 666 /var/run/docker.sock
-docker pull $AccountId.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO_NAME:$APP_VERSION
-docker run -t -d -p 3000:3000 --name $ECR_REPO_NAME $AccountId.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO_NAME:$APP_VERSION
+docker pull $AccountId.dkr.ecr.$aws_region.amazonaws.com/$ECR_REPO_NAME:$APP_VERSION
+docker run -t -d -p 3000:3000 --name $ECR_REPO_NAME $AccountId.dkr.ecr.$aws_region.amazonaws.com/$ECR_REPO_NAME:$APP_VERSION
 
 yum update -y
 yum install -y amazon-cloudwatch-agent

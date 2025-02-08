@@ -9,7 +9,7 @@ resource "aws_route_table" "public_route_table" {
   }
 
   tags = {
-    Name      = "public_route_table"
+    Name      = "${var.env}-public_route_table"
     Terraform = "yes"
   }
 }
@@ -31,7 +31,7 @@ resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.app_vpc.id
 
   tags = {
-    Name      = "private_route_table"
+    Name      = "${var.env}-private_route_table"
     Terraform = "yes"
   }
 }

@@ -1,6 +1,6 @@
 # IAM Role for EC2 to Access CloudWatch
 resource "aws_iam_role" "ec2_execution_role" {
-  name = "ec2-app-execution-role"
+  name = "${var.env}-ec2-app-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -19,7 +19,7 @@ resource "aws_iam_role" "ec2_execution_role" {
 # IAM Policy for Logging Permissions
 #note: "ec2:DescribeTags" this one is needed for CW Agent to run
 resource "aws_iam_policy" "cloudwatch_log_policy_agent" {
-  name = "cloudwatch-log-policy-agent"
+  name = "${var.env}-cloudwatch-log-policy-agent"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -44,7 +44,7 @@ resource "aws_iam_policy" "cloudwatch_log_policy_agent" {
 
 # IAM Policy for SSM Access
 resource "aws_iam_policy" "ssm_read_policy" {
-  name = "ssm-read-policy"
+  name = "${var.env}-ssm-read-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -81,7 +81,7 @@ resource "aws_iam_role_policy_attachment" "attach_policy_read_ssm" {
 
 # EC2 Instance Profile for IAM Role
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "ec2-instance-profile"
+  name = "${var.env}-ec2-instance-profile"
   role = aws_iam_role.ec2_execution_role.name
 }
 

@@ -68,3 +68,8 @@ variable "private_subnet_b_name" {
   description = "Name tag for Private Subnet B"
   default     = "PrivateSubnetB"
 }
+
+variable "env" {
+  type    = string
+  default = "dev"
+}
