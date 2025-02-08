@@ -19,9 +19,37 @@ permissions:
 
 jobs:
 
+  load_variables:
+    name: Load Variables from YAML
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install yq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yq
+
+      - name: Load Variables from YAML
+        id: load_vars
+        run: |
+          # Read variables from the YAML file
+          while IFS= read -r line; do
+            key=$(echo "$line" | yq eval '.key' -)
+            value=$(echo "$line" | yq eval '.value' -)
+            echo "$key=$value" >> $GITHUB_ENV
+          done < <(yq eval '. | to_entries | .[]' /home/runner/work/portfolio_John_Duran/portfolio_John_Duran/app/.env)
+
+      - name: Debug Loaded Variables
+        run: |
+          echo "test_var1: $test_var1"
+          echo "test_var2: $test_var2"
+
   validate_version:
     name: Validate Version
     runs-on: ubuntu-latest
+    needs: load_variables
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
