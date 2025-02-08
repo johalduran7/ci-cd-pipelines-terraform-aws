@@ -38,10 +38,10 @@ jobs:
         id: read_version
         run: |
           echo "VERSION=$(cat ${{ github.workspace }}/app/terraform/version.txt)" >> $GITHUB_ENV
-          echo "var_test=$(cat ${{ github.workspace }}/app/.env)" >> $GITHUB_ENV
+          echo "$(cat ${{ github.workspace }}/app/.env)" >> $GITHUB_ENV
           cat ${{ github.workspace }}/app/.env
-          echo "var_test: $var_test"
-          echo "var_test: ${var_test}"
+          echo "test_var: $test_var"
+          echo "test_var: ${test_var}"
 
       - name: Check if Tag Exists
         run: |
