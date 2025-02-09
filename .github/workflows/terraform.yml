@@ -92,9 +92,12 @@ jobs:
 
       - name: Get the current infrastructure version
         run: |
-          current_infra_version=$(aws ssm get-parameter --name "/app/${{ github.ref_name }}/infrastructure_version" --query "Parameter.Value" --output text)
-          echo "current_infra_version=$current_infra_version" >> $GITHUB_ENV  
-
+          if current_infra_version=$(aws ssm get-parameter --name "/app/${{ github.ref_name }}/infrastructure_version" --query "Parameter.Value" --output text 2>/dev/null); then
+            echo "current_infra_version=$current_infra_version" >> $GITHUB_ENV
+          else
+            echo "Parameter '/app/dev/infrastructure_version' not found, setting current_infra_version to empty"
+            echo "current_infra_version=" >> $GITHUB_ENV
+          fi
       - name: Check if version exists on AWS
         id: check_infra_version
         run: |
@@ -251,7 +254,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.aws_region }} 
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
-          TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
+          TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
           TF_path_user_data: ${{ env.path_user_data }}
           TF_cidr_block: ${{ env.cidr_block }}
@@ -274,7 +277,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ env.aws_region }} 
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
-          TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
+          TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
           TF_path_user_data: ${{ env.path_user_data }}
           TF_cidr_block: ${{ env.cidr_block }}
