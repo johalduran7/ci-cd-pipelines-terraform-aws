@@ -7,7 +7,7 @@ on:
       - stg
       - prod
     paths:
-    - 'app/src/version.txt'  # app/src/** for any file and subdirectory
+    - 'app/app_version.txt'  # app/src/** for any file and subdirectory
   workflow_dispatch: # Allows manual triggering
 
 jobs:
@@ -26,9 +26,9 @@ jobs:
           git branch --show-current
           echo "Available tags:"
           git tag
-      - name: Read Version from version.txt
+      - name: Read Version from app_version.txt
         id: read_version
-        run: echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/app_version.txt)" >> $GITHUB_ENV
       - name: Check if Tag Exists
         run: |
           TAG="${{ github.ref_name }}-app-v${VERSION}"
@@ -52,9 +52,9 @@ jobs:
         with:
           fetch-depth: 0 # Ensure full history is fetched
           fetch-tags: true  # Ensure we fetch all tags
-      - name: Read Version from version.txt
+      - name: Read Version from app_version.txt
         id: read_version
-        run: echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/app_version.txt)" >> $GITHUB_ENV
 
       - name: Load .env Variables into GITHUB_ENV
         run: |
@@ -116,9 +116,9 @@ jobs:
         with:
           fetch-depth: 0 # Ensure full history is fetched
           fetch-tags: true  # Ensure we fetch all tags
-      - name: Read Version from version.txt
+      - name: Read Version from app_version.txt
         id: read_version
-        run: echo "VERSION=$(cat ${{ github.workspace }}/app/src/version.txt)" >> $GITHUB_ENV
+        run: echo "VERSION=$(cat ${{ github.workspace }}/app/app_version.txt)" >> $GITHUB_ENV
       - name: Load .env Variables into GITHUB_ENV
         run: |
           sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
@@ -179,9 +179,9 @@ jobs:
         with:
           fetch-depth: 0 # Ensure full history is fetched
           fetch-tags: true  # Ensure we fetch all tags
-      - name: Read Version from version.txt and Push TAG to GITHUB_ENV
+      - name: Read Version from app_version.txt and Push TAG to GITHUB_ENV
         id: read_version
-        run: echo "TAG=${{ github.ref_name }}-app-v$(cat app/src/version.txt)" >> $GITHUB_ENV
+        run: echo "TAG=${{ github.ref_name }}-app-v$(cat app/app_version.txt)" >> $GITHUB_ENV
       - name: Load .env Variables into GITHUB_ENV #(They can only be used in thee next step). This has to be done before checking out to the tag
         run: |
           sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
@@ -225,6 +225,14 @@ jobs:
           set +o allexport  # Disable automatic exporting
           cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV
 
+      - name: Load asg-config.txt Variables into GITHUB_ENV
+        run: |
+          sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
+          set -o allexport  # Enable automatic exporting of variables
+          source ${{ github.workspace }}/app/.env  # Load variables
+          set +o allexport  # Disable automatic exporting
+          cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV    
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -237,6 +245,6 @@ jobs:
         run: |
           aws autoscaling update-auto-scaling-group \
           --auto-scaling-group-name ${{ github.ref_name }}-app_asg \
-          --min-size 0 \
-          --max-size 2 \
-          --desired-capacity 1
+          --min-size ${{ env.min_size}} \
+          --max-size ${{ env.max_size}} \
+          --desired-capacity ${{ env.desired_capacity}}
