@@ -227,11 +227,11 @@ jobs:
 
       - name: Load asg-config.txt Variables into GITHUB_ENV
         run: |
-          sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
+          sed -i 's/\r$//' ${{ github.workspace }}/app/asg-config.txt  # Fix Windows line endings if present
           set -o allexport  # Enable automatic exporting of variables
-          source ${{ github.workspace }}/app/.env  # Load variables
+          source ${{ github.workspace }}/app/asg-config.txt  # Load variables
           set +o allexport  # Disable automatic exporting
-          cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV    
+          cat ${{ github.workspace }}/app/asg-config.txt >> $GITHUB_ENV  # Append variables to GITHUB_ENV    
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
