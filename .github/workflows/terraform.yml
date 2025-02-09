@@ -108,7 +108,15 @@ jobs:
             echo "The version app-infra-${VERSION} will be deployed on AWS"
             version_exists=false
           fi
-          echo "version_exists=${version_exists}" >> $GITHUB_OUTPUT
+
+          echo "version_exists: ${version_exists}"
+
+          if [ -n "$GITHUB_ENV" ]; then
+              echo "version_exists=${version_exists}" >> $GITHUB_ENV
+          fi
+          if [ -n "$GITHUB_OUTPUT" ]; then
+              echo "version_exists=${version_exists}" >> $GITHUB_OUTPUT
+          fi
 
   validate:
     name: Validate Terraform
