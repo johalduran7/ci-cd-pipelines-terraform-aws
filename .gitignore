@@ -1,3 +1,7 @@
 # Ignore everything by default
 #finance-app
-
+./ansible
+./docker
+./jenkins
+./kubernetes
+./terraform-aws
