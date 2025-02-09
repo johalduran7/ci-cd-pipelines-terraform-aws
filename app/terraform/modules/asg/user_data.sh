@@ -23,7 +23,7 @@ AccountId=$(curl -s http://169.254.169.254/latest/meta-data/identity-credentials
 aws_region=$(curl http://169.254.169.254/latest/meta-data/placement/region)
 aws ecr get-login-password | docker login --username AWS --password-stdin $AccountId.dkr.ecr.$aws_region.amazonaws.com
 APP_VERSION=$(aws ssm get-parameter --name "/app/${Env}/app_version" --query "Parameter.Value" --output text)
-APP_VERSION=$(echo $APP_VERSION | cut -d "v" -f3)
+APP_VERSION=$(echo "$APP_VERSION" | grep -oE "[0-9]+\.[0-9]+\.[0-9]+")
 ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/${Env}/ecr_repository_name" --query "Parameter.Value" --output text)
 public_hostname=$(curl http://169.254.169.254/latest/meta-data/public-hostname)
 sudo chmod 666 /var/run/docker.sock
