@@ -192,19 +192,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.aws_region }} 
-
-
       - name: update app_version SSM
         run: |
           aws ssm put-parameter \
-              --name "/app/dev/app_version" \
+              --name "/app/${{ github.ref_name }}/app_version" \
               --value "${TAG}" \
               --type "String" \
               --overwrite
 
   update_asg:
     runs-on: ubuntu-latest
-    needs: app_version_to_parameter_store
+    needs: 
+      - app_version_to_parameter_store
+      - build-and-push
+    if: always() && (needs.build-and-push.result == 'success' || needs.app_version_to_parameter_store.result == 'success' )
     environment: AWS
     steps:
       - name: Checkout Repository
@@ -228,7 +229,7 @@ jobs:
           aws-region: ${{ env.aws_region }} 
 
 
-      - name: update app_version SSM
+      - name: update asg
         run: |
           aws autoscaling update-auto-scaling-group \
           --auto-scaling-group-name app_asg \
