@@ -79,6 +79,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true  # Ensure the Docker password is masked
 
       - name: Check if version exists on ECR
         id: check_tag
@@ -146,6 +148,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true  # Ensure the Docker password is masked
 
       - name: Build Docker image
         run: |
