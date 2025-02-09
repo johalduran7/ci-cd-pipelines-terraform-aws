@@ -90,12 +90,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.aws_region }} 
 
-      - name: Get ECR Repository URL from SSM
+      - name: Get the current infrastructure version
         run: |
           current_infra_version=$(aws ssm get-parameter --name "/app/${{ github.ref_name }}/infrastructure_version" --query "Parameter.Value" --output text)
           echo "current_infra_version=$current_infra_version" >> $GITHUB_ENV  
 
-      - name: Check if version exists on ECR
+      - name: Check if version exists on AWS
         id: check_infra_version
         run: |
           if [ "$VERSION" = "$current_infra_version" ]; then
@@ -192,6 +192,12 @@ jobs:
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
           TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
+          TF_path_user_data: ${{ env.path_user_data }}
+          TF_cidr_block: ${{ env.cidr_block }}
+          TF_public_subnet_a_cidr: ${{ env.public_subnet_a_cidr }}
+          TF_public_subnet_b_cidr: ${{ env.public_subnet_b_cidr }}
+          TF_private_subnet_a_cidr: ${{ env.private_subnet_a_cidr }}
+          TF_private_subnet_b_cidr: ${{ env.private_subnet_b_cidr }}
         run: |
           cd app/terraform
           terraform init
@@ -247,6 +253,12 @@ jobs:
           TF_VAR_env: ${{ github.ref_name }}
           TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
+          TF_path_user_data: ${{ env.path_user_data }}
+          TF_cidr_block: ${{ env.cidr_block }}
+          TF_public_subnet_a_cidr: ${{ env.public_subnet_a_cidr }}
+          TF_public_subnet_b_cidr: ${{ env.public_subnet_b_cidr }}
+          TF_private_subnet_a_cidr: ${{ env.private_subnet_a_cidr }}
+          TF_private_subnet_b_cidr: ${{ env.private_subnet_b_cidr }}
       - name: Download Plan Artifact
         uses: actions/download-artifact@v4
         with:
@@ -264,6 +276,12 @@ jobs:
           TF_VAR_env: ${{ github.ref_name }}
           TF_VAR_infrastructure_version: "dev-infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
+          TF_path_user_data: ${{ env.path_user_data }}
+          TF_cidr_block: ${{ env.cidr_block }}
+          TF_public_subnet_a_cidr: ${{ env.public_subnet_a_cidr }}
+          TF_public_subnet_b_cidr: ${{ env.public_subnet_b_cidr }}
+          TF_private_subnet_a_cidr: ${{ env.private_subnet_a_cidr }}
+          TF_private_subnet_b_cidr: ${{ env.private_subnet_b_cidr }}
         if: github.event_name == 'push'
 
   trigger_deployer:
