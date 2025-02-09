@@ -232,7 +232,7 @@ jobs:
       - name: update asg
         run: |
           aws autoscaling update-auto-scaling-group \
-          --auto-scaling-group-name app_asg \
+          --auto-scaling-group-name ${{ github.ref_name }}-app_asg \
           --min-size 0 \
           --max-size 2 \
           --desired-capacity 1
