@@ -1,12 +1,12 @@
 variable "vpc_id" {
   type    = string
-  default = "vpc-53cd6b2e"
+  #default = "vpc-53cd6b2e"
 
 }
 
 variable "aws_region" {
   description = "The AWS region to create resources in"
-  default     = "us-east-1"
+  #default     = "us-east-1"
 }
 
 variable "app_tg_arn" {
@@ -38,7 +38,7 @@ variable "asg_name" {
 
 variable "env" {
   type    = string
-  default = "dev"
+  #default = "dev"
 }
 
 variable "ssh_public_key" {
