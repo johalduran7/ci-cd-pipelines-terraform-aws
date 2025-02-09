@@ -64,7 +64,7 @@ jobs:
     needs: validate_version
     environment: AWS
     outputs:
-      tag_exists: ${{ steps.check_infra_version.outputs.version_exists }}
+      version_exists: ${{ steps.check_infra_version.outputs.version_exists }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
