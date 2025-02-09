@@ -22,9 +22,9 @@ systemctl enable docker
 AccountId=$(curl -s http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | jq -r .AccountId)
 aws_region=$(curl http://169.254.169.254/latest/meta-data/placement/region)
 aws ecr get-login-password | docker login --username AWS --password-stdin $AccountId.dkr.ecr.$aws_region.amazonaws.com
-APP_VERSION=$(aws ssm get-parameter --name "/app/dev/app_version" --query "Parameter.Value" --output text)
+APP_VERSION=$(aws ssm get-parameter --name "/app/${Env}/app_version" --query "Parameter.Value" --output text)
 APP_VERSION=$(echo $APP_VERSION | cut -d "v" -f3)
-ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/dev/ecr_repository_name" --query "Parameter.Value" --output text)
+ECR_REPO_NAME=$(aws ssm get-parameter --name "/app/${Env}/ecr_repository_name" --query "Parameter.Value" --output text)
 public_hostname=$(curl http://169.254.169.254/latest/meta-data/public-hostname)
 sudo chmod 666 /var/run/docker.sock
 docker pull $AccountId.dkr.ecr.$aws_region.amazonaws.com/$ECR_REPO_NAME:$APP_VERSION
@@ -112,7 +112,7 @@ RUNNING_TIME=$((END_TIME - START_TIME))
 echo "User_data procesing elapsed time: $RUNNING_TIME" 
 echo "User_data procesing elapsed time: $RUNNING_TIME" > /home/ec2-user/running_time.txt
 aws ssm put-parameter \
-    --name "/app/dev/running_time_user_data" \
+    --name "/app/${Env}/running_time_user_data" \
     --value "${RUNNING_TIME} seconds" \
     --type "String" \
     --overwrite
