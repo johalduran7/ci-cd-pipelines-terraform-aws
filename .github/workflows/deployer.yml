@@ -201,3 +201,37 @@ jobs:
               --value "${TAG}" \
               --type "String" \
               --overwrite
+
+  update_asg:
+    runs-on: ubuntu-latest
+    needs: app_version_to_parameter_store
+    environment: AWS
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensure full history is fetched
+          fetch-tags: true  # Ensure we fetch all tags
+      - name: Load .env Variables into GITHUB_ENV #(They can only be used in thee next step). This has to be done before checking out to the tag
+        run: |
+          sed -i 's/\r$//' ${{ github.workspace }}/app/.env  # Fix Windows line endings if present
+          set -o allexport  # Enable automatic exporting of variables
+          source ${{ github.workspace }}/app/.env  # Load variables
+          set +o allexport  # Disable automatic exporting
+          cat ${{ github.workspace }}/app/.env >> $GITHUB_ENV  # Append variables to GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.aws_region }} 
+
+
+      - name: update app_version SSM
+        run: |
+          aws autoscaling update-auto-scaling-group \
+          --auto-scaling-group-name app_asg \
+          --min-size 0 \
+          --max-size 2 \
+          --desired-capacity 1
