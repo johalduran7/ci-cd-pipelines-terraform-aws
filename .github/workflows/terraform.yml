@@ -95,7 +95,7 @@ jobs:
           if current_infra_version=$(aws ssm get-parameter --name "/app/${{ github.ref_name }}/infrastructure_version" --query "Parameter.Value" --output text 2>/dev/null); then
             echo "current_infra_version=$current_infra_version" >> $GITHUB_ENV
           else
-            echo "Parameter '/app/dev/infrastructure_version' not found, setting current_infra_version to empty"
+            echo "Parameter '/app/${{ github.ref_name }}/infrastructure_version' not found, setting current_infra_version to empty"
             echo "current_infra_version=" >> $GITHUB_ENV
           fi
       - name: Check if version exists on AWS
@@ -199,6 +199,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.aws_region }} 
+          TF_VAR_aws_region: ${{ env.aws_region }}
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
           TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
@@ -260,6 +261,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.aws_region }} 
+          TF_VAR_aws_region: ${{ env.aws_region }}
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
           TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
@@ -283,6 +285,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ env.aws_region }} 
+          TF_VAR_aws_region: ${{ env.aws_region }}
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
           TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
