@@ -43,7 +43,7 @@ resource "aws_iam_policy" "cloudwatch_log_policy_agent" {
 
 
 # IAM Policy for SSM Access
-resource "aws_iam_policy" "ssm_read_policy" {
+resource "aws_iam_policy" "ssm_read_write_policy" {
   name = "${var.env}-ssm-read-policy"
 
   policy = jsonencode({
@@ -56,7 +56,7 @@ resource "aws_iam_policy" "ssm_read_policy" {
           "ssm:PutParameter"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:ssm:us-east-1:948586925757:parameter/app/${var.env}/*"
+        Resource = "arn:aws:ssm:${var.aws_region}:948586925757:parameter/app/${var.env}/*"
       }
     ]
   })
@@ -75,7 +75,7 @@ resource "aws_iam_role_policy_attachment" "attach_policy_ecr" {
 
 resource "aws_iam_role_policy_attachment" "attach_policy_read_ssm" {
   role       = aws_iam_role.ec2_execution_role.name
-  policy_arn = aws_iam_policy.ssm_read_policy.arn
+  policy_arn = aws_iam_policy.ssm_read_write_policy.arn
 }
 
 

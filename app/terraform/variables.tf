@@ -41,7 +41,7 @@ variable "cidr_block" {
 # VPC Name Tag
 variable "vpc_name" {
   description = "The name tag for the VPC"
-  default     = "dev-app-vpc"
+  default     = "app-vpc"
 }
 
 # Public Subnet A

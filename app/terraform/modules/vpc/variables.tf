@@ -21,7 +21,7 @@ variable "instance_tenancy" {
 # VPC Name Tag
 variable "vpc_name" {
   description = "The name tag for the VPC"
-  default     = "AppVPC"
+  default     = "app-vpc"
 }
 
 
