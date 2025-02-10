@@ -1,12 +1,11 @@
 # AWS Infrastructure and Apache+NodeJs APP deployed via GitHub Actions.
 Simple project to demo a pipeline to be deployed on AWS with the following features:
-- [About](#about)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
-- 
+- Infrastructure deployed with Terraform
+- Backend stored on Terraform Cloud
+- GitHub Actions Workflow for pipeline
+- Docker stored on ECR
+  
+  
 ## Creating branch, configuring .env, and triggering pipeline
 ![Setup](./resources/first_part_gif_portfolio.gif)
 
