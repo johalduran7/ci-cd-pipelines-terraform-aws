@@ -26,6 +26,7 @@ This repository automates the provisioning and deployment of a Node.js applicati
       - Set up CloudWatch Unified Agent
 - **Security:** Security Groups, IAM roles
 - **Storage & Configuration:** ECR repository, CloudWatch, Parameter Store keys
+- **Backened stored in:** Terraform Cloud
 
 **Additional Features:**
 - **ASG Scaling Control:**
