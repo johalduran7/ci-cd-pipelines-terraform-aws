@@ -3,7 +3,7 @@ terraform {
 
     organization = "john-organization"
     workspaces {
-      #name = "app-portfolio"
+      name = "stg"
       #tags =  
       # set TF_WORKSPACE instead
     }
