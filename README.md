@@ -3,7 +3,7 @@ Simple project to demo a pipeline to be deployed on AWS with the following featu
 - Infrastructure deployed with Terraform
 - Backend stored on Terraform Cloud
 - GitHub Actions Workflow for pipeline
-- Docker stored on ECR
+- Docker image stored on ECR
   
   
 ## Creating branch, configuring .env, and triggering pipeline
