@@ -4,10 +4,10 @@
 This repository automates the provisioning and deployment of a Node.js application on AWS using Terraform and GitHub Actions.
 
 ### Repository Structure
-- **Terraform Pipeline** [`.github/workflow/terraform.yml`](.github/workflow/terraform.yml)
-- **Deployer Pipeline** (`.github/workflow/deployer.yml`)
-- **Infrastructure Code** (`./app/terraform/`)
-- **Application Code** (`./app/src/`)
+- **Terraform Pipeline** [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml)
+- **Deployer Pipeline** [`.github/workflows/deployer.yml`](.github/workflows/deployer.yml)
+- **Infrastructure Code** [`./app/terraform/`](./app/terraform/)
+- **Application Code** [`./app/src/`](./app/src/)
 
 ---
 ## Demo
