@@ -1,7 +1,0 @@
----
-# roles/apacheservers/handlers/main.yml
-- name: Restart_apache2
-  service:
-    name: apache2
-    state: restarted
-  
