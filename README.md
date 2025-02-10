@@ -10,18 +10,6 @@ This repository automates the provisioning and deployment of a Node.js applicati
 - **Application Code** [`./app/src/`](./app/src/)
 
 ---
-## Demo
-
-### Creating branch, configuring .env, and triggering the pipelines
-![Setup](./resources/first_part_gif_portfolio.gif)
-
-### Running Infrastructure and Application pipelines
-![Setup](./resources/second_part_gif_portfolio.gif)
-
-### Checking deployment on AWS
-![Setup](./resources/third_part_gif_portfolio.gif)
-
-
 ## Terraform Pipeline (Infrastructure Provisioning)
 **Triggers:**
 - Runs whenever the infrastructure version file [`./app/infra_version.txt`](./app/infra_version.txt) is updated.
@@ -51,7 +39,6 @@ This repository automates the provisioning and deployment of a Node.js applicati
 **Trigger:** Calls the Deployer Pipeline upon successful provisioning.
 
 ---
-
 ## Deployer Pipeline (Application Deployment)
 **Triggers:**
 - Runs when:
@@ -66,14 +53,24 @@ This repository automates the provisioning and deployment of a Node.js applicati
 3. Builds a Docker image from `src/` using a pre-defined [`Dockerfile`](./app/src/Dockerfile) containing all necessary dependencies for the Node.js application.
 
 ---
+## Demo
 
+### Creating branch, configuring .env, and triggering the pipelines
+![Setup](./resources/first_part_gif_portfolio.gif)
+
+### Running Infrastructure and Application pipelines
+![Setup](./resources/second_part_gif_portfolio.gif)
+
+### Checking deployment on AWS
+![Setup](./resources/third_part_gif_portfolio.gif)
+
+---
 ## Future Improvements
 - Enhance lifecycle management for better deployment flexibility.
 - Improve monitoring and alerting within CloudWatch.
 - Implement blue-green or rolling deployments for zero-downtime updates.
 
 ---
-
 ## How to Contribute
 1. Fork the repository.
 2. Create a new branch for your changes.
