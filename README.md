@@ -24,7 +24,7 @@ This repository automates the provisioning and deployment of a Node.js applicati
 
 ## Terraform Pipeline (Infrastructure Provisioning)
 **Triggers:**
-- Runs whenever the infrastructure version file (`./app/terraform/infra_version.txt`) is updated.
+- Runs whenever the infrastructure version file [`./app/terraform/infra_version.txt`](./app/terraform/infra_version.txt) is updated.
 
 **Provisions the following AWS resources:**
 - **Networking:** VPC, Subnets, Route Tables, Internet Gateway
@@ -55,7 +55,7 @@ This repository automates the provisioning and deployment of a Node.js applicati
 ## Deployer Pipeline (Application Deployment)
 **Triggers:**
 - Runs when:
-  - The application version file (`./app/app_version.txt`) is updated with a new release tag.
+  - The application version file [`./app/app_version.txt`](./app/app_version.txt) is updated with a new release tag.
   - Called by the Terraform pipeline after provisioning.
 
 **Deployment Process:**
@@ -63,7 +63,7 @@ This repository automates the provisioning and deployment of a Node.js applicati
 2. Checks if the corresponding Docker image already exists in ECR:
    - If **exists**, updates Parameter Store value so the Launch Template User Data pulls the new version.
    - If **does not exist**, builds and pushes the image to ECR.
-3. Builds a Docker image from `src/` using a pre-defined `Dockerfile` containing all necessary dependencies for the Node.js application.
+3. Builds a Docker image from `src/` using a pre-defined `[`Dockerfile`](./app/src/Dockerfile)` containing all necessary dependencies for the Node.js application.
 
 ---
 
