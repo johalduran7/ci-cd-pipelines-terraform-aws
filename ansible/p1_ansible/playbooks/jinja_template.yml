@@ -1,6 +1,0 @@
----
-- hosts: ubuntu-vb-localhost # it applies to all the hosts of the path i provide in the command
-  become: yes  # Enable privilege escalation for all tasks by default
-
-  roles:
-    - jinja
