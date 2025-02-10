@@ -1,3 +1,3 @@
 # Test
 Test
-![test](./GIF_test.gif)
+![test](./resources/first_part_gif_portfolio.gif)
