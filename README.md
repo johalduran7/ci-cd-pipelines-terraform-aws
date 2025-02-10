@@ -9,8 +9,8 @@ Tools and features:
 ## Creating branch, configuring .env, and triggering pipeline
 ![Setup](./resources/first_part_gif_portfolio.gif)
 
-## Running pipeline
+## Running Infrastructure and Application pipelines
 ![Setup](./resources/second_part_gif_portfolio.gif)
 
-## Checking deployment
+## Checking deployment on AWS
 ![Setup](./resources/third_part_gif_portfolio.gif)
