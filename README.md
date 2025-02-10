@@ -79,7 +79,3 @@ This repository automates the provisioning and deployment of a Node.js applicati
 2. Create a new branch for your changes.
 3. Submit a pull request with a clear description of improvements.
 
----
-
-## License
-This project is licensed under [MIT License](LICENSE).
