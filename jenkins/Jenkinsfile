@@ -182,15 +182,7 @@ pipeline {
                             println("output: ${output}")
                             def output2 = sh (
                                 script: """
-                                    if current_app_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/app_version" --query "Parameter.Value" --output text 2>/dev/null); then
-                                        echo "current_app_version=${current_app_version}"
-                                        
-                                        exit 1
-                                    else
-                                        echo "Parameter '/app/${GIT_BRANCH}/app_version' not found, setting current_app_version to empty"
-                                        current_app_version=''
-                                        exit 0
-                                    fi
+                                    aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/app_version" --query "Parameter.Value" --output text
                                 """,
                                 returnStdout: true
                             )
