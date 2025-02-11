@@ -192,9 +192,11 @@ pipeline {
                             } else if ( "${infrastructure_version}"  == "${TAG}" ) {
                                 version_exists=true
                                 println("The parameter /app/${GIT_BRANCH}/infrastructure_version is ${output} then the tag ${TAG} won't be deployed!")
+                                print("Setting version_exists to true")
                             } else if ( "${infrastructure_version}"  != "${TAG}" ) {
                                 version_exists=false
                                 println("The parameter /app/${GIT_BRANCH}/infrastructure_version shows another version ${output}. The tag ${TAG} will be deployed!")
+                                print("Setting version_exists to false")
                             }
 
                     }
@@ -202,6 +204,143 @@ pipeline {
                 }
             }
         }
+        stage('Validate Terraform') {
+            when {
+                expression { return !version_exists }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+                    // Setup Terraform with environment variables
+                    withEnv([
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]) {
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key')
+                            ]){
+                            sh """
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform version
+                                terraform init
+                            """
+                        }
+                    }
+                }
+            }
+        }
 
+        stage('Terraform Plan') {
+            when {
+                expression { return !version_exists }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+                    // Setup Terraform with environment variables
+                    withEnv([
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]) {
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
+                            ]){
+                            sh """
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform init
+                                terraform plan -out=tfplan
+                            """
+                        }
+                    }
+                    archiveArtifacts artifacts: "app/terraform/tfplan", fingerprint: true
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                expression { return !version_exists }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+                    // Setup Terraform with environment variables
+                    withEnv([
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]) {
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
+                            ]){
+                            sh """
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform apply -auto-approve
+                            """
+                        }
+                    }
+                }
+            }
+        }
     }
 }
+
