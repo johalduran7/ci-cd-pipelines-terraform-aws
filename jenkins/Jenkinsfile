@@ -158,27 +158,36 @@ pipeline {
                     echo "aws_region = ${envVars['aws_region']}"
                     aws_region="${envVars['aws_region']}"
                     println("aws_region: ${aws_region}")
-                    def current_infrastructure_version = sh (
-                        script: """
-                            if current_infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text 2>/dev/null); then
-                                echo "current_infra_version=${current_infra_version}"
-                                exit 1
-                            else
-                                echo "Parameter '/app/${GIT_BRANCH}/infrastructure_version' not found, setting current_infra_version to empty"
-                                current_infra_version=''
-                                exit 0
-                            fi
-                        """,
-                        returnStatus: true
-                    )
-
-                    println("current_infrastructure_version: ${current_infrastructure_version}")
-                    if (current_infrastructure_version == 1) {
-                        version_exists=true
-                    }else {
-                        version_exists=false
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
+                        ]){
+                            def current_infrastructure_version = sh (
+                                script: """
+                                    if current_infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text 2>/dev/null); then
+                                        echo "current_infra_version=${current_infra_version}"
+                                        exit 1
+                                    else
+                                        echo "Parameter '/app/${GIT_BRANCH}/infrastructure_version' not found, setting current_infra_version to empty"
+                                        current_infra_version=''
+                                        exit 0
+                                    fi
+                                """,
+                                returnStatus: true
+                            )
+                            println("current_infrastructure_version: ${current_infrastructure_version}")
+                            if (current_infrastructure_version == 1) {
+                                version_exists=true
+                            }else {
+                                version_exists=false
+                            }
+                            println("version_exists: ${version_exists}")
                     }
-                    println("version_exists: ${version_exists}")
+
+
                 
                 }
             }
@@ -215,17 +224,13 @@ pipeline {
                             ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
                             ]){
                             sh """
-                                aws s3 ls --region us-east-1
                                 git checkout "${TAG}"
                                 mkdir -p ~/.terraform.d
                                 echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
                                 chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
                                 cd app/terraform/
-                                env
-                                #cat ~/.terraform.d/credentials.tfrc.json
                                 terraform version
                                 terraform init
-                                #terraform plan -out=tfplan
                             """
                         }
                     }
@@ -239,8 +244,6 @@ pipeline {
                 script {
                     // Checkout repository
                     checkout scm
-                    println("${env.TF_API_TOKEN}")
-                    println('$env.TF_API_TOKEN')
                     // Setup Terraform with environment variables
                     withEnv([
                         "TF_VAR_ssh_public_key=${env.TF_SSH_PUBLIC_KEY}",
@@ -248,7 +251,6 @@ pipeline {
                         "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
                         "TF_VAR_infrastructure_version=${TAG}",
                         "TF_WORKSPACE=${GIT_BRANCH}",
-                        "TF_API_TOKEN=${env.TF_API_TOKEN}",
                         "TF_VAR_aws_region=${envVars['aws_region']}",
                         "TF_path_user_data=${envVars['TF_path_user_data']}",
                         "TF_cidr_block=${envVars['cidr_block']}",
@@ -258,15 +260,23 @@ pipeline {
                         "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
                         
                     ]) {
-                        sh """
-                            git checkout "${TAG}"
-                            cd app/terraform/
-                            env
-                            cat ~/.terraform.d/credentials.tfrc.json
-                            #terraform version
-                            ##terraform init
-                            #terraform plan -out=tfplan
-                        """
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
+                            ]){
+                            sh """
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform init
+                                terraform plan -out=tfplan
+                            """
+                        }
                     }
                     archiveArtifacts artifacts: 'app/terraform/tfplan', fingerprint: true
                 }
