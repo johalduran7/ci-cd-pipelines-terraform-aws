@@ -159,7 +159,7 @@ pipeline {
                             def output = sh (
                                 script: """
                                     set +e
-                                    ECR_REPO_NAME=\$(aws ssm get-parameter --name "/app/${{ github.ref_name }}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
+                                    ECR_REPO_NAME=\$(aws ssm get-parameter --name "/app/${GIT_BRANCH}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
                                     exit_code=\$?
                                     set -e
                                     
