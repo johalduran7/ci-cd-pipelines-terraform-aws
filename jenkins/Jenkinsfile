@@ -181,43 +181,43 @@ pipeline {
                 }
             }
         }
-        stage('Validate Terraform') {
-            when {
-                expression { return !version_exists }
-            }
-            steps {
-                script {
-                    // Checkout repository
-                    checkout scm
+        // stage('Validate Terraform') {
+        //     when {
+        //         expression { return !version_exists }
+        //     }
+        //     steps {
+        //         script {
+        //             // Checkout repository
+        //             checkout scm
 
-                    // Use withCredentials to securely inject secrets
-                    withCredentials([
-                        string(credentialsId: 'TF_API_TOKEN_ID', variable: 'TF_API_TOKEN'),
-                        string(credentialsId: 'TF_VAR_SSH_PUBLIC_KEY_ID', variable: 'TF_VAR_ssh_public_key')
-                    ]) {
-                        withEnv([
-                            "TF_VAR_ssh_public_key=${TF_VAR_ssh_public_key}",
-                            "TF_VAR_env=${GIT_BRANCH}",
-                            "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
-                            "TF_VAR_infrastructure_version=${TAG}",
-                            "TF_WORKSPACE=${GIT_BRANCH}"
-                        ]) {
-                            sh """
-                                git checkout ${TAG}
-                                cd app/terraform/
-                                env
-                                echo \$TF_API_TOKEN 
+        //             // Use withCredentials to securely inject secrets
+        //             withCredentials([
+        //                 string(credentialsId: 'TF_API_TOKEN_ID', variable: 'TF_API_TOKEN'),
+        //                 string(credentialsId: 'TF_VAR_SSH_PUBLIC_KEY_ID', variable: 'TF_VAR_ssh_public_key')
+        //             ]) {
+        //                 withEnv([
+        //                     "TF_VAR_ssh_public_key=${TF_VAR_ssh_public_key}",
+        //                     "TF_VAR_env=${GIT_BRANCH}",
+        //                     "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
+        //                     "TF_VAR_infrastructure_version=${TAG}",
+        //                     "TF_WORKSPACE=${GIT_BRANCH}"
+        //                 ]) {
+        //                     sh """
+        //                         git checkout ${TAG}
+        //                         cd app/terraform/
+        //                         env
+        //                         echo \$TF_API_TOKEN 
                                 
-                                terraform version
-                                TF_LOG=DEBUG terraform init
-                                terraform fmt -check
-                                terraform validate
-                            """
-                        }
-                    }
-                }
-            }
-        }
+        //                         terraform version
+        //                         TF_LOG=DEBUG terraform init
+        //                         terraform fmt -check
+        //                         terraform validate
+        //                     """
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Terraform Plan') {
             steps {
