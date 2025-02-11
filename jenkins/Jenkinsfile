@@ -190,17 +190,32 @@ pipeline {
                     // Checkout repository
                     checkout scm
 
-                    def test = sh(
-                        script: """
-                            git checkout "${TAG}"
-                            cd app/terraform/
-                            env
-                            terraform version
-                            terraform init
-                            #terraform plan -out=tfplan
-                        """,
-                        returnStatus: true // Capture exit code instead of failing immediately
-                    )
+                    withEnv([
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=${TAG}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]){
+                        def test = sh(
+                            script: """
+                                git checkout "${TAG}"
+                                cd app/terraform/
+                                env
+                                terraform version
+                                terraform init
+                                #terraform plan -out=tfplan
+                            """,
+                            returnStatus: true // Capture exit code instead of failing immediately
+                        )
+                    }
 
                 }
             }
