@@ -168,7 +168,7 @@ pipeline {
                             def output = sh (
                                 script: """
                                     set +e
-                                    infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/app_version" --query "Parameter.Value" --output text 2>&1)
+                                    infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text 2>&1)
                                     exit_code=\$?
                                     set -e
                                     
@@ -181,8 +181,21 @@ pipeline {
                                 returnStdout: true
                             ).trim()
                             
-                            
-                            println("output: ${output}")
+
+                            println("The TAG to deploy is ${TAG}")
+                            infrastructure_version=output
+                            if ( "${infrastructure_version}" == "" ) {
+                                println("No Infrastructure has been deployed because parameter /app/${GIT_BRANCH}/infrastructure_version doesn't exist: ${output}")
+                                println("The TAG to deploy is ${TAG}")
+                                version_exists=false
+                                print("Setting version_exists to false")
+                            } else if ( "${infrastructure_version}"  == "${TAG}" ) {
+                                version_exists=true
+                                println("The parameter /app/${GIT_BRANCH}/infrastructure_version is ${output} then the tag ${TAG} won't be deployed!")
+                            } else if ( "${infrastructure_version}"  != "${TAG}" ) {
+                                version_exists=false
+                                println("The parameter /app/${GIT_BRANCH}/infrastructure_version shows another version ${output}. The tag ${TAG} will be deployed!")
+                            }
 
                     }
                 
