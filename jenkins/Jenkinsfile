@@ -195,6 +195,7 @@ pipeline {
                         string(credentialsId: 'TF_API_TOKEN_ID', variable: 'TF_API_TOKEN'),
                         string(credentialsId: 'TF_VAR_SSH_PUBLIC_KEY_ID', variable: 'TF_VAR_ssh_public_key')
                     ]) {
+                        checkout scm
                         sh """
                             git checkout ${TAG}
                             cd app/terraform/
