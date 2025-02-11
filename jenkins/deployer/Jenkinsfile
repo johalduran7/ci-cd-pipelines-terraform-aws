@@ -1,0 +1,213 @@
+def GIT_BRANCH = ''
+def envVars = [:]
+def ENV_PREFIX = ''
+def VERSION = ''
+def ECR_REPO_NAME = ''
+def version_exists = ''
+def TAG = ''
+def aws_region = ''
+pipeline {
+    agent any
+    tools {
+        terraform 'Terraform 1.9.5 amd64'
+    }
+
+    stages {
+        stage('Detect Branch') {
+            steps {
+                script {
+                    sh 'printenv'
+                    // Execute the git command to find the branch containing the commit
+                    def branchOutput = sh(
+                        script: """
+                            git branch -r --contains ${env.GIT_COMMIT} | sed 's| *origin/||'
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Raw output of git branch -r --contains: ${branchOutput}"
+
+                    // Ensure branchOutput is not empty
+                    if (branchOutput.isEmpty()) {
+                        error "Commit ${env.GIT_COMMIT} not found in any branch."
+                    } else {
+                        GIT_BRANCH="${branchOutput}"
+                        println("Detected branch: ${GIT_BRANCH}")
+
+                    }
+                }
+            }
+        }
+        stage('Read .env File') {
+            steps {
+                script {
+                    // Read the .env file
+                    def envFileContent = sh(
+                        script: """
+                            cat app/.env
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Raw .env file content:\n${envFileContent}"
+
+                    // Split the content into lines
+                    def envLines = envFileContent.split('\n')
+
+                    ENV_PREFIX=GIT_BRANCH.toUpperCase()
+                    println("${ENV_PREFIX}")
+
+                    // Filter and parse variables based on the prefix
+                    envLines.each { line ->
+                        if (line.startsWith(ENV_PREFIX + '_')) {
+                            // Remove the prefix and split into key and value
+                            def keyValue = line.substring(ENV_PREFIX.length() + 1).split('=', 2)
+                            if (keyValue.size() == 2) {
+                                def key = keyValue[0].trim()
+                                def value = keyValue[1].trim()
+
+                                // Remove the leading underscore from the key (if present)
+                                if (key.startsWith('_')) {
+                                    key = key.substring(1)
+                                }
+
+                                // Store the variable in the global map
+                                envVars[key] = value
+                                echo "Set variable: ${key} = ${value}"
+                            }
+                        }
+                    }
+                }
+            }
+        }  
+        stage('Print Variables') {
+            steps {
+                script {
+                    // Use the dynamically created variables from the global map
+                    echo "Using variables:"
+                    echo "aws_region = ${envVars['aws_region']}"
+                    echo "TF_path_user_data = ${envVars['TF_path_user_data']}"
+                    echo "cidr_block = ${envVars['cidr_block']}"
+                    echo "public_subnet_a_cidr = ${envVars['public_subnet_a_cidr']}"
+                    echo "public_subnet_b_cidr = ${envVars['public_subnet_b_cidr']}"
+                    echo "private_subnet_a_cidr = ${envVars['private_subnet_a_cidr']}"
+                    echo "private_subnet_b_cidr = ${envVars['private_subnet_b_cidr']}"
+                }
+            }
+        }
+        stage('Validate Version') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Read Version from infra_version.txt
+                    def versionOutput = sh(
+                        script: """
+                            cat app/app_version.txt
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    VERSION="${versionOutput}"
+                    println("VERSION: ${VERSION}")
+                    println("GIT_BRANCH: ${VERSION}")
+
+                    sh "ls"
+                    TAG = "${GIT_BRANCH}-app-v${VERSION}"
+                    println("TAG: ${TAG}")
+                    sh "git tag -l"
+
+                    // Check if tag exists
+                    def tagExists = sh(
+                        script: """
+                            if git tag -l "${TAG}" | grep -q "^${TAG}\$"; then
+                                echo "Tag '${TAG}' exists!"
+                                exit 0
+                            else
+                                echo "Error: No matching tag '${TAG}' found."
+                                exit 1
+                            fi
+                        """,
+                        returnStatus: true // Capture exit code instead of failing immediately
+                    )
+
+                    // Abort pipeline if tag is missing
+                    if (tagExists != 0) {
+                        error("Tag '${TAG}' does not exist. Aborting pipeline.")
+                    }
+ 
+                }
+            }
+        }
+        stage('Validate Existing ECR tags') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            def output = sh (
+                                script: """
+                                    set +e
+                                    ECR_REPO_NAME=\$(aws ssm get-parameter --name "/app/${{ github.ref_name }}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
+                                    exit_code=\$?
+                                    set -e
+                                    
+                                    if [[ "\$ECR_REPO_NAME" == *"ParameterNotFound"* ]]; then
+                                        echo ""
+                                    else
+                                        echo "\$ECR_REPO_NAME"
+                                    fi
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            
+
+                            println("The ECR_REPO_NAME is: ${ECR_REPO_NAME}")
+                            ECR_REPO_NAME=output
+                            if ( "${ECR_REPO_NAME}" == "" ) {
+                                println("No ECR registry for the app has been created yet. Parameter /app/${GIT_BRANCH}/ecr_repository_name doesn't exist: ${output}")
+                                println("Pipeline ends here since no ECR registry was found")
+                            } else {
+                                print("Logging into Amazon ECR and checking if the app version exists in the registry ${ECR_REPO_NAME}")
+
+                                def output = sh (
+                                    script: """
+                                        set +e
+                                        tags=\$(aws ecr list-images --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
+
+                                        if echo "\$tags" | jq -e --arg VERSION "${VERSION}" '.[] | select(. == ${VERSION})' >/dev/null; then
+                                            tag_exists=true
+                                        else
+                                            tag_exists=false
+                                        fi
+
+                                        echo "\$tag_exists"
+                                    """,
+                                    returnStdout: true
+                                ).trim()
+
+                                println("The tag_exists value is: ${tag_exists}")
+                                tag_exists=output
+
+                            } 
+
+                    }
+                
+                }
+            }
+        }
+
+
+    }
+}
