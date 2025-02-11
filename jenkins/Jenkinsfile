@@ -329,6 +329,7 @@ pipeline {
                              string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
                             ]){
                             sh """
+                                echo \$TF_VAR_infrastructure_version
                                 git checkout "${TAG}"
                                 mkdir -p ~/.terraform.d
                                 echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
