@@ -163,12 +163,13 @@ pipeline {
                         credentialsId: 'AWS_CREDENTIALS_ID',
                         accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                        ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
+                        ]
                         ]){
-                            def current_infrastructure_version = sh (
+                            def output = sh (
                                 script: """
                                     if current_infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text 2>/dev/null); then
                                         echo "current_infra_version=${current_infra_version}"
+                                        
                                         exit 1
                                     else
                                         echo "Parameter '/app/${GIT_BRANCH}/infrastructure_version' not found, setting current_infra_version to empty"
@@ -176,152 +177,30 @@ pipeline {
                                         exit 0
                                     fi
                                 """,
-                                returnStatus: true
+                                returnStdout: true
                             )
-                            println("current_infrastructure_version: ${current_infrastructure_version}")
-                            if (current_infrastructure_version == 1) {
-                                version_exists=true
-                            }else {
-                                version_exists=false
-                            }
-                            println("version_exists: ${version_exists}")
+                            println("output: ${output}")
+                            def output2 = sh (
+                                script: """
+                                    if current_app_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/app_version" --query "Parameter.Value" --output text 2>/dev/null); then
+                                        echo "current_app_version=${current_app_version}"
+                                        
+                                        exit 1
+                                    else
+                                        echo "Parameter '/app/${GIT_BRANCH}/app_version' not found, setting current_app_version to empty"
+                                        current_app_version=''
+                                        exit 0
+                                    fi
+                                """,
+                                returnStdout: true
+                            )
+                            println("output2: ${output2}")
+
                     }
-
-
                 
                 }
             }
         }
-        stage('Validate Terraform') {
-            when {
-                expression { return !version_exists }
-            }
-            steps {
-                script {
-                    // Checkout repository
-                    checkout scm
-                    // Setup Terraform with environment variables
-                    withEnv([
-                        "TF_VAR_env=${GIT_BRANCH}",
-                        "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
-                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
-                        "TF_WORKSPACE=${GIT_BRANCH}",
-                        "TF_VAR_aws_region=${envVars['aws_region']}",
-                        "TF_path_user_data=${envVars['TF_path_user_data']}",
-                        "TF_cidr_block=${envVars['cidr_block']}",
-                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
-                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
-                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
-                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
-                        
-                    ]) {
-                        withCredentials([[ 
-                            $class: 'AmazonWebServicesCredentialsBinding',
-                            credentialsId: 'AWS_CREDENTIALS_ID',
-                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
-                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key')
-                            ]){
-                            sh """
-                                git checkout "${TAG}"
-                                mkdir -p ~/.terraform.d
-                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
-                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
-                                cd app/terraform/
-                                terraform version
-                                terraform init
-                            """
-                        }
-                    }
-                }
-            }
-        }
 
-        stage('Terraform Plan') {
-            steps {
-                script {
-                    // Checkout repository
-                    checkout scm
-                    // Setup Terraform with environment variables
-                    withEnv([
-                        "TF_VAR_env=${GIT_BRANCH}",
-                        "TF_VAR_path_user_data=modules/asg/user_data.sh",
-                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
-                        "TF_WORKSPACE=${GIT_BRANCH}",
-                        "TF_VAR_aws_region=${envVars['aws_region']}",
-                        "TF_path_user_data=${envVars['TF_path_user_data']}",
-                        "TF_cidr_block=${envVars['cidr_block']}",
-                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
-                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
-                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
-                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
-                        
-                    ]) {
-                        withCredentials([[ 
-                            $class: 'AmazonWebServicesCredentialsBinding',
-                            credentialsId: 'AWS_CREDENTIALS_ID',
-                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
-                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
-                            ]){
-                            sh """
-                                git checkout "${TAG}"
-                                mkdir -p ~/.terraform.d
-                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
-                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
-                                cd app/terraform/
-                                terraform init
-                                terraform plan -out=tfplan
-                            """
-                        }
-                    }
-                    archiveArtifacts artifacts: "app/terraform/tfplan", fingerprint: true
-                }
-            }
-        }
-
-        stage('Terraform Apply') {
-            steps {
-                script {
-                    // Checkout repository
-                    checkout scm
-                    // Setup Terraform with environment variables
-                    withEnv([
-                        "TF_VAR_env=${GIT_BRANCH}",
-                        "TF_VAR_path_user_data=modules/asg/user_data.sh",
-                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
-                        "TF_WORKSPACE=${GIT_BRANCH}",
-                        "TF_VAR_aws_region=${envVars['aws_region']}",
-                        "TF_path_user_data=${envVars['TF_path_user_data']}",
-                        "TF_cidr_block=${envVars['cidr_block']}",
-                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
-                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
-                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
-                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
-                        
-                    ]) {
-                        withCredentials([[ 
-                            $class: 'AmazonWebServicesCredentialsBinding',
-                            credentialsId: 'AWS_CREDENTIALS_ID',
-                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
-                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
-                            ]){
-                            sh """
-                                git checkout "${TAG}"
-                                mkdir -p ~/.terraform.d
-                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
-                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
-                                cd app/terraform/
-                                terraform apply -auto-approve
-                            """
-                        }
-                    }
-                }
-            }
-        }
     }
 }
