@@ -234,7 +234,6 @@ pipeline {
                             """
                         }
                     }
-                    archiveArtifacts artifacts: 'app/terraform/tfplan', fingerprint: true
                 }
             }
         }
