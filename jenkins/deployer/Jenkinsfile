@@ -159,7 +159,7 @@ pipeline {
                             def outputECR = sh (
                                 script: """
                                     set +e
-                                    ECR_REPO_NAME=\$(aws ssm get-parameter --name "/app/${GIT_BRANCH}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
+                                    ECR_REPO_NAME=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
                                     exit_code=\$?
                                     set -e
                                     
@@ -184,7 +184,7 @@ pipeline {
                                 def outputTagExists = sh (
                                     script: """
                                         set +e
-                                        tags=\$(aws ecr list-images --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
+                                        tags=\$(aws ecr list-images ${aws_region} --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
 
                                         if echo "\$tags" | jq -e --arg VERSION "${VERSION}" '.[] | select(. == ${VERSION})' >/dev/null; then
                                             tag_exists=true
