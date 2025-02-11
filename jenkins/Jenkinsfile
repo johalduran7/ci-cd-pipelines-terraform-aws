@@ -189,7 +189,19 @@ pipeline {
                 script {
                     // Checkout repository
                     checkout scm
-
+                    withCredentials([string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN')]) {
+                        def test1 = sh(
+                            script: """
+                                git checkout "${TAG}"
+                                cd app/terraform/
+                                env
+                                terraform version
+                                terraform init
+                                #terraform plan -out=tfplan
+                            """,
+                            returnStatus: true // Capture exit code instead of failing immediately
+                        )
+                    }
                     withEnv([
                         "TF_VAR_env=${GIT_BRANCH}",
                         "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
