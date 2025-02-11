@@ -309,7 +309,7 @@ pipeline {
                     withEnv([
                         "TF_VAR_env=${GIT_BRANCH}",
                         "TF_VAR_path_user_data=modules/asg/user_data.sh",
-                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
+                        "TF_VAR_infrastructure_version=infra-v${VERSION}",
                         "TF_WORKSPACE=${GIT_BRANCH}",
                         "TF_VAR_aws_region=${envVars['aws_region']}",
                         "TF_path_user_data=${envVars['TF_path_user_data']}",
