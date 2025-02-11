@@ -217,6 +217,9 @@ pipeline {
                             sh """
                                 aws s3 ls --region us-east-1
                                 git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
                                 cd app/terraform/
                                 env
                                 #cat ~/.terraform.d/credentials.tfrc.json
