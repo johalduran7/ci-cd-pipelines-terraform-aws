@@ -273,12 +273,53 @@ pipeline {
                                 chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
                                 cd app/terraform/
                                 terraform init
-                                ls -lrth /var/jenkins_home/workspace/app_dev/app/terraform/modules/asg/user_data.sh
                                 terraform plan -out=tfplan
                             """
                         }
                     }
-                    archiveArtifacts artifacts: '$WORKSPACE/app/terraform/tfplan', fingerprint: true
+                    archiveArtifacts artifacts: "$WORKSPACE/app/terraform/tfplan", fingerprint: true
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+                    // Setup Terraform with environment variables
+                    withEnv([
+                        "TF_VAR_ssh_public_key=${env.TF_SSH_PUBLIC_KEY}",
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=${TAG}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]) {
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
+                            ]){
+                            sh """
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform apply -auto-approve
+                            """
+                        }
+                    }
                 }
             }
         }
