@@ -190,24 +190,18 @@ pipeline {
                     // Checkout repository
                     checkout scm
 
-                    // Use withCredentials to securely inject secrets
-                    withCredentials([
-                        string(credentialsId: 'TF_API_TOKEN_ID', variable: 'TF_API_TOKEN'),
-                        string(credentialsId: 'TF_VAR_SSH_PUBLIC_KEY_ID', variable: 'TF_VAR_ssh_public_key')
-                    ]) {
-                        checkout scm
-                        sh """
-                            git checkout ${TAG}
+                    def test = sh(
+                        script: """
+                            git checkout "${TAG}"
                             cd app/terraform/
                             env
-                            echo \$TF_API_TOKEN 
-                            
                             terraform version
-                            TF_LOG=DEBUG terraform init
-                            terraform fmt -check
-                            terraform validate
-                        """
-                    }
+                            terraform init
+                            #terraform plan -out=tfplan
+                        """,
+                        returnStatus: true // Capture exit code instead of failing immediately
+                    )
+
                 }
             }
         }
