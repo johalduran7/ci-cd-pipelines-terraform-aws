@@ -184,7 +184,7 @@ pipeline {
                                 def outputTagExists = sh (
                                     script: """
                                         set +e
-                                        tags=\$(aws ecr list-images ${aws_region} --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
+                                        tags=\$(aws ecr list-images --region ${aws_region} --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
 
                                         if echo "\$tags" | jq -e --arg VERSION "${VERSION}" '.[] | select(. == ${VERSION})' >/dev/null; then
                                             tag_exists=true
