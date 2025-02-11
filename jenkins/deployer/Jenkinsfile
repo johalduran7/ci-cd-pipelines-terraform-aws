@@ -172,9 +172,8 @@ pipeline {
                                 returnStdout: true
                             ).trim()
                             
-
-                            println("The ECR_REPO_NAME is: ${ECR_REPO_NAME}")
                             ECR_REPO_NAME=outputECR
+                            println("The ECR_REPO_NAME is: ${ECR_REPO_NAME}")
                             if ( "${ECR_REPO_NAME}" == "" ) {
                                 println("No ECR registry for the app has been created yet. Parameter /app/${GIT_BRANCH}/ecr_repository_name doesn't exist: ${output}")
                                 println("Pipeline ends here since no ECR registry was found")
