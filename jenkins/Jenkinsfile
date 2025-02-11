@@ -273,6 +273,7 @@ pipeline {
                                 chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
                                 cd app/terraform/
                                 terraform init
+                                ls -lrth /var/jenkins_home/workspace/app_dev/app/terraform/modules/asg/user_data.sh
                                 terraform plan -out=tfplan
                             """
                         }
