@@ -203,7 +203,7 @@ pipeline {
                             "TF_WORKSPACE=${GIT_BRANCH}"
                         ]) {
                             sh """
-                                git checkout "${TAG}"
+                                git checkout ${TAG}
                                 cd app/terraform/
                                 env
                                 echo \$TF_API_TOKEN 
