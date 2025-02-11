@@ -5,6 +5,7 @@ def VERSION = ''
 def current_infra_version = ''
 def version_exists = ''
 def TAG = ''
+def aws_region = ''
 pipeline {
     agent any
     tools {
@@ -154,7 +155,7 @@ pipeline {
 
                     // Get the current infrastructure version
                     echo "aws_region = ${envVars['aws_region']}"
-                    def aws_region="${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
                     println("aws_region: ${aws_region}")
                     def current_infrastructure_version = sh (
                         script: """
@@ -192,6 +193,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN')]) {
                         def test1 = sh(
                             script: """
+                                aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text
                                 aws iam list-users
                                 export TF_WORKSPACE=dev
                                 export TF_VAR_aws_region=us-easst-1
