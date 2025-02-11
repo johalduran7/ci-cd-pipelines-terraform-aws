@@ -277,7 +277,7 @@ pipeline {
                             """
                         }
                     }
-                    archiveArtifacts artifacts: "$WORKSPACE/app/terraform/tfplan", fingerprint: true
+                    archiveArtifacts artifacts: "app/terraform/tfplan", fingerprint: true
                 }
             }
         }
