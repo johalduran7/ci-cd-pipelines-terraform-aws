@@ -169,23 +169,20 @@ pipeline {
                                 script: """
                                     set +e
                                     infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text 2>&1)
-                                    exit_code=$?
+                                    exit_code=\$?
                                     set -e
-                                    if [[ $exit_code -eq 0 ]]; then
-                                        echo "current_infra_version=${infra_version}"
-                                        echo "VERSION_EXISTS=true" > version_flag
+                                    
+                                    if [[ "\$infra_version" == *"ParameterNotFound"* ]]; then
+                                        echo ""
                                     else
-                                        echo "Parameter '/app/${GIT_BRANCH}/infrastructure_version' not found, setting current_infra_version to empty"
-                                        echo "VERSION_EXISTS=false" > version_flag
+                                        echo "\$infra_version"
                                     fi
                                 """,
                                 returnStdout: true
                             ).trim()
                             
-                            def version_flag = readFile('version_flag').trim()
-                            version_exists = version_flag == 'true'
                             
-                            println("version_exists: ${version_exists}")
+                            println("output: ${output}")
 
                     }
                 
