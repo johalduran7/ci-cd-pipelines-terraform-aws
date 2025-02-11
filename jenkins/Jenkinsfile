@@ -168,7 +168,7 @@ pipeline {
                             def output = sh (
                                 script: """
                                     set +e
-                                    infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text 2>&1)
+                                    infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/app_version" --query "Parameter.Value" --output text 2>&1)
                                     exit_code=\$?
                                     set -e
                                     
