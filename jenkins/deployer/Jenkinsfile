@@ -6,6 +6,7 @@ def ECR_REPO_NAME = ''
 def version_exists = ''
 def TAG = ''
 def aws_region = ''
+def tag_exists = ''
 pipeline {
     agent any
     tools {
@@ -196,8 +197,9 @@ pipeline {
                                     returnStdout: true
                                 ).trim()
 
-                                println("The tag_exists value is: ${tag_exists}")
+                                
                                 tag_exists=outputTagExists
+                                println("The tag_exists value is: ${tag_exists}")
 
                             } 
 
