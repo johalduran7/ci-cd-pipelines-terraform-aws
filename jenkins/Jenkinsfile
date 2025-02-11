@@ -192,7 +192,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN')]) {
                         def test1 = sh(
                             script: """
-                                aws configure list
+                                aws iam list-users
                                 export TF_WORKSPACE=dev
                                 export TF_VAR_aws_region=us-easst-1
                                 git checkout "${TAG}"
@@ -221,7 +221,7 @@ pipeline {
                     ]){
                         def test = sh(
                             script: """
-                                aws configure list
+                                aws iam list-users
                                 git checkout "${TAG}"
                                 cd app/terraform/
                                 env
