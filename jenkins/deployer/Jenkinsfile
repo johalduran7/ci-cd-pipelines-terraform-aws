@@ -156,7 +156,7 @@ pipeline {
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                         ]
                         ]){
-                            def output = sh (
+                            def outputECR = sh (
                                 script: """
                                     set +e
                                     ECR_REPO_NAME=\$(aws ssm get-parameter --name "/app/${GIT_BRANCH}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
@@ -174,14 +174,14 @@ pipeline {
                             
 
                             println("The ECR_REPO_NAME is: ${ECR_REPO_NAME}")
-                            ECR_REPO_NAME=output
+                            ECR_REPO_NAME=outputECR
                             if ( "${ECR_REPO_NAME}" == "" ) {
                                 println("No ECR registry for the app has been created yet. Parameter /app/${GIT_BRANCH}/ecr_repository_name doesn't exist: ${output}")
                                 println("Pipeline ends here since no ECR registry was found")
                             } else {
                                 print("Logging into Amazon ECR and checking if the app version exists in the registry ${ECR_REPO_NAME}")
 
-                                def output = sh (
+                                def outputTagExists = sh (
                                     script: """
                                         set +e
                                         tags=\$(aws ecr list-images --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
@@ -198,7 +198,7 @@ pipeline {
                                 ).trim()
 
                                 println("The tag_exists value is: ${tag_exists}")
-                                tag_exists=output
+                                tag_exists=outputTagExists
 
                             } 
 
