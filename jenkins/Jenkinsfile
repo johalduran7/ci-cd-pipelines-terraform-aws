@@ -202,7 +202,6 @@ pipeline {
                     checkout scm
                     // Setup Terraform with environment variables
                     withEnv([
-                        "TF_VAR_ssh_public_key=${env.TF_SSH_PUBLIC_KEY}",
                         "TF_VAR_env=${GIT_BRANCH}",
                         "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
                         "TF_VAR_infrastructure_version=${TAG}",
@@ -221,7 +220,8 @@ pipeline {
                             credentialsId: 'AWS_CREDENTIALS_ID',
                             accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key')
                             ]){
                             sh """
                                 git checkout "${TAG}"
@@ -245,7 +245,6 @@ pipeline {
                     checkout scm
                     // Setup Terraform with environment variables
                     withEnv([
-                        "TF_VAR_ssh_public_key=${env.TF_SSH_PUBLIC_KEY}",
                         "TF_VAR_env=${GIT_BRANCH}",
                         "TF_VAR_path_user_data=modules/asg/user_data.sh",
                         "TF_VAR_infrastructure_version=${TAG}",
@@ -264,7 +263,8 @@ pipeline {
                             credentialsId: 'AWS_CREDENTIALS_ID',
                             accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
                             ]){
                             sh """
                                 git checkout "${TAG}"
@@ -289,7 +289,6 @@ pipeline {
                     checkout scm
                     // Setup Terraform with environment variables
                     withEnv([
-                        "TF_VAR_ssh_public_key=${env.TF_SSH_PUBLIC_KEY}",
                         "TF_VAR_env=${GIT_BRANCH}",
                         "TF_VAR_path_user_data=modules/asg/user_data.sh",
                         "TF_VAR_infrastructure_version=${TAG}",
@@ -308,7 +307,8 @@ pipeline {
                             credentialsId: 'AWS_CREDENTIALS_ID',
                             accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                             secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN') 
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
                             ]){
                             sh """
                                 git checkout "${TAG}"
