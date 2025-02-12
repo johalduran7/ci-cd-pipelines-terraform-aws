@@ -340,6 +340,9 @@ pipeline {
                     // Get the current infrastructure version
                     echo "aws_region = ${envVars['aws_region']}"
                     aws_region="${envVars['aws_region']}"
+                    min_size="${envVars['min_size']}"
+                    max_size="${envVars['max_size']}"
+                    desired_capacity="${envVars['desired_capacity']}"
                     println("aws_region: ${aws_region}")
                     withCredentials([[ 
                         $class: 'AmazonWebServicesCredentialsBinding',
@@ -380,9 +383,9 @@ pipeline {
                                 aws autoscaling update-auto-scaling-group \
                                 --region ${aws_region} \
                                 --auto-scaling-group-name ${GIT_BRANCH}-app_asg \
-                                --min-size ${envVars['min_size']} \
-                                --max-size ${envVars['max_size']} \
-                                --desired-capacity ${envVars['desired_capacity']}
+                                --min-size ${min_size} \
+                                --max-size ${max_size} \
+                                --desired-capacity ${desired_capacity}
                                 """,
                                 returnStdout: true
                             ).trim()
