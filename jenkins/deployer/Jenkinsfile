@@ -213,7 +213,7 @@ pipeline {
         }
         stage('Build and push') {
             when {
-                expression { !tag_exists }
+                expression { return tag_exists == "false" }
             }
             steps {
                 script {
