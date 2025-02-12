@@ -1,0 +1,353 @@
+def GIT_BRANCH = ''
+def envVars = [:]
+def ENV_PREFIX = ''
+def VERSION = ''
+def current_infra_version = ''
+def version_exists = ''
+def TAG = ''
+def aws_region = ''
+pipeline {
+    agent any
+    tools {
+        terraform 'Terraform 1.9.5 amd64'
+    }
+
+    environment {
+        // Define environment variables
+        //AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        //AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        //TF_API_TOKEN = credentials('TF_API_TOKEN')
+        //TF_SSH_PUBLIC_KEY = credentials('TF_SSH_PUBLIC_KEY')
+        TEST=''
+    }
+
+    stages {
+        stage('Detect Branch') {
+            steps {
+                script {
+                    sh 'printenv'
+                    // Execute the git command to find the branch containing the commit
+                    def branchOutput = sh(
+                        script: """
+                            git branch -r --contains ${env.GIT_COMMIT} | sed 's| *origin/||'
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Raw output of git branch -r --contains: ${branchOutput}"
+
+                    // Ensure branchOutput is not empty
+                    if (branchOutput.isEmpty()) {
+                        error "Commit ${env.GIT_COMMIT} not found in any branch."
+                    } else {
+                        GIT_BRANCH="${branchOutput}"
+                        println("Detected branch: ${GIT_BRANCH}")
+
+                    }
+                }
+            }
+        }
+        stage('Read .env File') {
+            steps {
+                script {
+                    // Read the .env file
+                    def envFileContent = sh(
+                        script: """
+                            cat app/.env
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Raw .env file content:\n${envFileContent}"
+
+                    // Split the content into lines
+                    def envLines = envFileContent.split('\n')
+
+                    ENV_PREFIX=GIT_BRANCH.toUpperCase()
+                    println("${ENV_PREFIX}")
+
+                    // Filter and parse variables based on the prefix
+                    envLines.each { line ->
+                        if (line.startsWith(ENV_PREFIX + '_')) {
+                            // Remove the prefix and split into key and value
+                            def keyValue = line.substring(ENV_PREFIX.length() + 1).split('=', 2)
+                            if (keyValue.size() == 2) {
+                                def key = keyValue[0].trim()
+                                def value = keyValue[1].trim()
+
+                                // Remove the leading underscore from the key (if present)
+                                if (key.startsWith('_')) {
+                                    key = key.substring(1)
+                                }
+
+                                // Store the variable in the global map
+                                envVars[key] = value
+                                echo "Set variable: ${key} = ${value}"
+                            }
+                        }
+                    }
+                }
+            }
+        }  
+        stage('Print Variables') {
+            steps {
+                script {
+                    // Use the dynamically created variables from the global map
+                    echo "Using variables:"
+                    echo "aws_region = ${envVars['aws_region']}"
+                    echo "TF_path_user_data = ${envVars['TF_path_user_data']}"
+                    echo "cidr_block = ${envVars['cidr_block']}"
+                    echo "public_subnet_a_cidr = ${envVars['public_subnet_a_cidr']}"
+                    echo "public_subnet_b_cidr = ${envVars['public_subnet_b_cidr']}"
+                    echo "private_subnet_a_cidr = ${envVars['private_subnet_a_cidr']}"
+                    echo "private_subnet_b_cidr = ${envVars['private_subnet_b_cidr']}"
+                }
+            }
+        }
+        stage('Validate Version') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Read Version from infra_version.txt
+                    def versionOutput = sh(
+                        script: """
+                            cat app/infra_version.txt
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    VERSION="${versionOutput}"
+                    println("VERSION: ${VERSION}")
+                    println("GIT_BRANCH: ${VERSION}")
+
+                    sh "ls"
+                    TAG = "${GIT_BRANCH}-infra-v${VERSION}"
+                    println("TAG: ${TAG}")
+                    sh "git tag -l"
+
+                    // Check if tag exists
+                    def tagExists = sh(
+                        script: """
+                            if git tag -l "${TAG}" | grep -q "^${TAG}\$"; then
+                                echo "Tag '${TAG}' exists!"
+                                exit 0
+                            else
+                                echo "Error: No matching tag '${TAG}' found."
+                                exit 1
+                            fi
+                        """,
+                        returnStatus: true // Capture exit code instead of failing immediately
+                    )
+
+                    // Abort pipeline if tag is missing
+                    if (tagExists != 0) {
+                        error("Tag '${TAG}' does not exist. Aborting pipeline.")
+                    }
+ 
+                }
+            }
+        }
+        stage('Validate Existing Infra Tags') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            def output = sh (
+                                script: """
+                                    set +e
+                                    infra_version=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/infrastructure_version" --query "Parameter.Value" --output text 2>&1)
+                                    exit_code=\$?
+                                    set -e
+                                    
+                                    if [[ "\$infra_version" == *"ParameterNotFound"* ]]; then
+                                        echo ""
+                                    else
+                                        echo "\$infra_version"
+                                    fi
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            
+
+                            println("The TAG to deploy is ${TAG}")
+                            infrastructure_version=output
+                            if ( "${infrastructure_version}" == "" ) {
+                                println("No Infrastructure has been deployed because parameter /app/${GIT_BRANCH}/infrastructure_version doesn't exist: ${output}")
+                                println("The TAG to deploy is ${TAG}")
+                                version_exists=false
+                                print("Setting version_exists to false")
+                            } else if ( "${infrastructure_version}"  == "${TAG}" ) {
+                                version_exists=true
+                                println("The parameter /app/${GIT_BRANCH}/infrastructure_version is ${output} then the tag ${TAG} won't be deployed!")
+                                print("Setting version_exists to true")
+                            } else if ( "${infrastructure_version}"  != "${TAG}" ) {
+                                version_exists=false
+                                println("The parameter /app/${GIT_BRANCH}/infrastructure_version shows another version ${output}. The tag ${TAG} will be deployed!")
+                                print("Setting version_exists to false")
+                            }
+
+                    }
+                
+                }
+            }
+        }
+        stage('Validate Terraform') {
+            when {
+                expression { return !version_exists }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+                    // Setup Terraform with environment variables
+                    withEnv([
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]) {
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key')
+                            ]){
+                            sh """
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform version
+                                terraform init
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            when {
+                expression { return !version_exists }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+                    // Setup Terraform with environment variables
+                    withEnv([
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=${GIT_BRANCH}-infra-v${VERSION}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]) {
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
+                            ]){
+                            sh """
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform init
+                                terraform plan -out=tfplan
+                            """
+                        }
+                    }
+                    archiveArtifacts artifacts: "app/terraform/tfplan", fingerprint: true
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                expression { return !version_exists }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+                    // Setup Terraform with environment variables
+                    withEnv([
+                        "TF_VAR_env=${GIT_BRANCH}",
+                        "TF_VAR_path_user_data=modules/asg/user_data.sh",
+                        "TF_VAR_infrastructure_version=infra-v${VERSION}",
+                        "TF_WORKSPACE=${GIT_BRANCH}",
+                        "TF_VAR_aws_region=${envVars['aws_region']}",
+                        "TF_path_user_data=${envVars['TF_path_user_data']}",
+                        "TF_cidr_block=${envVars['cidr_block']}",
+                        "TF_public_subnet_a_cidr=${envVars['public_subnet_a_cidr']}",
+                        "TF_public_subnet_b_cidr=${envVars['public_subnet_b_cidr']}",
+                        "TF_private_subnet_a_cidr=${envVars['private_subnet_a_cidr']}",
+                        "TF_private_subnet_b_cidr=${envVars['private_subnet_b_cidr']}"
+                        
+                    ]) {
+                        withCredentials([[ 
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'AWS_CREDENTIALS_ID',
+                            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                            ],string(credentialsId: 'TF_API_TOKEN', variable: 'TF_API_TOKEN'),
+                             string(credentialsId: 'TF_VAR_ssh_public_key', variable: 'TF_VAR_ssh_public_key') 
+                            ]){
+                            sh """
+                                echo \$TF_VAR_infrastructure_version
+                                git checkout "${TAG}"
+                                mkdir -p ~/.terraform.d
+                                echo '{ "credentials": { "app.terraform.io": { "token": "'$TF_API_TOKEN'" } } }' > ~/.terraform.d/credentials.tfrc.json
+                                chmod 600 ~/.terraform.d/credentials.tfrc.json  # Secure the file
+                                cd app/terraform/
+                                terraform apply -auto-approve
+                            """
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Trigger Deployer Pipeline') {
+            steps {
+                build job: 'dev_deployer_app', wait: false
+            }
+        } 
+    }
+}
+

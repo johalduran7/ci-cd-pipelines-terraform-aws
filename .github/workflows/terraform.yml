@@ -97,10 +97,10 @@ jobs:
         id: check_infra_version
         run: |
           if [ "$VERSION" = "$current_infra_version" ]; then
-            echo "The version app-infra-${VERSION} is already deployed on AWS"
+            echo "The version ${{ github.ref_name }}-infra-${VERSION} is already deployed on AWS"
             version_exists=true
           else
-            echo "The version app-infra-${VERSION} will be deployed on AWS"
+            echo "The version ${{ github.ref_name }}-infra-${VERSION} will be deployed on AWS"
             version_exists=false
           fi
 
@@ -194,7 +194,7 @@ jobs:
           TF_VAR_aws_region: ${{ env.aws_region }}
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }} # pushes the name branch: dev or prod
-          TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
+          TF_VAR_infrastructure_version: "infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
           TF_path_user_data: ${{ env.path_user_data }}
           TF_cidr_block: ${{ env.cidr_block }}
@@ -253,7 +253,7 @@ jobs:
           TF_VAR_aws_region: ${{ env.aws_region }}
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
-          TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
+          TF_VAR_infrastructure_version: "infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
           TF_path_user_data: ${{ env.path_user_data }}
           TF_cidr_block: ${{ env.cidr_block }}
@@ -277,7 +277,7 @@ jobs:
           TF_VAR_aws_region: ${{ env.aws_region }}
           TF_VAR_ssh_public_key: ${{ secrets.TF_SSH_PUBLIC_KEY }}
           TF_VAR_env: ${{ github.ref_name }}
-          TF_VAR_infrastructure_version: "${{ github.ref_name }}-infra-v${{ env.VERSION }}" 
+          TF_VAR_infrastructure_version: "infra-v${{ env.VERSION }}" 
           TF_WORKSPACE: "${{ github.ref_name }}"
           TF_path_user_data: ${{ env.path_user_data }}
           TF_cidr_block: ${{ env.cidr_block }}

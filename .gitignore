@@ -1,6 +1,7 @@
 # Ignore everything by default
+*.pem
 ansible/
 docker/
-jenkins/
+#jenkins/
 kubernetes/
 terraform-aws/

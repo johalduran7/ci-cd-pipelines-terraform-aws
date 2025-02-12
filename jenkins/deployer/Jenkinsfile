@@ -1,0 +1,399 @@
+def GIT_BRANCH = ''
+def envVars = [:]
+def ENV_PREFIX = ''
+def VERSION = ''
+def ECR_REPO_NAME = ''
+def version_exists = ''
+def TAG = ''
+def aws_region = ''
+def tag_exists = ''
+def ECR_REGISTRY = ''
+def asgVars = [:]
+pipeline {
+    agent any
+    tools {
+        terraform 'Terraform 1.9.5 amd64'
+    }
+
+    stages {
+        stage('Detect Branch') {
+            steps {
+                script {
+                    sh 'printenv'
+                    // Execute the git command to find the branch containing the commit
+                    def branchOutput = sh(
+                        script: """
+                            git branch -r --contains ${env.GIT_COMMIT} | sed 's| *origin/||'
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Raw output of git branch -r --contains: ${branchOutput}"
+
+                    // Ensure branchOutput is not empty
+                    if (branchOutput.isEmpty()) {
+                        error "Commit ${env.GIT_COMMIT} not found in any branch."
+                    } else {
+                        GIT_BRANCH="${branchOutput}"
+                        println("Detected branch: ${GIT_BRANCH}")
+
+                    }
+                }
+            }
+        }
+        stage('Read .env File') {
+            steps {
+                script {
+                    // Read the .env file
+                    def envFileContent = sh(
+                        script: """
+                            cat app/.env
+                        """,
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Raw .env file content:\n${envFileContent}"
+
+                    // Split the content into lines
+                    def envLines = envFileContent.split('\n')
+
+                    ENV_PREFIX=GIT_BRANCH.toUpperCase()
+                    println("${ENV_PREFIX}")
+
+                    // Filter and parse variables based on the prefix
+                    envLines.each { line ->
+                        if (line.startsWith(ENV_PREFIX + '_')) {
+                            // Remove the prefix and split into key and value
+                            def keyValue = line.substring(ENV_PREFIX.length() + 1).split('=', 2)
+                            if (keyValue.size() == 2) {
+                                def key = keyValue[0].trim()
+                                def value = keyValue[1].trim()
+
+                                // Remove the leading underscore from the key (if present)
+                                if (key.startsWith('_')) {
+                                    key = key.substring(1)
+                                }
+
+                                // Store the variable in the global map
+                                envVars[key] = value
+                                echo "Set variable: ${key} = ${value}"
+                            }
+                        }
+                    }
+                }
+            }
+        }  
+        stage('Print Variables') {
+            steps {
+                script {
+                    // Use the dynamically created variables from the global map
+                    echo "Using variables:"
+                    echo "aws_region = ${envVars['aws_region']}"
+                    echo "TF_path_user_data = ${envVars['TF_path_user_data']}"
+                    echo "cidr_block = ${envVars['cidr_block']}"
+                    echo "public_subnet_a_cidr = ${envVars['public_subnet_a_cidr']}"
+                    echo "public_subnet_b_cidr = ${envVars['public_subnet_b_cidr']}"
+                    echo "private_subnet_a_cidr = ${envVars['private_subnet_a_cidr']}"
+                    echo "private_subnet_b_cidr = ${envVars['private_subnet_b_cidr']}"
+                }
+            }
+        }
+        stage('Validate Version') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Read Version from infra_version.txt
+                    def versionOutput = sh(
+                        script: """
+                            cat app/app_version.txt
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    VERSION="${versionOutput}"
+                    println("VERSION: ${VERSION}")
+                    println("GIT_BRANCH: ${VERSION}")
+
+                    sh "ls"
+                    TAG = "${GIT_BRANCH}-app-v${VERSION}"
+                    println("TAG: ${TAG}")
+                    sh "git tag -l"
+
+                    // Check if tag exists
+                    def tagExists = sh(
+                        script: """
+                            if git tag -l "${TAG}" | grep -q "^${TAG}\$"; then
+                                echo "Tag '${TAG}' exists!"
+                                exit 0
+                            else
+                                echo "Error: No matching tag '${TAG}' found."
+                                exit 1
+                            fi
+                        """,
+                        returnStatus: true // Capture exit code instead of failing immediately
+                    )
+
+                    // Abort pipeline if tag is missing
+                    if (tagExists != 0) {
+                        error("Tag '${TAG}' does not exist. Aborting pipeline.")
+                    }
+ 
+                }
+            }
+        }
+        stage('Validate Existing ECR tags') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            def outputECR = sh (
+                                script: """
+                                    set +e
+                                    ECR_REPO_NAME=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
+                                    exit_code=\$?
+                                    set -e
+                                    
+                                    if [[ "\$ECR_REPO_NAME" == *"ParameterNotFound"* ]]; then
+                                        echo ""
+                                    else
+                                        echo "\$ECR_REPO_NAME"
+                                    fi
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            
+                            ECR_REPO_NAME=outputECR
+                            println("The ECR_REPO_NAME is: ${ECR_REPO_NAME}")
+                            if ( "${ECR_REPO_NAME}" == "" ) {
+                                println("No ECR registry for the app has been created yet. Parameter /app/${GIT_BRANCH}/ecr_repository_name doesn't exist: ${output}")
+                                println("Pipeline ends here since no ECR registry was found")
+                            } else {
+                                print("Logging into Amazon ECR and checking if the app version exists in the registry ${ECR_REPO_NAME}")
+
+                                def outputTagExists = sh (
+                                    script: """
+                                        set +e
+                                        tags=\$(aws ecr list-images --region ${aws_region} --repository-name ${ECR_REPO_NAME} --query 'imageIds[].imageTag' --output json)
+
+                                        if echo "\$tags" | jq -e --arg VERSION "${VERSION}" '.[] | select(. == "${VERSION}")' >/dev/null; then
+                                            tag_exists=true
+                                        else
+                                            tag_exists=false
+                                        fi
+
+                                        echo "\$tag_exists"
+                                    """,
+                                    returnStdout: true
+                                ).trim()
+
+                                
+                                tag_exists=outputTagExists
+                                println("The tag_exists value is: ${tag_exists}")
+
+                            } 
+
+                    }
+                
+                }
+            }
+
+
+        }
+        stage('Build and push') {
+            when {
+                expression { return tag_exists == "false" }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            
+                            def outputECR_login = sh (
+                                script: """
+                                
+                                aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com
+                                docker ps
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            println("Output ECR_login:${outputECR_login} ")
+                            //expected output: Login Succeeded
+                            
+                            def outputRegistry = sh (
+                                script: """
+                                ECR_REGISTRY="\$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com"
+                                echo "\$ECR_REGISTRY"
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            ECR_REGISTRY=outputRegistry
+                            //expoected output: 948586925757.dkr.ecr.us-east-1.amazonaws.com
+                            println("ECR_REGISTRY: ${ECR_REGISTRY}")
+
+                            def outputBuild = sh (
+                                script: """
+                                git checkout "${TAG}"
+                                cd app/src/
+                                docker build -t ${ECR_REPO_NAME}:${VERSION} .
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            def outputTag = sh (
+                                script: """
+                                docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            def outputPush = sh (
+                                script: """
+                                docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                                """,
+                                returnStdout: true
+                            ).trim()                            
+                            
+                    }
+                
+                }
+            }
+
+        }
+
+        stage('App_version to Parameter Store') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            
+                            def outputSSM = sh (
+                                script: """
+                                
+                                aws ssm put-parameter \
+                                    --name "/app/${GIT_BRANCH}/app_version" \
+                                    --region ${aws_region} \
+                                    --value "${TAG}" \
+                                    --type "String" \
+                                    --overwrite
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            println("Output outputSSM:${outputSSM} ")
+                   
+                            
+                    }
+                
+                }
+            }
+
+        }        
+
+        stage('Update ASG') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+
+                            // Read the .asg-config.txt file
+                            def envFileContent = sh(
+                                script: """
+                                    cat app/asg-config.txt
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            echo "Raw asg-config.txt file content:\n${envFileContent}"
+
+                            // Split the content into lines
+                            def envLines = envFileContent.split('\n')
+
+
+                            // Creating map of variables
+                            envLines.each { line ->
+                                def keyValue = line.split('=', 2)
+                                def key = keyValue[0].trim()
+                                def value = keyValue[1].trim()
+                                asgVars[key] = value
+                                echo "Set variable for asg: ${key} = ${value}"
+                            }
+ 
+                                min_size="${asgVars['min_size']}"
+                                max_size="${asgVars['max_size']}"
+                                desired_capacity="${asgVars['desired_capacity']}"
+                                println("min_size: ${min_size}")
+                                println("max_size: ${max_size}")
+                                println("desired_capacity: ${desired_capacity}")
+
+                            def outputUpdateASG = sh (
+                                script: """
+                                
+                                aws autoscaling update-auto-scaling-group \
+                                --region ${aws_region} \
+                                --auto-scaling-group-name ${GIT_BRANCH}-app_asg \
+                                --min-size ${min_size} \
+                                --max-size ${max_size} \
+                                --desired-capacity ${desired_capacity}
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            println("Output outputUpdateASG:${outputUpdateASG} ")
+                  
+                            
+                    }
+                
+                }
+            }
+
+        }
+
+    }
+}
