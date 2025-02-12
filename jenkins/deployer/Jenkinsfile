@@ -238,7 +238,7 @@ pipeline {
                                 returnStdout: true
                             ).trim()
                             println("Output ECR_login:${outputECR_login} ")
-                            expected output: Login Succeeded
+                            //expected output: Login Succeeded
                             
                             def outputRegistry = sh (
                                 script: """
