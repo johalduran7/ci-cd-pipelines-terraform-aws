@@ -8,6 +8,7 @@ def TAG = ''
 def aws_region = ''
 def tag_exists = ''
 def ECR_REGISTRY = ''
+def asgVars = [:]
 pipeline {
     agent any
     tools {
@@ -346,31 +347,44 @@ pipeline {
                         secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                         ]
                         ]){
-                            def outputASGvalues = sh(
+
+                            // Read the .asg-config.txt file
+                            def envFileContent = sh(
                                 script: """
-                                sed -i 's/\\r$//' ${GIT_BRANCH}/app/asg-config.txt  # Fix Windows line endings if present
-                                set -o allexport  # Enable automatic exporting of variables
-                                source ${GIT_BRANCH}/app/asg-config.txt  # Load variables
-                                set +o allexport  # Disable automatic exporting
-                                echo ${GIT_BRANCH}/app/asg-config.txt
+                                    cat app/asg-config.txt
                                 """,
                                 returnStdout: true
                             ).trim()
-                            outputASGvalues="${outputASGvalues}"
-                            println("outputASGvalues: ${outputASGvalues}")
 
-                            // def outputUpdateASG = sh (
-                            //     script: """
+                            echo "Raw asg-config.txt file content:\n${envFileContent}"
+
+                            // Split the content into lines
+                            def envLines = envFileContent.split('\n')
+
+
+                            // Creating map of variables
+                            envLines.each { line ->
+                                def keyValue = line.split('=', 2)
+                                def key = keyValue[0].trim()
+                                def value = keyValue[1].trim()
+                                asgVars[key] = value
+                                echo "Set variable for asg: ${key} = ${value}"
+                            }
+ 
+                           
+
+                            def outputUpdateASG = sh (
+                                script: """
                                 
-                            //     aws autoscaling update-auto-scaling-group \
-                            //     --auto-scaling-group-name ${GIT_BRANCH}-app_asg \
-                            //     --min-size ${{ env.min_size}} \
-                            //     --max-size ${{ env.max_size}} \
-                            //     --desired-capacity ${{ env.desired_capacity}}
-                            //     """,
-                            //     returnStdout: true
-                            // ).trim()
-                            // println("Output outputUpdateASG:${outputUpdateASG} ")
+                                aws autoscaling update-auto-scaling-group \
+                                --auto-scaling-group-name ${GIT_BRANCH}-app_asg \
+                                --min-size ${envVars['min_size']} \
+                                --max-size ${envVars['max_size']} \
+                                --desired-capacity ${envVars['desired_capacity']}
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            println("Output outputUpdateASG:${outputUpdateASG} ")
                   
                             
                     }
