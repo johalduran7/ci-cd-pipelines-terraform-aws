@@ -7,6 +7,7 @@ def version_exists = ''
 def TAG = ''
 def aws_region = ''
 def tag_exists = ''
+def ECR_REGISTRY = ''
 pipeline {
     agent any
     tools {
@@ -207,8 +208,55 @@ pipeline {
                 
                 }
             }
-        }
 
+
+        }
+        stage('Build and push') {
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            
+                            def outputECR_login = sh (
+                                script: """
+                                aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_REGION}.amazonaws.com
+
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            println("Output ECR_login:${outputECR_login} ")
+                            
+                            def outputRegistry = sh (
+                                script: """
+                                ECR_REGISTRY=\$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_REGION}.amazonaws.com
+                                echo \$ECR_REGISTRY
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            ECR_REGISTRY=outputRegistry
+                            println("ECR_REGISTRY: ${ECR_REGISTRY}")
+
+                            
+                            
+                    }
+                
+                }
+            }
+
+
+        }
 
     }
 }
