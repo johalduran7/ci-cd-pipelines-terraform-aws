@@ -212,6 +212,9 @@ pipeline {
 
         }
         stage('Build and push') {
+            when {
+                expression { return !tag_exists }
+            }
             steps {
                 script {
                     // Checkout repository
@@ -248,9 +251,31 @@ pipeline {
                                 returnStdout: true
                             ).trim()
                             ECR_REGISTRY=outputRegistry
+                            //expoected output: 948586925757.dkr.ecr.us-east-1.amazonaws.com
                             println("ECR_REGISTRY: ${ECR_REGISTRY}")
 
-                            
+                            def outputBuild = sh (
+                                script: """
+                                git checkout "${TAG}"
+                                cd app/src/
+                                docker build -t ${ECR_REPO_NAME}:${VERSION} .
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            def outputTag = sh (
+                                script: """
+                                docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            def outputPush = sh (
+                                script: """
+                                docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                                """,
+                                returnStdout: true
+                            ).trim()                            
                             
                     }
                 
