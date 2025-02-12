@@ -231,23 +231,23 @@ pipeline {
                             
                             def outputECR_login = sh (
                                 script: """
+                                
+                                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.us-east-1.amazonaws.com
                                 docker ps
-                                aws ecr get-login-password --region $aws_region | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$aws_region.amazonaws.com
-
                                 """,
                                 returnStdout: true
                             ).trim()
                             println("Output ECR_login:${outputECR_login} ")
                             
-                            def outputRegistry = sh (
-                                script: """
-                                ECR_REGISTRY=\$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$aws_region.amazonaws.com
-                                echo \$ECR_REGISTRY
-                                """,
-                                returnStdout: true
-                            ).trim()
-                            ECR_REGISTRY=outputRegistry
-                            println("ECR_REGISTRY: ${ECR_REGISTRY}")
+                            // def outputRegistry = sh (
+                            //     script: """
+                            //     ECR_REGISTRY=\$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$aws_region.amazonaws.com
+                            //     echo \$ECR_REGISTRY
+                            //     """,
+                            //     returnStdout: true
+                            // ).trim()
+                            // ECR_REGISTRY=outputRegistry
+                            // println("ECR_REGISTRY: ${ECR_REGISTRY}")
 
                             
                             
