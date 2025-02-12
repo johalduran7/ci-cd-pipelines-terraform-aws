@@ -232,7 +232,7 @@ pipeline {
                             def outputECR_login = sh (
                                 script: """
                                 docker ps
-                                aws ecr get-login-password --region $aws_region | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.$aws_region.amazonaws.com
+                                aws ecr get-login-password --region $aws_region | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$aws_region.amazonaws.com
 
                                 """,
                                 returnStdout: true
