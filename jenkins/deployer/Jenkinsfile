@@ -311,6 +311,7 @@ pipeline {
                                 
                                 aws ssm put-parameter \
                                     --name "/app/${GIT_BRANCH}/app_version" \
+                                    --region ${aws_region} \
                                     --value "${TAG}" \
                                     --type "String" \
                                     --overwrite
@@ -377,6 +378,7 @@ pipeline {
                                 script: """
                                 
                                 aws autoscaling update-auto-scaling-group \
+                                --region ${aws_region} \
                                 --auto-scaling-group-name ${GIT_BRANCH}-app_asg \
                                 --min-size ${envVars['min_size']} \
                                 --max-size ${envVars['max_size']} \
