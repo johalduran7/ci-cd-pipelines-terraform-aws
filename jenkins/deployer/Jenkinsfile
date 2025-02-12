@@ -282,8 +282,103 @@ pipeline {
                 }
             }
 
-
         }
+
+        stage('App_version to Parameter Store') {
+            when {
+                expression { return tag_exists == "false" }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            
+                            def outputSSM = sh (
+                                script: """
+                                
+                                aws ssm put-parameter \
+                                    --name "/app/${GIT_BRANCH}/app_version" \
+                                    --value "${TAG}" \
+                                    --type "String" \
+                                    --overwrite
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            println("Output outputSSM:${outputSSM} ")
+                   
+                            
+                    }
+                
+                }
+            }
+
+        }        
+
+        stage('Update ASG') {
+            when {
+                expression { return tag_exists == "false" }
+            }
+            steps {
+                script {
+                    // Checkout repository
+                    checkout scm
+
+                    // Get the current infrastructure version
+                    echo "aws_region = ${envVars['aws_region']}"
+                    aws_region="${envVars['aws_region']}"
+                    println("aws_region: ${aws_region}")
+                    withCredentials([[ 
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'AWS_CREDENTIALS_ID',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                        ]
+                        ]){
+                            def outputASGvalues = sh(
+                                script: """
+                                sed -i 's/\\r$//' ${GIT_BRANCH}/app/asg-config.txt  # Fix Windows line endings if present
+                                set -o allexport  # Enable automatic exporting of variables
+                                source ${GIT_BRANCH}/app/asg-config.txt  # Load variables
+                                set +o allexport  # Disable automatic exporting
+                                echo ${GIT_BRANCH}/app/asg-config.txt
+                                """,
+                                returnStdout: true
+                            ).trim()
+                            outputASGvalues="${outputASGvalues}"
+                            println("outputASGvalues: ${outputASGvalues}")
+
+                            // def outputUpdateASG = sh (
+                            //     script: """
+                                
+                            //     aws autoscaling update-auto-scaling-group \
+                            //     --auto-scaling-group-name ${GIT_BRANCH}-app_asg \
+                            //     --min-size ${{ env.min_size}} \
+                            //     --max-size ${{ env.max_size}} \
+                            //     --desired-capacity ${{ env.desired_capacity}}
+                            //     """,
+                            //     returnStdout: true
+                            // ).trim()
+                            // println("Output outputUpdateASG:${outputUpdateASG} ")
+                  
+                            
+                    }
+                
+                }
+            }
+
+        } 
 
     }
 }
