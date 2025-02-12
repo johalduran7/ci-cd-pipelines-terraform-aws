@@ -286,9 +286,6 @@ pipeline {
         }
 
         stage('App_version to Parameter Store') {
-            when {
-                expression { return tag_exists == "false" }
-            }
             steps {
                 script {
                     // Checkout repository
@@ -329,9 +326,6 @@ pipeline {
         }        
 
         stage('Update ASG') {
-            when {
-                expression { return tag_exists == "false" }
-            }
             steps {
                 script {
                     // Checkout repository
