@@ -59,7 +59,7 @@ This repository automates the provisioning and deployment of a Node.js applicati
 ### Creating branch, configuring .env, and triggering the pipelines
 ![Setup](./resources/first_part_gif_portfolio.gif)
 
-### Running Infrastructure and Application pipelines
+### Running Infrastructure and Application pipelines on GitHub Actions
 ![Setup](./resources/second_part_gif_portfolio.gif)
 
 ### Checking deployment on AWS
