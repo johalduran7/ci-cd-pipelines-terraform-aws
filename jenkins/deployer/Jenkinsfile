@@ -340,10 +340,12 @@ pipeline {
                     // Get the current infrastructure version
                     echo "aws_region = ${envVars['aws_region']}"
                     aws_region="${envVars['aws_region']}"
-                    min_size="${envVars['min_size']}"
-                    max_size="${envVars['max_size']}"
-                    desired_capacity="${envVars['desired_capacity']}"
-                    println("aws_region: ${aws_region}")
+                    min_size="${asgVars['min_size']}"
+                    max_size="${asgVars['max_size']}"
+                    desired_capacity="${asgVars['desired_capacity']}"
+                    println("min_size: ${min_size}")
+                    println("max_size: ${max_size}")
+                    println("desired_capacity: ${desired_capacity}")
                     withCredentials([[ 
                         $class: 'AmazonWebServicesCredentialsBinding',
                         credentialsId: 'AWS_CREDENTIALS_ID',
