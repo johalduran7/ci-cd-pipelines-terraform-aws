@@ -342,6 +342,12 @@ pipeline {
                 }
             }
         }
+        
+        stage('Trigger Deployer Pipeline') {
+            steps {
+                build job: 'dev_deployer_app', wait: false
+            }
+        } 
     }
 }
 
