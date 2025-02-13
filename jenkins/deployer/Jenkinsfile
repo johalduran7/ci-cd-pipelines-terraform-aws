@@ -35,8 +35,8 @@ pipeline {
                         if (branchOutput.isEmpty()) {
                             error "Commit ${env.GIT_COMMIT} not found in any branch."
                         } else {
-                            ENVIRONMET="${branchOutput}"
-                            println("Detected branch: ${ENVIRONMET}")
+                            ENVIRONMENT="${branchOutput}"
+                            println("Detected branch: ${ENVIRONMENT}")
 
                         }
                     }else {
@@ -46,8 +46,8 @@ pipeline {
                             """,
                             returnStdout: true
                         ).trim()
-                        ENVIRONMET="${branchOutputNoCommit}"
-                        println("Detected branch no commit condition: ${ENVIRONMET}")
+                        ENVIRONMENT="${branchOutputNoCommit}"
+                        println("Detected branch no commit condition: ${ENVIRONMENT}")
 
                     }
 
