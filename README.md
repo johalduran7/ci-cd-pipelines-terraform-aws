@@ -70,7 +70,7 @@ This repository automates the provisioning and deployment of a Node.js applicati
 ![Setup](./resources/third_part_gif_portfolio.gif)
 
 ### Jenkins Deployer and Infrastructure pipelines
-![Setup](./resources/jenkin_gif_portfolio.gif)
+![Setup](./resources/jenkins_gif_portfolio.gif)
 
 ---
 ## Future Improvements
