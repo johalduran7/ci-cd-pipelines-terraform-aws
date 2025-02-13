@@ -1,5 +1,6 @@
 stages:
   - validate_version
+  - load_env_variables
   - validate_existing_infra_tags
 
 variables:
@@ -26,21 +27,37 @@ validate_version:
       fi
     - 'echo "TAG=${TAG}" >> variables.env'
     - 'echo "VERSION=${VERSION}" >> variables.env'
+    - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
   artifacts:
     reports:
       dotenv: variables.env 
 
-validate_existing_infra_tags:
-  stage: validate_existing_infra_tags
+load_env_variables:
+  stage: load_env_variables
   needs: [validate_version]
   script:
+    - 'ENVIRONMENT_UPPERCASE=$(echo "${{ github.ref_name }}" | tr '[:lower:]' '[:upper:]')'
+    - 'grep "^${ENVIRONMENT_UPPERCASE}_" app/.env | sed -E "s/^${ENVIRONMENT_UPPERCASE}_//" >> variables.env'
+
+
+validate_existing_infra_tags:
+  stage: validate_existing_infra_tags
+  needs: [load_env_variables]
+  script:
     - 'echo TAG on second stage: ${TAG}'
-    - 'export AWS_REGION=$(grep "^${CI_COMMIT_REF_NAME}_" app/.env | sed -E "s/^${CI_COMMIT_REF_NAME}_//")'
-    - 'export CURRENT_INFRA_VERSION=$(aws ssm get-parameter --name "/app/${CI_COMMIT_REF_NAME}/infrastructure_version" --query "Parameter.Value" --output text || echo "")'
-    - 'echo AWS_REGION: ${AWS_REGION}'
+    - 'export CURRENT_INFRA_VERSION=$(aws ssm get-parameter --name "/app/${ENVIRONMENT}/infrastructure_version" --query "Parameter.Value" --output text || echo "")'
+    - 'echo aws_region: ${aws_region}'
     - 'echo CURRENT_INFRA_VERSION: ${CURRENT_INFRA_VERSION}'
     - 'echo VERSION: ${VERSION}'
-    #- if [ "${VERSION}" = "${CURRENT_INFRA_VERSION}" ]; then echo "version_exists=true" > version_exists.txt; else echo "version_exists=false" > version_exists.txt; fi
-  #artifacts:
-  #  paths:
-  #    - version_exists.txt
+    - > 
+      if [ "${VERSION}" = "${current_infra_version}" ]; then
+        echo "The version ${ENVIRONMENT}-infra-${VERSION} is already deployed on AWS"
+        version_exists=true
+      else
+        echo "The version ${ENVIRONMENT}-infra-${VERSION} will be deployed on AWS"
+        version_exists=false
+      fi
+    - 'echo "CURRENT_INFRA_VERSION=${CURRENT_INFRA_VERSION}" >> variables.env'
+    - 'echo "version_exists=${version_exists}" >> variables.env'
+
+
