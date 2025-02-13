@@ -20,7 +20,7 @@ pipeline {
             steps {
                 script {
                     sh 'printenv'
-                    if ( "${env.GIT_BRANCH}" is empty) {
+                    if ( !env.GIT_BRANCH?.trim() ) {
                         // Execute the git command to find the branch containing the commit
                         def branchOutput = sh(
                             script: """
