@@ -1,4 +1,4 @@
-def GIT_BRANCH = ''
+def ENVIRONMENT = ''
 def envVars = [:]
 def ENV_PREFIX = ''
 def VERSION = ''
@@ -20,24 +20,37 @@ pipeline {
             steps {
                 script {
                     sh 'printenv'
-                    // Execute the git command to find the branch containing the commit
-                    def branchOutput = sh(
-                        script: """
-                            git branch -r --contains ${env.GIT_COMMIT} | sed 's| *origin/||'
-                        """,
-                        returnStdout: true
-                    ).trim()
+                    if ( "${env.GIT_BRANCH}" is empty) {
+                        // Execute the git command to find the branch containing the commit
+                        def branchOutput = sh(
+                            script: """
+                                git branch -r --contains ${env.GIT_COMMIT} | sed 's| *origin/||'
+                            """,
+                            returnStdout: true
+                        ).trim()
 
-                    echo "Raw output of git branch -r --contains: ${branchOutput}"
+                        echo "Raw output of git branch -r --contains: ${branchOutput}"
 
-                    // Ensure branchOutput is not empty
-                    if (branchOutput.isEmpty()) {
-                        error "Commit ${env.GIT_COMMIT} not found in any branch."
-                    } else {
-                        GIT_BRANCH="${branchOutput}"
-                        println("Detected branch: ${GIT_BRANCH}")
+                        // Ensure branchOutput is not empty
+                        if (branchOutput.isEmpty()) {
+                            error "Commit ${env.GIT_COMMIT} not found in any branch."
+                        } else {
+                            ENVIRONMET="${branchOutput}"
+                            println("Detected branch: ${ENVIRONMET}")
+
+                        }
+                    }else {
+                        def branchOutputNoCommit = sh(
+                            script: """
+                                echo ${env.GIT_BRANCH} | sed 's| *origin/||'
+                            """,
+                            returnStdout: true
+                        ).trim()
+                        ENVIRONMET="${branchOutputNoCommit}"
+                        println("Detected branch no commit condition: ${ENVIRONMET}")
 
                     }
+
                 }
             }
         }
@@ -57,7 +70,7 @@ pipeline {
                     // Split the content into lines
                     def envLines = envFileContent.split('\n')
 
-                    ENV_PREFIX=GIT_BRANCH.toUpperCase()
+                    ENV_PREFIX=ENVIRONMENT.toUpperCase()
                     println("${ENV_PREFIX}")
 
                     // Filter and parse variables based on the prefix
@@ -113,10 +126,10 @@ pipeline {
                     ).trim()
                     VERSION="${versionOutput}"
                     println("VERSION: ${VERSION}")
-                    println("GIT_BRANCH: ${VERSION}")
+                    println("ENVIRONMENT: ${VERSION}")
 
                     sh "ls"
-                    TAG = "${GIT_BRANCH}-app-v${VERSION}"
+                    TAG = "${ENVIRONMENT}-app-v${VERSION}"
                     println("TAG: ${TAG}")
                     sh "git tag -l"
 
@@ -162,7 +175,7 @@ pipeline {
                             def outputECR = sh (
                                 script: """
                                     set +e
-                                    ECR_REPO_NAME=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${GIT_BRANCH}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
+                                    ECR_REPO_NAME=\$(aws ssm get-parameter --region ${aws_region} --name "/app/${ENVIRONMENT}/ecr_repository_name" --query "Parameter.Value" --output text 2>&1)
                                     exit_code=\$?
                                     set -e
                                     
@@ -178,7 +191,7 @@ pipeline {
                             ECR_REPO_NAME=outputECR
                             println("The ECR_REPO_NAME is: ${ECR_REPO_NAME}")
                             if ( "${ECR_REPO_NAME}" == "" ) {
-                                println("No ECR registry for the app has been created yet. Parameter /app/${GIT_BRANCH}/ecr_repository_name doesn't exist: ${output}")
+                                println("No ECR registry for the app has been created yet. Parameter /app/${ENVIRONMENT}/ecr_repository_name doesn't exist: ${output}")
                                 println("Pipeline ends here since no ECR registry was found")
                             } else {
                                 print("Logging into Amazon ECR and checking if the app version exists in the registry ${ECR_REPO_NAME}")
@@ -307,7 +320,7 @@ pipeline {
                                 script: """
                                 
                                 aws ssm put-parameter \
-                                    --name "/app/${GIT_BRANCH}/app_version" \
+                                    --name "/app/${ENVIRONMENT}/app_version" \
                                     --region ${aws_region} \
                                     --value "${TAG}" \
                                     --type "String" \
@@ -378,7 +391,7 @@ pipeline {
                                 
                                 aws autoscaling update-auto-scaling-group \
                                 --region ${aws_region} \
-                                --auto-scaling-group-name ${GIT_BRANCH}-app_asg \
+                                --auto-scaling-group-name ${ENVIRONMENT}-app_asg \
                                 --min-size ${min_size} \
                                 --max-size ${max_size} \
                                 --desired-capacity ${desired_capacity}
