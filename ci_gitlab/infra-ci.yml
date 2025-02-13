@@ -11,3 +11,4 @@ validate_version:
   stage: validate_version
   script:
     - echo "Current branch"
+    - env
