@@ -16,4 +16,4 @@ validate_version:
     - 'export VERSION=$(cat app/infra_version.txt)'
     - 'echo "VERSION=${VERSION}"'
     - 'TAG="${CI_COMMIT_REF_NAME}-infra-v${VERSION}"'
-    - 'if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then echo "Error: No matching tag '${TAG}' found." && exit 1; fi'
+    - 'if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then echo "Error: No matching tag \'${TAG}\' found." && exit 1; fi'
