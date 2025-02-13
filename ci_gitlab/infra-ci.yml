@@ -20,7 +20,7 @@ validate_version:
     - 'git fetch --tags'
     - 'git tag'
     - >
-      'if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then 
-        echo "Error: No matching tag ${TAG} found." && exit 1; 
+      'if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then \
+        echo "Error: No matching tag ${TAG} found." && exit 1; \
       fi'
     
