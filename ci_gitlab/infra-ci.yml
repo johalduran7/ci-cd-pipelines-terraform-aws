@@ -24,6 +24,11 @@ validate_version:
       if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then 
         echo "Error: No matching tag ${TAG} found." && exit 1;  
       fi
+    - 'echo "TAG=${TAG}" >> variables.env'
+    - 'echo "VERSION=${VERSION}" >> variables.env'
+  artifacts:
+    reports:
+      dotenv: variables.env 
 
 validate_existing_infra_tags:
   stage: validate_existing_infra_tags
