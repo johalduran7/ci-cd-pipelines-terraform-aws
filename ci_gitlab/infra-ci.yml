@@ -1,5 +1,6 @@
 stages:
   - validate_version
+  - validate_existing_infra_tags
 
 variables:
   TF_VERSION: "1.9.5"
@@ -23,4 +24,17 @@ validate_version:
       if ! git fetch --tags || ! git tag | grep -q "^${TAG}$"; then 
         echo "Error: No matching tag ${TAG} found." && exit 1;  
       fi
-    
+
+validate_existing_infra_tags:
+  stage: validate_existing_infra_tags
+  needs: [validate_version]
+  script:
+    - 'echo TAG on second stage: ${TAG}'
+    - 'export AWS_REGION=$(grep "^${CI_COMMIT_REF_NAME}_" app/.env | sed -E "s/^${CI_COMMIT_REF_NAME}_//")'
+    - 'export CURRENT_INFRA_VERSION=$(aws ssm get-parameter --name "/app/${CI_COMMIT_REF_NAME}/infrastructure_version" --query "Parameter.Value" --output text || echo "")'
+    - 'echo AWS_REGION: ${AWS_REGION}'
+    - 'echo CURRENT_INFRA_VERSION: ${CURRENT_INFRA_VERSION}'
+    #- if [ "${VERSION}" = "${CURRENT_INFRA_VERSION}" ]; then echo "version_exists=true" > version_exists.txt; else echo "version_exists=false" > version_exists.txt; fi
+  #artifacts:
+  #  paths:
+  #    - version_exists.txt
