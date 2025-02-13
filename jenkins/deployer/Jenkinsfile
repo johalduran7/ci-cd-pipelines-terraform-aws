@@ -69,7 +69,7 @@ pipeline {
 
                     // Split the content into lines
                     def envLines = envFileContent.split('\n')
-
+                    println("Environment: ${ENVIRONMENT}")
                     ENV_PREFIX=ENVIRONMENT.toUpperCase()
                     println("${ENV_PREFIX}")
 
@@ -126,7 +126,7 @@ pipeline {
                     ).trim()
                     VERSION="${versionOutput}"
                     println("VERSION: ${VERSION}")
-                    println("ENVIRONMENT: ${VERSION}")
+                    println("ENVIRONMENT: ${ENVIRONMENT}")
 
                     sh "ls"
                     TAG = "${ENVIRONMENT}-app-v${VERSION}"
