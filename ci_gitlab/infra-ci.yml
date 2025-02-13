@@ -34,6 +34,7 @@ validate_existing_infra_tags:
     - 'export CURRENT_INFRA_VERSION=$(aws ssm get-parameter --name "/app/${CI_COMMIT_REF_NAME}/infrastructure_version" --query "Parameter.Value" --output text || echo "")'
     - 'echo AWS_REGION: ${AWS_REGION}'
     - 'echo CURRENT_INFRA_VERSION: ${CURRENT_INFRA_VERSION}'
+    - 'echo VERSION: ${VERSION}'
     #- if [ "${VERSION}" = "${CURRENT_INFRA_VERSION}" ]; then echo "version_exists=true" > version_exists.txt; else echo "version_exists=false" > version_exists.txt; fi
   #artifacts:
   #  paths:
