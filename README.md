@@ -1,11 +1,15 @@
 # Infrastructure and Deployment Automation
 
 ## Overview
-This repository automates the provisioning and deployment of a Node.js application on AWS using Terraform and GitHub Actions.
+This repository automates the provisioning and deployment of a Node.js application on AWS using Terraform and GitHub Actions/Jenkins.
 
 ### Repository Structure
-- **Terraform Pipeline** [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml)
-- **Deployer Pipeline** [`.github/workflows/deployer.yml`](.github/workflows/deployer.yml)
+- **Infrastructure Pipeline**
+  - [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml)
+  - [`.github/jenkins/deployer/Jenkinsfile`](.github/jenkins/deployer/Jenkinsfile)
+- **Deployer Pipeline**
+  - [`.github/workflows/deployer.yml`](.github/workflows/deployer.yml)
+  - [`.github/jenkins/infrastructure/Jenkinsfile`](.github/jenkins/infrastructure/Jenkinsfile)
 - **Infrastructure Code** [`./app/terraform/`](./app/terraform/)
 - **Application Code** [`./app/src/`](./app/src/)
 
@@ -64,6 +68,9 @@ This repository automates the provisioning and deployment of a Node.js applicati
 
 ### Checking deployment on AWS
 ![Setup](./resources/third_part_gif_portfolio.gif)
+
+### Jenkins Deployer and Infrastructure pipelines
+![Setup](./resources/jenkin_gif_portfolio.gif)
 
 ---
 ## Future Improvements
