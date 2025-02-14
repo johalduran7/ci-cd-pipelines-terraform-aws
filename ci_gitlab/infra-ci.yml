@@ -58,13 +58,6 @@ before_script:
   #   rm terraform.zip;
   # - apt-get update && apt-get install -y jq
 
-  # - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-  # - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-  #- aws configure set region ${AWS_DEFAULT_REGION}
-  # - export PATH=$PATH:/usr/local/bin
-  # - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-  # - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-  # - export TF_API_TOKEN=${TF_API_TOKEN}
 
 setup:
   stage: setup
@@ -141,13 +134,18 @@ validate_existing_infra_tags:
         echo "Different version detected (${infra_version}). Deploying new tag: ${TAG}"
         echo "version_exists=false" >> variables.env
       fi
+  artifacts:
+    reports:
+      dotenv: variables.env 
 
 validate_terraform_config:
   stage: validate_terraform_config
   needs: [validate_existing_infra_tags]
   script:
-
     - 'git checkout "${TAG}"'
+    - ls
+    - pwd
+    - cd app/terraform/
     - terraform init
     - terraform fmt -check
     - terraform validate
