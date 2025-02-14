@@ -39,6 +39,11 @@ load_env_variables:
   script:
     - 'ENVIRONMENT_UPPERCASE=$(echo "${ENVIRONMENT}" | tr "[:lower:]" "[:upper:]")'
     - 'grep "^${ENVIRONMENT_UPPERCASE}_" app/.env | sed -E "s/^${ENVIRONMENT_UPPERCASE}_//" >> variables.env'
+    - 'echo "ENVIRONMENT_UPPERCASE: ${ENVIRONMENT_UPPERCASE}"'
+    - 'echo "ENVIRONMENT: ${ENVIRONMENT}"'
+    - 'echo "TAG: ${TAG}"'
+    - 'echo "aws_region: ${aws_region}"'
+    - 'cat variables.env'
 
 
 validate_existing_infra_tags:
