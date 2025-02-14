@@ -12,7 +12,7 @@ image: amazon/aws-cli:latest #amazon/aws-cli # I'm not using an image just yet
 cache:
   key: "$TF_VERSION"
   paths:
-    - "$TF_CACHE_DIR"ss
+    - "$TF_CACHE_DIR"
 
 before_script:
   - yum update -y
