@@ -102,6 +102,8 @@ validate_version:
     - 'echo "VERSION=${VERSION}" >> variables.env'
     - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
   artifacts:
+    paths:
+    - variables.env  # Ensure `variables.env` persis
     reports:
       dotenv: variables.env 
   cache:
@@ -127,11 +129,13 @@ load_env_variables:
     - 'echo "TAG: ${TAG}"'
     - env
     - 'echo "aws_region: ${aws_region}"' # it will be shown in the next stage
-    - 'echo "TAG=${TAG}" >> variables.env'
+    # - 'echo "TAG=${TAG}" >> variables.env'
     - 'echo "VERSION=${VERSION}" >> variables.env'
     - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
     - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
   artifacts:
+    paths:
+      - variables.env  
     reports:
       dotenv: variables.env 
   cache:
@@ -150,6 +154,7 @@ validate_existing_infra_tags:
   script:
     - env
     - 'echo TAG on second stage: ${TAG}'
+    - ls -lah
     - 'echo "AWS Region: ${aws_region}"'
     - |
       infra_version=$(aws ssm get-parameter --region "${aws_region}" \
@@ -167,6 +172,8 @@ validate_existing_infra_tags:
         echo "version_exists=false" >> variables.env
       fi
   artifacts:
+    paths:
+      - variables.env  
     reports:
       dotenv: variables.env 
   cache:
