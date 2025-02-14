@@ -7,43 +7,17 @@ stages:
 
 variables:
   TF_VERSION: "1.9.5"
-  CACHE_DIR: "/cache"
+
 
 #image: amazon/aws-cli:latest #amazon/aws-cli # I'm not using an image just yet
 cache:
-  key: "${TF_VERSION}"
+  key: "terraform-aws-cli-cache"
   paths:
-    - "${CACHE_DIR}/aws-cli"
-    - "${CACHE_DIR}/terraform"
-
-before_script:
-  - apt-get update && apt-get install -y unzip curl jq
-  - mkdir -p $CACHE_DIR
-
-  # Install AWS CLI if not cached
-  - |
-    if [ ! -f "${CACHE_DIR}/aws-cli/bin/aws" ]; then
-      echo "Installing AWS CLI..."
-      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-      unzip awscliv2.zip
-      ./aws/install --install-dir ${CACHE_DIR}/aws-cli --bin-dir ${CACHE_DIR}/aws-cli/bin
-      rm -rf awscliv2.zip aws
-    fi
-  - export PATH="${CACHE_DIR}/aws-cli/bin:$PATH"
-
-
-  # Install Terraform if not cached
-  - |
-    if [ ! -f "${CACHE_DIR}/terraform" ]; then
-      echo "Installing Terraform..."
-      curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip
-      unzip terraform.zip
-      mv terraform $CACHE_DIR/terraform
-      rm terraform.zip
-    fi
-  - ln -sf $CACHE_DIR/terraform /usr/local/bin/terraform
-
-
+    - .terraform/  # Cache Terraform modules
+    - ~/.aws/      # Cache AWS CLI configurations
+    - /usr/local/bin/aws
+    - /usr/local/bin/terraform
+  policy: pull-push
 
   # - > # Installing AWS CLI
   #   - apt-get update && apt-get install -y jq
@@ -61,15 +35,36 @@ before_script:
 
 setup:
   stage: setup
+  before_script:
+    - apt-get update && apt-get install -y unzip curl jq
+
+    # Install AWS CLI if not cached
+    - |
+      if [ ! -f "${CACHE_DIR}/aws-cli/bin/aws" ]; then
+        echo "Installing AWS CLI..."
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        ./aws/install --install-dir ${CACHE_DIR}/aws-cli --bin-dir ${CACHE_DIR}/aws-cli/bin
+        rm -rf awscliv2.zip aws
+      fi
+
+    # Install Terraform if not cached
+    - |
+      if [ ! -f "${CACHE_DIR}/terraform" ]; then
+        echo "Installing Terraform..."
+        curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip
+        unzip terraform.zip
+        mv terraform $CACHE_DIR/terraform
+        rm terraform.zip
+      fi
+
   #image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+
   script:
     #- aws --version
     - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
     - terraform -version
-  artifacts:
-    paths:
-      - "${CACHE_DIR}"
-    expire_in: 1d  # Cache for 1 day
+
 
 validate_version:
   stage: validate_version
