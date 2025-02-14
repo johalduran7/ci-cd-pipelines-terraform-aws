@@ -8,7 +8,7 @@ stages:
 variables:
   TF_VERSION: "1.9.5"
 
-image: hashicorp/terraform:latest #amazon/aws-cli # I'm not using an image just yet
+image: hashicorp/terraform:light #amazon/aws-cli # I'm not using an image just yet
 cache: # caching it for subsequent runs
   key: aws-cli-cache
   paths:
@@ -17,6 +17,7 @@ cache: # caching it for subsequent runs
 
 before_script:
   - > # Installing AWS CLI
+    - apt-get update && apt-get install -y jq
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
     unzip awscliv2.zip;
     ./aws/install;
