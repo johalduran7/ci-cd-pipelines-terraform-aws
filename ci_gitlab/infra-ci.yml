@@ -37,7 +37,7 @@ load_env_variables:
   stage: load_env_variables
   needs: [validate_version]
   script:
-    - 'ENVIRONMENT_UPPERCASE=$(echo "${{ github.ref_name }}" | tr "[:lower:]" "[:upper:]")'
+    - 'ENVIRONMENT_UPPERCASE=$(echo "${ENVIRONMENT}" | tr "[:lower:]" "[:upper:]")'
     - 'grep "^${ENVIRONMENT_UPPERCASE}_" app/.env | sed -E "s/^${ENVIRONMENT_UPPERCASE}_//" >> variables.env'
 
 
