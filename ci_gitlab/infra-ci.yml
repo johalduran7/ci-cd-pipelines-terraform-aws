@@ -76,7 +76,9 @@ load_env_variables:
     - 'echo "TAG=${TAG}" >> variables.env'
     - 'echo "VERSION=${VERSION}" >> variables.env'
     - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
-
+  artifacts:
+    reports:
+      dotenv: variables.env 
 
 validate_existing_infra_tags:
   stage: validate_existing_infra_tags
