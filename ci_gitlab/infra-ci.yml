@@ -69,13 +69,13 @@ setup:
     # - terraform -version
     - ls /usr/local/bin/
   cache:
-  key: "terraform-aws-cli-cache"
-  paths:
-    - .terraform/  # Cache Terraform modules
-    - ~/.aws/      # Cache AWS CLI configurations
-    - /usr/local/bin/aws
-    - /usr/local/bin/terraform
-  policy: pull-push
+    key: "terraform-aws-cli-cache"
+    paths:
+      - .terraform/  # Cache Terraform modules
+      - ~/.aws/      # Cache AWS CLI configurations
+      - /usr/local/bin/aws
+      - /usr/local/bin/terraform
+    policy: pull-push
 
 
 validate_version:
