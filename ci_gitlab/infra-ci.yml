@@ -40,6 +40,7 @@ before_script:
 validate_version:
   stage: validate_version
   script:
+    - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
     - env
     - 'echo "Current branch: ${CI_COMMIT_REF_NAME}"'
     - echo "Available tags:" && git tag
