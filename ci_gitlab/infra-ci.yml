@@ -142,6 +142,7 @@ validate_terraform_config:
   stage: validate_terraform_config
   needs: [validate_existing_infra_tags]
   script:
+    - "version_exists: ${version_exists}"
     - 'git checkout "${TAG}"'
     - ls
     - pwd
@@ -149,5 +150,5 @@ validate_terraform_config:
     - terraform init
     - terraform fmt -check
     - terraform validate
-  rules:
-    - if: $version_exists == "false"  
+  # rules:
+  #   - if: $version_exists == "false"  
