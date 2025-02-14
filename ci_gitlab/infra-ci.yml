@@ -62,8 +62,9 @@ setup:
 
   script:
     #- aws --version
-    - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
-    - terraform -version
+    # - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
+    # - terraform -version
+    - ls
 
 
 validate_version:
