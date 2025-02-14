@@ -42,7 +42,7 @@ load_env_variables:
     - 'echo "ENVIRONMENT_UPPERCASE: ${ENVIRONMENT_UPPERCASE}"'
     - 'echo "ENVIRONMENT: ${ENVIRONMENT}"'
     - 'echo "TAG: ${TAG}"'
-    - 'echo "aws_region: ${aws_region}"'
+    - 'echo "aws_region: $aws_region"'
     - 'cat variables.env'
 
 
