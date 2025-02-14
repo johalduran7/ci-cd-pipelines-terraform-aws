@@ -37,9 +37,9 @@ setup:
   stage: setup
   before_script:
     - apt-get update && apt-get install -y unzip curl jq
-    
-    - if [ ! -f "/usr/local/bin/aws" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install; fi
-    - if [ ! -f "/usr/local/bin/terraform" ]; then curl -O https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && unzip terraform_${TF_VERSION}_linux_amd64.zip && sudo mv terraform /usr/local/bin/; fi
+
+    - if [ ! -f "/usr/local/bin/aws" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install; fi
+    - if [ ! -f "/usr/local/bin/terraform" ]; then curl -O https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && unzip terraform_${TF_VERSION}_linux_amd64.zip && mv terraform /usr/local/bin/; fi
 
     # # Install AWS CLI if not cached
     # - |
