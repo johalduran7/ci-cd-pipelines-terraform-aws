@@ -144,9 +144,11 @@ validate_terraform_config:
   needs: [validate_existing_infra_tags]
   script:
     - 'echo "version_exists: ${version_exists}"'
-    - 'git checkout "${TAG}"'
+    - 'echo "TAG: ${TAG}"'
+    - 'git --version'
     - ls
     - pwd
+    - 'git checkout "${TAG}"'
     - cd app/terraform/
     - terraform init
     - terraform fmt -check
