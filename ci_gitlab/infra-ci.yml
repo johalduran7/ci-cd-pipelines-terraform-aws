@@ -69,6 +69,7 @@ setup:
 
 validate_version:
   stage: validate_version
+  needs: [setup]
   script:
     - aws --version
     - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
@@ -142,7 +143,7 @@ validate_terraform_config:
   stage: validate_terraform_config
   needs: [validate_existing_infra_tags]
   script:
-    - "version_exists: ${version_exists}"
+    - 'echo "version_exists: ${version_exists}"'
     - 'git checkout "${TAG}"'
     - ls
     - pwd
