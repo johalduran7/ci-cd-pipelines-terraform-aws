@@ -2,6 +2,7 @@ stages:
   - validate_version
   - load_env_variables
   - validate_existing_infra_tags
+  - validate_terraform_config
 
 variables:
   TF_VERSION: "1.9.5"
@@ -36,7 +37,7 @@ load_env_variables:
   stage: load_env_variables
   needs: [validate_version]
   script:
-    - 'ENVIRONMENT_UPPERCASE=$(echo "${{ github.ref_name }}" | tr "[:lower:]" "[:upper:]"")'
+    - 'ENVIRONMENT_UPPERCASE=$(echo "${{ github.ref_name }}" | tr "[:lower:]" "[:upper:]")'
     - 'grep "^${ENVIRONMENT_UPPERCASE}_" app/.env | sed -E "s/^${ENVIRONMENT_UPPERCASE}_//" >> variables.env'
 
 
@@ -60,4 +61,14 @@ validate_existing_infra_tags:
     - 'echo "CURRENT_INFRA_VERSION=${CURRENT_INFRA_VERSION}" >> variables.env'
     - 'echo "version_exists=${version_exists}" >> variables.env'
 
+validate_terraform_config:
+  stage: validate_terraform_config
+  needs: [validate_existing_infra_tags]
+  script:
 
+    - 'git checkout "${TAG}"'
+    - terraform init
+    - terraform fmt -check
+    - terraform validate
+  rules:
+    - if: '${version_exists} == "false"'  
