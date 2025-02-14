@@ -6,8 +6,8 @@ stages:
 
 variables:
   TF_VERSION: "1.9.5"
-  AWS_CLI_PATH: "/usr/local/bin/aws"
-  TERRAFORM_PATH: "/usr/local/bin/terraform"
+  # AWS_CLI_PATH: "/usr/local/bin/aws"
+  # TERRAFORM_PATH: "/usr/local/bin/terraform"
 
 # cache:
 #   key: tools
@@ -18,7 +18,7 @@ variables:
 #     - ~/.terraform.d
 image: amazon/aws-cli
 before_script:
-  - apt-get update && apt-get install -y jq
+  #- apt-get update && apt-get install -y jq
   - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
   - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
   - export TF_API_TOKEN=${TF_API_TOKEN}
