@@ -195,6 +195,9 @@ validate_terraform_config:
     - 'git --version'
     - 'git tag'
     - 'git branch'
+    - 'git checkout ${ENVIRONMENT}'
+    - 'git tag'
+    - 'git fetch --tags'
     - ls
     - pwd
     - env
