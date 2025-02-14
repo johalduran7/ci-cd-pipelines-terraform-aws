@@ -17,19 +17,20 @@ variables:
 #     - /usr/local/aws-cli
 #     - /usr/local/bin/terraform
 #     - ~/.terraform.d
-#image: public.ecr.aws/aws-cli/aws-cli
+
+#image: amazon/aws-cli # I'm not using an image just yet
 before_script:
-  # - > # Installing AWS CLI
-  #   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
-  #   unzip awscliv2.zip;
-  #   ./aws/install;
-  #   rm -rf awscliv2.zip aws;
-  # - > # Installing Terraform
-  #   curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
-  #   unzip terraform.zip;
-  #   mv terraform /usr/local/bin/;
-  #   rm terraform.zip;
-  # - apt-get update && apt-get install -y jq
+  - > # Installing AWS CLI
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
+    unzip awscliv2.zip;
+    ./aws/install;
+    rm -rf awscliv2.zip aws;
+  - > # Installing Terraform
+    curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
+    unzip terraform.zip;
+    mv terraform /usr/local/bin/;
+    rm terraform.zip;
+  - apt-get update && apt-get install -y jq
 
   # - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
   # - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
@@ -41,10 +42,11 @@ before_script:
 
 deploy:
   stage: deploy
-  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  #image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
   script:
     - aws --version
     - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
+    - terraform -version
 
 validate_version:
   stage: validate_version
