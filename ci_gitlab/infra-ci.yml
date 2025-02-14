@@ -9,31 +9,31 @@ variables:
   AWS_CLI_PATH: "/usr/local/bin/aws"
   TERRAFORM_PATH: "/usr/local/bin/terraform"
 
-cache:
-  key: tools
-  paths:
-    - /usr/local/bin/aws
-    - /usr/local/aws-cli
-    - /usr/local/bin/terraform
-    - ~/.terraform.d
+# cache:
+#   key: tools
+#   paths:
+#     - /usr/local/bin/aws
+#     - /usr/local/aws-cli
+#     - /usr/local/bin/terraform
+#     - ~/.terraform.d
 
-before_script:
-  - apt-get update && apt-get install -y jq
-  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-  - export TF_API_TOKEN=$TF_API_TOKEN
-  - > # Installing AWS CLI
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
-    unzip awscliv2.zip;
-    sudo ./aws/install;
-    rm -rf awscliv2.zip aws;
-  - > # Installing Terraform
-    curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
-    unzip terraform.zip;
-    sudo mv terraform /usr/local/bin/;
-    rm terraform.zip;
+# before_script:
+#   - apt-get update && apt-get install -y jq
+#   - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+#   - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+#   - export TF_API_TOKEN=$TF_API_TOKEN
+#   - > # Installing AWS CLI
+#     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
+#     unzip awscliv2.zip;
+#     sudo ./aws/install;
+#     rm -rf awscliv2.zip aws;
+#   - > # Installing Terraform
+#     curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
+#     unzip terraform.zip;
+#     sudo mv terraform /usr/local/bin/;
+#     rm terraform.zip;
   
-  - export PATH=$PATH:/usr/local/bin
+#   - export PATH=$PATH:/usr/local/bin
 
 
 initialize:
