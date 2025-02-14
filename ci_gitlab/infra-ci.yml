@@ -114,6 +114,8 @@ validate_version:
 load_env_variables:
   stage: load_env_variables
   needs: [validate_version]
+  before_script:
+  - export PATH="${BIN_DIR}:$PATH"
   script:
     - env
     - 'echo TAG on second stage: ${TAG}'
@@ -123,10 +125,11 @@ load_env_variables:
     - 'echo "ENVIRONMENT: ${ENVIRONMENT}"'
     - 'echo "TAG: ${TAG}"'
     - env
-    - 'echo "aws_region: ${aws_region}"'
+    - 'echo "aws_region: ${aws_region}"' # it will be shown in the next stage
     - 'echo "TAG=${TAG}" >> variables.env'
     - 'echo "VERSION=${VERSION}" >> variables.env'
     - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
+    - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
   artifacts:
     reports:
       dotenv: variables.env 
@@ -140,6 +143,8 @@ load_env_variables:
 validate_existing_infra_tags:
   stage: validate_existing_infra_tags
   needs: [load_env_variables]
+  before_script:
+  - export PATH="${BIN_DIR}:$PATH"
   script:
     - env
     - 'echo TAG on second stage: ${TAG}'
@@ -172,6 +177,8 @@ validate_existing_infra_tags:
 validate_terraform_config:
   stage: validate_terraform_config
   needs: [validate_existing_infra_tags]
+  before_script:
+  - export PATH="${BIN_DIR}:$PATH"
   script:
     - 'echo "version_exists: ${version_exists}"'
     - 'echo "TAG: ${TAG}"'
