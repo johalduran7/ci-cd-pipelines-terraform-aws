@@ -18,7 +18,7 @@ before_script:
   - yum update -y
   - yum install -y unzip curl
   - mkdir -p $TF_CACHE_DIR
-  - if [ ! -f "$TF_CACHE_DIR/terraform" ]; then
+  - if [ ! -f "${TF_CACHE_DIR}/terraform" ]; then
       curl -fsSL -o terraform.zip https://releases.hashicorp.com/terraform/$TF_VERSION/terraform_${TF_VERSION}_linux_amd64.zip &&
       unzip terraform.zip &&
       mv terraform $TF_CACHE_DIR/terraform &&
