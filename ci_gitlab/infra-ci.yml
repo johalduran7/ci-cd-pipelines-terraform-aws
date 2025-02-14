@@ -107,11 +107,9 @@ validate_version:
   cache:
     key: "terraform-aws-cli-cache"
     paths:
-      - .terraform/  # Cache Terraform modules
-      - ~/.aws/      # Cache AWS CLI configurations
-      - /usr/local/bin/aws
-      - /usr/local/bin/terraform
-    policy: pull-push
+      - .terraform/  
+      - ${BIN_DIR}/  
+    policy: pull-push  
 
 load_env_variables:
   stage: load_env_variables
@@ -131,7 +129,13 @@ load_env_variables:
     - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
   artifacts:
     reports:
-      dotenv: variables2.env 
+      dotenv: variables.env 
+  cache:
+    key: "terraform-aws-cli-cache"
+    paths:
+      - .terraform/  
+      - ${BIN_DIR}/  
+    policy: pull-push  
 
 validate_existing_infra_tags:
   stage: validate_existing_infra_tags
@@ -157,7 +161,13 @@ validate_existing_infra_tags:
       fi
   artifacts:
     reports:
-      dotenv: variables3.env 
+      dotenv: variables.env 
+  cache:
+    key: "terraform-aws-cli-cache"
+    paths:
+      - .terraform/  
+      - ${BIN_DIR}/  
+    policy: pull-push  
 
 validate_terraform_config:
   stage: validate_terraform_config
@@ -176,3 +186,9 @@ validate_terraform_config:
     - terraform validate
   # rules:
   #   - if: $version_exists == "false"  
+  cache:
+    key: "terraform-aws-cli-cache"
+    paths:
+      - .terraform/  
+      - ${BIN_DIR}/  
+    policy: pull-push  
