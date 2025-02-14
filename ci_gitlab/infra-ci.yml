@@ -7,30 +7,20 @@ stages:
 
 variables:
   TF_VERSION: "1.9.5"
-  # AWS_CLI_PATH: "/usr/local/bin/aws"
-  # TERRAFORM_PATH: "/usr/local/bin/terraform"
 
-# cache:
-#   key: tools
-#   paths:
-#     - /usr/local/bin/aws
-#     - /usr/local/aws-cli
-#     - /usr/local/bin/terraform
-#     - ~/.terraform.d
-
-#image: amazon/aws-cli # I'm not using an image just yet
-before_script:
-  - > # Installing AWS CLI
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
-    unzip awscliv2.zip;
-    ./aws/install;
-    rm -rf awscliv2.zip aws;
-  - > # Installing Terraform
-    curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
-    unzip terraform.zip;
-    mv terraform /usr/local/bin/;
-    rm terraform.zip;
-  - apt-get update && apt-get install -y jq
+image: cytopia/terraform-aws:latest #amazon/aws-cli # I'm not using an image just yet
+# before_script:
+#   - > # Installing AWS CLI
+#     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
+#     unzip awscliv2.zip;
+#     ./aws/install;
+#     rm -rf awscliv2.zip aws;
+#   - > # Installing Terraform
+#     curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
+#     unzip terraform.zip;
+#     mv terraform /usr/local/bin/;
+#     rm terraform.zip;
+#   - apt-get update && apt-get install -y jq
 
   # - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
   # - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
@@ -99,7 +89,6 @@ validate_existing_infra_tags:
   script:
     - env
     - 'echo TAG on second stage: ${TAG}'
-    - 'aws ssm get-parameter --region ${aws_region} --name "/app/${ENVIRONMENT}/infrastructure_version" --query "Parameter.Value" --output text 2>&1'
     - 'echo "AWS Region: ${aws_region}"'
     - |
       infra_version=$(aws ssm get-parameter --region "${aws_region}" \
