@@ -130,8 +130,8 @@ load_env_variables:
     - env
     - 'echo "aws_region: ${aws_region}"' # it will be shown in the next stage
     # - 'echo "TAG=${TAG}" >> variables.env'
-    - 'echo "VERSION=${VERSION}" >> variables.env'
-    - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
+    # - 'echo "VERSION=${VERSION}" >> variables.env'
+    # - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
     - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
   artifacts:
     paths:
@@ -193,16 +193,23 @@ validate_terraform_config:
     - 'echo "version_exists: ${version_exists}"'
     - 'echo "TAG: ${TAG}"'
     - 'git --version'
+    - 'git tag'
+    - 'git branch'
     - ls
     - pwd
     - env
-    - 'git checkout "${TAG}"'
+    - 'git checkout ${TAG}'
     - cd app/terraform/
     - terraform init
     - terraform fmt -check
     - terraform validate
   # rules:
-  #   - if: $version_exists == "false"  
+  #   - if: $version_exists == "false" 
+  artifacts:
+    paths:
+      - variables.env  
+    reports:
+      dotenv: variables.env  
   cache:
     key: "terraform-aws-cli-cache"
     paths:
