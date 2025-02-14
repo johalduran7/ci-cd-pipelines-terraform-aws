@@ -30,7 +30,7 @@ before_script:
       rm -rf awscliv2.zip aws
     fi
   - export PATH="${CACHE_DIR}/aws-cli/bin:$PATH"
-  - aws --version
+
 
   # Install Terraform if not cached
   - |
@@ -42,7 +42,7 @@ before_script:
       rm terraform.zip
     fi
   - ln -sf $CACHE_DIR/terraform /usr/local/bin/terraform
-  - terraform --version
+
 
 
   # - > # Installing AWS CLI
