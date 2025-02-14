@@ -116,6 +116,7 @@ load_env_variables:
   needs: [validate_version]
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
+  - source variables.env  # Load persisted variable
   script:
     - env
     - 'echo TAG on second stage: ${TAG}'
@@ -145,6 +146,7 @@ validate_existing_infra_tags:
   needs: [load_env_variables]
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
+  - source variables.env
   script:
     - env
     - 'echo TAG on second stage: ${TAG}'
@@ -179,6 +181,7 @@ validate_terraform_config:
   needs: [validate_existing_infra_tags]
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
+  - source variables.env
   script:
     - 'echo "version_exists: ${version_exists}"'
     - 'echo "TAG: ${TAG}"'
