@@ -110,7 +110,7 @@ load_env_variables:
     - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
   artifacts:
     reports:
-      dotenv: variables.env 
+      dotenv: variables2.env 
 
 validate_existing_infra_tags:
   stage: validate_existing_infra_tags
@@ -136,7 +136,7 @@ validate_existing_infra_tags:
       fi
   artifacts:
     reports:
-      dotenv: variables.env 
+      dotenv: variables3.env 
 
 validate_terraform_config:
   stage: validate_terraform_config
