@@ -37,26 +37,29 @@ setup:
   stage: setup
   before_script:
     - apt-get update && apt-get install -y unzip curl jq
+    
+    - if [ ! -f "/usr/local/bin/aws" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install; fi
+    - if [ ! -f "/usr/local/bin/terraform" ]; then curl -O https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && unzip terraform_${TF_VERSION}_linux_amd64.zip && sudo mv terraform /usr/local/bin/; fi
 
-    # Install AWS CLI if not cached
-    - |
-      if [ ! -f "${CACHE_DIR}/aws-cli/bin/aws" ]; then
-        echo "Installing AWS CLI..."
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        ./aws/install --install-dir ${CACHE_DIR}/aws-cli --bin-dir ${CACHE_DIR}/aws-cli/bin
-        rm -rf awscliv2.zip aws
-      fi
+    # # Install AWS CLI if not cached
+    # - |
+    #   if [ ! -f "${CACHE_DIR}/aws-cli/bin/aws" ]; then
+    #     echo "Installing AWS CLI..."
+    #     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    #     unzip awscliv2.zip
+    #     ./aws/install --install-dir ${CACHE_DIR}/aws-cli --bin-dir ${CACHE_DIR}/aws-cli/bin
+    #     rm -rf awscliv2.zip aws
+    #   fi
 
-    # Install Terraform if not cached
-    - |
-      if [ ! -f "${CACHE_DIR}/terraform" ]; then
-        echo "Installing Terraform..."
-        curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip
-        unzip terraform.zip
-        mv terraform $CACHE_DIR/terraform
-        rm terraform.zip
-      fi
+    # # Install Terraform if not cached
+    # - |
+    #   if [ ! -f "${CACHE_DIR}/terraform" ]; then
+    #     echo "Installing Terraform..."
+    #     curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip
+    #     unzip terraform.zip
+    #     mv terraform $CACHE_DIR/terraform
+    #     rm terraform.zip
+    #   fi
 
   #image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
 
