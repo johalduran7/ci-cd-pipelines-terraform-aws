@@ -67,7 +67,7 @@ setup:
     #- aws --version
     # - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
     # - terraform -version
-    - ls
+    - ls /usr/local/bin/
   cache:
   key: "terraform-aws-cli-cache"
   paths:
@@ -82,6 +82,7 @@ validate_version:
   stage: validate_version
   needs: [setup]
   script:
+    - ls /usr/local/bin/
     - aws --version
     - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
     - env
