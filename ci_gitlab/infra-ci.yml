@@ -71,4 +71,4 @@ validate_terraform_config:
     - terraform fmt -check
     - terraform validate
   rules:
-    - if: '${version_exists} == "false"'  
+    - if: $version_exists == "false"  
