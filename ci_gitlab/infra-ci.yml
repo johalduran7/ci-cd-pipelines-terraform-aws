@@ -1,4 +1,5 @@
 stages:
+  - deploy
   - validate_version
   - load_env_variables
   - validate_existing_infra_tags
@@ -9,36 +10,41 @@ variables:
   # AWS_CLI_PATH: "/usr/local/bin/aws"
   # TERRAFORM_PATH: "/usr/local/bin/terraform"
 
-cache:
-  key: tools
-  paths:
-    - /usr/local/bin/aws
-    - /usr/local/aws-cli
-    - /usr/local/bin/terraform
-    - ~/.terraform.d
+# cache:
+#   key: tools
+#   paths:
+#     - /usr/local/bin/aws
+#     - /usr/local/aws-cli
+#     - /usr/local/bin/terraform
+#     - ~/.terraform.d
 #image: public.ecr.aws/aws-cli/aws-cli
 before_script:
-  - > # Installing AWS CLI
-    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
-    unzip awscliv2.zip;
-    ./aws/install;
-    rm -rf awscliv2.zip aws;
+  # - > # Installing AWS CLI
+  #   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
+  #   unzip awscliv2.zip;
+  #   ./aws/install;
+  #   rm -rf awscliv2.zip aws;
   # - > # Installing Terraform
   #   curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
   #   unzip terraform.zip;
   #   mv terraform /usr/local/bin/;
   #   rm terraform.zip;
-  - apt-get update && apt-get install -y jq
+  # - apt-get update && apt-get install -y jq
 
-  - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-  - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
+  # - aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
+  # - aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
   #- aws configure set region ${AWS_DEFAULT_REGION}
   # - export PATH=$PATH:/usr/local/bin
   # - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
   # - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
   # - export TF_API_TOKEN=${TF_API_TOKEN}
 
-
+deploy:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
+  script:
+    - aws --version
+    - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
 
 validate_version:
   stage: validate_version
