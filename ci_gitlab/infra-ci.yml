@@ -37,6 +37,8 @@ load_env_variables:
   stage: load_env_variables
   needs: [validate_version]
   script:
+    - env
+    - 'cat variables.env'
     - 'echo TAG on second stage: ${TAG}'
     - 'ENVIRONMENT_UPPERCASE=$(echo "${ENVIRONMENT}" | tr "[:lower:]" "[:upper:]")'
     - 'grep "^${ENVIRONMENT_UPPERCASE}_" app/.env | sed -E "s/^${ENVIRONMENT_UPPERCASE}_//" >> variables.env'
