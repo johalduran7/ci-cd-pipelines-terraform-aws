@@ -3,6 +3,7 @@ stages:
   - validate_version
   - load_env_variables
   - validate_existing_infra_tags
+  - load_terraform_variables
   - validate_terraform_config
 
 variables:
@@ -183,9 +184,40 @@ validate_existing_infra_tags:
       - ${BIN_DIR}/  
     policy: pull-push  
 
+load_terraform_variables:
+  stage: load_terraform_variables
+  needs: [validate_existing_infra_tags]
+  before_script:
+  - export PATH="${BIN_DIR}:$PATH"
+  - source variables.env
+  script:
+    - 'echo "TF_VAR_env=${ENVIRONMENT}" >> variables.env' 
+    - 'echo "TF_VAR_path_user_data=app/terraform/modules/asg/user_data.sh" >> variables.env' 
+    - 'echo "TF_VAR_infrastructure_version=${ENVIRONMENT}-infra-v${VERSION}" >> variables.env' 
+    - 'echo "TF_WORKSPACE=${ENVIRONMENT}" >> variables.env' 
+    - 'echo "TF_VAR_aws_region=${aws_region}" >> variables.env' 
+    - 'echo "TF_cidr_block=${cidr_block}" >> variables.env' 
+    - 'echo "TF_public_subnet_a_cidr=${public_subnet_a_cidr}" >> variables.env' 
+    - 'echo "TF_public_subnet_b_cidr=${public_subnet_b_cidr}" >> variables.env' 
+    - 'echo "TF_private_subnet_a_cidr=${private_subnet_a_cidr}" >> variables.env' 
+    - 'echo "TF_private_subnet_b_cidr=${private_subnet_b_cidr}" >> variables.env' 
+
+
+  artifacts:
+    paths:
+      - variables.env  
+    reports:
+      dotenv: variables.env  
+  cache:
+    key: "terraform-aws-cli-cache"
+    paths:
+      - .terraform/  
+      - ${BIN_DIR}/  
+    policy: pull-push  
+
 validate_terraform_config:
   stage: validate_terraform_config
-  needs: [validate_existing_infra_tags]
+  needs: [load_terraform_variables]
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
@@ -195,7 +227,6 @@ validate_terraform_config:
     - 'git --version'
     - 'git tag'
     - 'git branch'
-    - 'git checkout ${ENVIRONMENT}'
     - 'git tag'
     - 'git fetch --tags'
     - ls
