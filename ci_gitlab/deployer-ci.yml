@@ -161,7 +161,7 @@ validate_existing_ECR_tags:
 
 
 build_and_push:
-  image: docker:latest
+  #image: docker:latest
   stage: build_and_push
   needs: [validate_existing_ECR_tags]
   rules:
