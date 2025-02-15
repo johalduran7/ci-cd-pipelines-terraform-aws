@@ -40,9 +40,6 @@ setup:
 
 
   script:
-    #- aws --version
-    # - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
-    # - terraform -version
     - ls /usr/local/bin/
   cache:
     key: "terraform-aws-cli-cache"
