@@ -18,7 +18,11 @@ stages:
 
 variables:
   BIN_DIR: "${CI_PROJECT_DIR}/bin"  # Store binaries in project directory
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
 
+services:
+  - docker:dind 
 
 
 cache:
