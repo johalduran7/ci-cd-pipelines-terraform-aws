@@ -34,8 +34,8 @@ setup:
     - apt-get update && apt-get install -y unzip curl jq  
     - mkdir -p ${BIN_DIR} && export PATH="${BIN_DIR}:$PATH"
     - if [ ! -f "${BIN_DIR}/aws" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install --bin-dir ${BIN_DIR} --install-dir ${BIN_DIR}; fi
- 		- 'curl -fsSL https://get.docker.com | bash'
-	  - 'chmod 666 /var/run/docker.sock'   
+ 		# - 'curl -fsSL https://get.docker.com | bash'
+	  # - 'chmod 666 /var/run/docker.sock'   
   script:
     - ls /usr/local/bin/
   cache:
