@@ -53,6 +53,10 @@ setup:
     paths:
       - ${BIN_DIR}/  
     policy: pull-push  # Save & restore cache across jobs
+  
+  stage: test_stage
+  script:
+    - ls
 
 
 validate_version:
