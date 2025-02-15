@@ -307,6 +307,7 @@ terraform_apply:
     - 'echo "{ \"credentials\": { \"app.terraform.io\": { \"token\": \"${TF_API_TOKEN}\" } } }" > ~/.terraform.d/credentials.tfrc.json'
     - 'chmod 600 ~/.terraform.d/credentials.tfrc.json'
     - cd app/terraform/
+    - terraform init
     - terraform apply -auto-approve
   # rules:
   #   - if: $version_exists == "false" 
