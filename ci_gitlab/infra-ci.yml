@@ -194,7 +194,7 @@ validate_terraform_config:
   needs: [load_terraform_variables]
   rules:
     - exists:
-        - version.env
+        - variables.env
     - if: '$version_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
@@ -237,7 +237,7 @@ terraform_plan:
   needs: [validate_terraform_config]
   rules:
     - exists:
-        - version.env
+        - variables.env
     - if: '$version_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
@@ -270,7 +270,7 @@ terraform_apply:
   needs: [terraform_plan]
   rules:
     - exists:
-        - version.env
+        - variables.env
     - if: '$version_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
@@ -303,7 +303,7 @@ terraform_apply:
 #   needs: [terraform_apply]
   # rules:
   #   - exists:
-  #       - version.env
+  #       - variables.env
   #   - if: '$version_exists == "false"'
 #   before_script:
 #   - export PATH="${BIN_DIR}:$PATH"
