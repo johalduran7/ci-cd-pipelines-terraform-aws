@@ -33,7 +33,7 @@ cache:
 
 
 setup:
-  image: docker:latest
+  #image: docker:latest
   stage: setup
   before_script:
     - apt-get update && apt-get install -y unzip curl jq 
@@ -42,8 +42,6 @@ setup:
 
   script:
     - ls /usr/local/bin/
-    - docker ps
-    - docker --version
     - which jq
   cache:
     key: "docker-aws-cli-cache"
