@@ -159,6 +159,10 @@ validate_existing_infra_tags:
 load_terraform_variables:
   stage: load_terraform_variables
   needs: [validate_existing_infra_tags]
+  rules:
+    - exists:
+        - version.env
+    - if: '$version_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
