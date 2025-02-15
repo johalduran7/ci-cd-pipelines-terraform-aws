@@ -8,6 +8,7 @@ workflow:
 
 stages:
   - setup
+  - test_stage
   - validate_version
   - load_env_variables
   - validate_existing_ECR_tags
@@ -36,25 +37,24 @@ setup:
   image: docker:latest
   stage: setup
   before_script:
-    - apt-get update && apt-get install -y unzip curl jq #docker.io  
+    - apt-get update && apt-get install -y unzip curl jq 
     - mkdir -p ${BIN_DIR} && export PATH="${BIN_DIR}:$PATH"
     - if [ ! -f "${BIN_DIR}/aws" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install --bin-dir ${BIN_DIR} --install-dir ${BIN_DIR}; fi
-    # - 'curl -fsSL https://get.docker.com | bash'
-    # #- systemctl status docker
-    # - systemctl start docker
-    # - systemctl enable docker
-    # - 'chmod 666 /var/run/docker.sock'
+
   script:
     - ls /usr/local/bin/
     - docker ps
     - docker --version
+    - which jq
   cache:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
     policy: pull-push  # Save & restore cache across jobs
   
-
+  stage: test_stage
+  script:
+    - ls
 
 
 validate_version:
