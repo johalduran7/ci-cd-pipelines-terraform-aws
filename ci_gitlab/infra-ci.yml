@@ -203,6 +203,8 @@ load_terraform_variables:
     - 'echo "TF_public_subnet_b_cidr=${public_subnet_b_cidr}" >> variables.env' 
     - 'echo "TF_private_subnet_a_cidr=${private_subnet_a_cidr}" >> variables.env' 
     - 'echo "TF_private_subnet_b_cidr=${private_subnet_b_cidr}" >> variables.env' 
+    - 'echo "TF_VAR_ssh_public_key=${private_subnet_b_cidr}" >> variables.env' 
+    - 'echo TF_VAR_ssh_public_key=$(echo "${TF_VAR_ssh_public_key}" | base64 --decode) >> variables.env'
 
 
   artifacts:
@@ -233,7 +235,7 @@ validate_terraform_config:
     - 'git fetch --tags'
     - ls
     - pwd
-    - env
+    #- env
     - 'git checkout ${TAG}'
     - 'mkdir -p ~/.terraform.d'
     - 'echo "{ \"credentials\": { \"app.terraform.io\": { \"token\": \"${TF_API_TOKEN}\" } } }" > ~/.terraform.d/credentials.tfrc.json'
@@ -312,3 +314,9 @@ terraform_apply:
       - .terraform/  
       - ${BIN_DIR}/  
     policy: pull-push  
+
+trigger_deployer_pipeline:
+  stage: trigger_deployer_pipeline
+  trigger:
+    project: johalduran/another-repo  # Replace with the actual project path
+    branch: main  # Target branch
