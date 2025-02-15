@@ -124,7 +124,7 @@ validate_existing_ECR_tags:
     - |
       ECR_REPO_NAME=$(aws ssm get-parameter --region "${aws_region}" \
         --name "/app/${ENVIRONMENT}/ecr_repository_name" \
-        --query "Parameter.Value" --output text 2>&1 || echo "ParameterNotFound")
+        --query "Parameter.Value" --output text 2>/dev/null || echo "ParameterNotFound")
       
       if [[ "${ECR_REPO_NAME}" == "ParameterNotFound" ]]; then
         echo "No ECR registry for the app has been created yet. Parameter /app/${ENVIRONMENT}/ecr_repository_name doesn't exist: ${ECR_REPO_NAME}"
@@ -164,7 +164,7 @@ validate_existing_ECR_tags:
 
 
 build_and_push:
-  image: docker:20.10.21-alpine3.21
+  image: docker:latest
   stage: build_and_push
   needs: [validate_existing_ECR_tags]
   rules:
@@ -175,8 +175,16 @@ build_and_push:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
   script:
-    - docker ps
-    - docker --version
+    - 'aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com'
+    - 'ECR_REGISTRY="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com"'
+    - 'git fetch --tags'
+    - 'git checkout ${TAG}'
+    - cd app/src/
+    - 'docker build -t ${ECR_REPO_NAME}:${VERSION} .'
+    - 'docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
+    - 'docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
+    
+
 
   artifacts:
     paths:
