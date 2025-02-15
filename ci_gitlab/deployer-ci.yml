@@ -50,6 +50,7 @@ validate_version:
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   script:
+    - docker ps
     - 'export VERSION=$(cat app/app_version.txt)'
     - 'echo "VERSION: $VERSION"'
     - 'TAG="${CI_COMMIT_REF_NAME}-app-v${VERSION}"'
@@ -113,7 +114,7 @@ validate_existing_ECR_tags:
     - |
       ECR_REPO_NAME=$(aws ssm get-parameter --region "${aws_region}" \
         --name "/app/${ENVIRONMENT}/ecr_repository_name" \
-        --query "Parameter.Value" --output text 2>&1 || echo "ParameterNotFound")
+        --query "Parameter.Value" --output text 2>/dev/null || echo "ParameterNotFound")
       
       if [[ "${ECR_REPO_NAME}" == "ParameterNotFound" ]]; then
         echo "No ECR registry for the app has been created yet. Parameter /app/${ENVIRONMENT}/ecr_repository_name doesn't exist: ${ECR_REPO_NAME}"

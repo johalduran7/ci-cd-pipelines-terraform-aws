@@ -170,7 +170,7 @@ validate_existing_infra_tags:
     - |
       infra_version=$(aws ssm get-parameter --region "${aws_region}" \
         --name "/app/${ENVIRONMENT}/infrastructure_version" \
-        --query "Parameter.Value" --output text 2>&1 || echo "ParameterNotFound")
+        --query "Parameter.Value" --output text 2>/dev/null || echo "ParameterNotFound")
       
       if [[ "${infra_version}" == "ParameterNotFound" ]]; then
         echo "No Infrastructure version found. Deploying tag: ${TAG}"
