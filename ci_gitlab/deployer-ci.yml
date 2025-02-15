@@ -174,8 +174,11 @@ build_and_push:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
   script:
+    - 'echo "aws_region: ${aws_region}"'
+    - 'echo "aws_region: ${aws_region}"'
     - 'aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com'
     - 'ECR_REGISTRY="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com"'
+    - 'echo "ECR_REGISTRY: ${ECR_REGISTRY}"'
     - 'git fetch --tags'
     - 'git checkout ${TAG}'
     - cd app/src/
