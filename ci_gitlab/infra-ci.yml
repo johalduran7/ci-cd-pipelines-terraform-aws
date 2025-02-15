@@ -1,3 +1,11 @@
+# workflow:
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH != "master"'  # Exclude master branch
+#       changes:
+#         - app/infra_version.txt  # Trigger only if this file changes
+#       when: always
+#     - when: never  # Prevents the pipeline from running otherwise
+
 stages:
   - setup
   - validate_version
@@ -194,7 +202,7 @@ load_terraform_variables:
   - source variables.env
   script:
     - 'echo "TF_VAR_env=${ENVIRONMENT}" >> variables.env' 
-    - 'echo "TF_VAR_path_user_data=.modules/asg/user_data.sh" >> variables.env' 
+    - 'echo "TF_VAR_path_user_data=${CI_PROJECT_DIR}/app/modules/asg/user_data.sh" >> variables.env' 
     - 'echo "TF_VAR_infrastructure_version=${ENVIRONMENT}-infra-v${VERSION}" >> variables.env' 
     - 'echo "TF_WORKSPACE=${ENVIRONMENT}" >> variables.env' 
     - 'echo "TF_VAR_aws_region=${aws_region}" >> variables.env' 
