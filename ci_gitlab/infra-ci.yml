@@ -195,6 +195,10 @@ load_terraform_variables:
 validate_terraform_config:
   stage: validate_terraform_config
   needs: [load_terraform_variables]
+  rules:
+    - exists:
+        - version.env
+    - if: '$version_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
@@ -234,6 +238,10 @@ validate_terraform_config:
 terraform_plan:
   stage: terraform_plan
   needs: [validate_terraform_config]
+  rules:
+    - exists:
+        - version.env
+    - if: '$version_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
@@ -263,6 +271,10 @@ terraform_plan:
 terraform_apply:
   stage: terraform_apply
   needs: [terraform_plan]
+  rules:
+    - exists:
+        - version.env
+    - if: '$version_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
@@ -292,6 +304,10 @@ terraform_apply:
 # trigger_deployer_pipeline:
 #   stage: trigger_deployer_pipeline
 #   needs: [terraform_apply]
+  # rules:
+  #   - exists:
+  #       - version.env
+  #   - if: '$version_exists == "false"'
 #   before_script:
 #   - export PATH="${BIN_DIR}:$PATH"
 #   - source variables.env
