@@ -1,10 +1,10 @@
-# workflow:
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH != "master"'  # Exclude master branch
-#       changes:
-#         - app/infra_version.txt  # Trigger only if this file changes
-#       when: always
-#     - when: never  # Prevents the pipeline from running otherwise
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "master"'  # Exclude master branch
+      changes:
+        - app/infra_version.txt  # Trigger only if this file changes
+      when: always
+    - when: never  # Prevents the pipeline from running otherwise
 
 stages:
   - setup
@@ -22,26 +22,12 @@ variables:
 
 
 
-#image: amazon/aws-cli:latest #amazon/aws-cli # I'm not using an image just yet
 cache:
   key: "terraform-aws-cli-cache"
   paths:
     - .terraform/  # Cache Terraform modules
     - ${BIN_DIR}/  # Cache AWS CLI & Terraform binaries
   policy: pull-push
-
-  # - > # Installing AWS CLI
-  #   - apt-get update && apt-get install -y jq
-  #   curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip";
-  #   unzip awscliv2.zip;
-  #   ./aws/install;
-  #   rm -rf awscliv2.zip aws;
-  # - > # Installing Terraform
-  #   curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip;
-  #   unzip terraform.zip;
-  #   mv terraform /usr/local/bin/;
-  #   rm terraform.zip;
-  # - apt-get update && apt-get install -y jq
 
 
 setup:
@@ -52,27 +38,6 @@ setup:
     - if [ ! -f "${BIN_DIR}/aws" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && ./aws/install --bin-dir ${BIN_DIR} --install-dir ${BIN_DIR}; fi
     - if [ ! -f "${BIN_DIR}/terraform" ]; then curl -O https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && unzip terraform_${TF_VERSION}_linux_amd64.zip && mv terraform ${BIN_DIR}/; fi
 
-    # # Install AWS CLI if not cached
-    # - |
-    #   if [ ! -f "${CACHE_DIR}/aws-cli/bin/aws" ]; then
-    #     echo "Installing AWS CLI..."
-    #     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-    #     unzip awscliv2.zip
-    #     ./aws/install --install-dir ${CACHE_DIR}/aws-cli --bin-dir ${CACHE_DIR}/aws-cli/bin
-    #     rm -rf awscliv2.zip aws
-    #   fi
-
-    # # Install Terraform if not cached
-    # - |
-    #   if [ ! -f "${CACHE_DIR}/terraform" ]; then
-    #     echo "Installing Terraform..."
-    #     curl -fsSL "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -o terraform.zip
-    #     unzip terraform.zip
-    #     mv terraform $CACHE_DIR/terraform
-    #     rm terraform.zip
-    #   fi
-
-  #image: registry.gitlab.com/gitlab-org/cloud-deploy/aws-base:latest
 
   script:
     #- aws --version
@@ -140,9 +105,6 @@ load_env_variables:
     - 'echo "TAG: ${TAG}"'
     - env
     - 'echo "aws_region: ${aws_region}"' # it will be shown in the next stage
-    # - 'echo "TAG=${TAG}" >> variables.env'
-    # - 'echo "VERSION=${VERSION}" >> variables.env'
-    # - 'echo "ENVIRONMENT=${CI_COMMIT_REF_NAME}" >> variables.env'
     - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
   artifacts:
     paths:
