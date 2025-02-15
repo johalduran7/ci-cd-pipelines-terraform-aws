@@ -100,7 +100,7 @@ load_env_variables:
     policy: pull-push  
 
 validate_existing_ECR_tags:
-  stage: validate_existing_infra_tags
+  stage: validate_existing_ECR_tags
   needs: [load_env_variables]
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
