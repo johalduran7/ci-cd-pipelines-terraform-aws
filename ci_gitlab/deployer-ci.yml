@@ -166,7 +166,7 @@ build_and_push:
   needs: [validate_existing_ECR_tags]
   rules:
     - exists:
-        - version.env
+        - variables.env
     - if: '$tag_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
@@ -181,8 +181,6 @@ build_and_push:
     - 'docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
     - 'docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
     
-
-
   artifacts:
     paths:
       - variables.env  
