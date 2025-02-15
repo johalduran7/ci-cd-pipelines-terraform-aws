@@ -315,8 +315,8 @@ terraform_apply:
       - ${BIN_DIR}/  
     policy: pull-push  
 
-trigger_deployer_pipeline:
-  stage: trigger_deployer_pipeline
-  trigger:
-    project: johalduran/another-repo  # Replace with the actual project path
-    branch: main  # Target branch
+# trigger_deployer_pipeline:
+#   stage: trigger_deployer_pipeline
+#   trigger:
+#     project: johalduran/another-repo  # Replace with the actual project path
+#     branch: main  # Target branch
