@@ -29,6 +29,7 @@ cache:
 
 
 setup:
+  image: docker:20.10.21-alpine3.21
   stage: setup
   before_script:
     - apt-get update && apt-get install -y unzip curl jq #docker.io  
@@ -41,6 +42,8 @@ setup:
     # - 'chmod 666 /var/run/docker.sock'
   script:
     - ls /usr/local/bin/
+    - docker ps
+    - docker --version
   cache:
     key: "docker-aws-cli-cache"
     paths:
@@ -54,7 +57,6 @@ validate_version:
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   script:
-    - docker ps
     - 'export VERSION=$(cat app/app_version.txt)'
     - 'echo "VERSION: $VERSION"'
     - 'TAG="${CI_COMMIT_REF_NAME}-app-v${VERSION}"'
