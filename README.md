@@ -1,7 +1,7 @@
 # Infrastructure and Deployment Automation
 
 ## Overview
-This repository automates the provisioning and deployment of a Node.js application on AWS using Terraform and GitHub Actions/Jenkins.
+This repository automates the provisioning and deployment of a Node.js application on AWS using Terraform, GitHub Actions, Jenkins, and GitLab.
 
 ### Repository Structure
 - **Infrastructure Pipeline**
