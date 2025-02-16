@@ -19,6 +19,7 @@ stages:
 variables:
   BIN_DIR: "${CI_PROJECT_DIR}/bin"  # Store binaries in project directory
   DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""
 
 services:
@@ -51,7 +52,9 @@ setup:
   
 
 build_and_push:
-  image: amazon/aws-cli:latest #docker:latest
+  image: docker:latest
+    services:
+    - docker:19-dind
   stage: build_and_push
   # needs: 
   #   - job: validate_existing_ECR_tags
