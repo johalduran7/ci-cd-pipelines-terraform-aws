@@ -116,6 +116,7 @@ validate_existing_ECR_tags:
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
+  - apt-get install -y jq 
   script:
     - env
     - 'echo TAG on second stage: ${TAG}'
