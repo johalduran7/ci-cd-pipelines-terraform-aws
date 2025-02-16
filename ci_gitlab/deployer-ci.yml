@@ -8,9 +8,9 @@ workflow:
 
 stages:
   - setup
-  - validate_version
-  - load_env_variables
-  - validate_existing_ECR_tags
+  # - validate_version
+  # - load_env_variables
+  # - validate_existing_ECR_tags
   - build_and_push
   # - app_version_to_parameter_store
   # - update_asg
@@ -163,34 +163,35 @@ validate_existing_ECR_tags:
 build_and_push:
   image: amazon/aws-cli:latest #docker:latest
   stage: build_and_push
-  needs: 
-    - job: validate_existing_ECR_tags
-      artifacts: true
+  # needs: 
+  #   - job: validate_existing_ECR_tags
+  #     artifacts: true
   # rules:
   #   - exists:
   #       - variables.env
   #   - if: '$tag_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
-  - source variables.env
+  # - source variables.env
   script:
-    - 'echo "aws_region: ${aws_region}"'
-    - 'echo "aws_region: ${aws_region}"'
-    - 'aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com'
-    - 'ECR_REGISTRY="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com"'
-    - 'echo "ECR_REGISTRY: ${ECR_REGISTRY}"'
-    - 'git fetch --tags'
-    - 'git checkout ${TAG}'
-    - cd app/src/
-    - 'docker build -t ${ECR_REPO_NAME}:${VERSION} .'
-    - 'docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
-    - 'docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
+    -  aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
+    # - 'echo "aws_region: ${aws_region}"'
+    # - 'echo "aws_region: ${aws_region}"'
+    # - 'aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin $(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com'
+    # - 'ECR_REGISTRY="$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com"'
+    # - 'echo "ECR_REGISTRY: ${ECR_REGISTRY}"'
+    # - 'git fetch --tags'
+    # - 'git checkout ${TAG}'
+    # - cd app/src/
+    # - 'docker build -t ${ECR_REPO_NAME}:${VERSION} .'
+    # - 'docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
+    # - 'docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}'
     
-  artifacts:
-    paths:
-      - variables.env  
-    reports:
-      dotenv: variables.env 
+  # artifacts:
+  #   paths:
+  #     - variables.env  
+  #   reports:
+  #     dotenv: variables.env 
   cache:
     key: "docker-aws-cli-cache"
     paths:

@@ -57,7 +57,6 @@ validate_version:
   script:
     - ls /usr/local/bin/
     - aws --version
-    - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
     - env
     - 'echo "Current branch: ${CI_COMMIT_REF_NAME}"'
     - echo "Available tags:" && git tag
@@ -102,7 +101,6 @@ load_env_variables:
     - 'echo "TAG: ${TAG}"'
     - env
     - 'echo "aws_region: ${aws_region}"' # it will be shown in the next stage
-    - aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
   artifacts:
     paths:
       - variables.env  
