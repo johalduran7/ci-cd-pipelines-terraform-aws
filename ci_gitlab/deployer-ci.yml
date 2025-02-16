@@ -198,10 +198,10 @@ build_and_push:
   needs: 
     - job: ECR_login
       artifacts: true
-  # rules:
-  #   - exists:
-  #       - variables.env
-  #   - if: '$tag_exists == "false"'
+  rules:
+    - exists:
+        - variables.env
+    - if: '$tag_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
@@ -228,6 +228,11 @@ build_and_push:
 app_version_to_parameter_store:
   stage: app_version_to_parameter_store
   needs: [build_and_push]
+  rules:
+    - exists:
+        - variables.env
+    - if: '$tag_exists == "false"'
+
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
@@ -254,6 +259,10 @@ app_version_to_parameter_store:
 update_asg:
   stage: update_asg
   needs: [app_version_to_parameter_store]
+  rules:
+    - exists:
+        - variables.env
+    - if: '$tag_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
