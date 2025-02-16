@@ -14,7 +14,7 @@ stages:
   - ECR_login
   - build_and_push
   - app_version_to_parameter_store
-  # - update_asg
+  - update_asg
 
 
 variables:
