@@ -65,13 +65,13 @@ This repository automates the provisioning and deployment of a Node.js applicati
 ### Creating branch, configuring .env, and triggering the pipelines
 ![Setup](./resources/first_part_gif_portfolio.gif)
 
-### Running Infrastructure and Application pipelines on GitHub Actions. <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/github.png" width="18">
+### Running Infrastructure and Application pipelines on GitHub Actions. <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/github.png" width="30">
 ![Setup](./resources/second_part_gif_portfolio.gif)
 
-### Checking deployment on AWS. <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/aws.png" width="18">
+### Checking deployment on AWS. <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/aws.png" width="30">
 ![Setup](./resources/third_part_gif_portfolio.gif)
 
-### Jenkins Deployer and Infrastructure pipelines. <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/jenkins.png" width="18">
+### Jenkins Deployer and Infrastructure pipelines. <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/jenkins.png" width="30">
 ![Setup](./resources/jenkins_gif_portfolio.gif)
 
 ---
