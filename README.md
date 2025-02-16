@@ -2,16 +2,16 @@
 
 ## Overview
 This repository automates the provisioning and deployment of a Node.js application on AWS using Terraform, GitHub Actions, Jenkins, and GitLab.
-<img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/gitlab.png" width="20">
+
 ### Repository Structure
 - **Infrastructure Pipeline**
-  - [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml)
-  - [`jenkins/infrastructure/Jenkinsfile`](jenkins/infrastructure/Jenkinsfile)
-  - [`GitLab->infra-ci.yml`](https://gitlab.com/johalduran/portfolio_John_Duran/-/blob/dev/ci_gitlab/infra-ci.yml?ref_type=heads)
+  - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/github.png" width="18"> [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml)
+  - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/jenkins.png" width="18"> [`jenkins/infrastructure/Jenkinsfile`](jenkins/infrastructure/Jenkinsfile)
+  - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/gitlab.png" width="18"> [`GitLab->infra-ci.yml`](https://gitlab.com/johalduran/portfolio_John_Duran/-/blob/dev/ci_gitlab/infra-ci.yml?ref_type=heads)
 - **Deployer Pipeline**
-  - [`.github/workflows/deployer.yml`](.github/workflows/deployer.yml)
-  - [`jenkins/deployer/Jenkinsfile`](jenkins/deployer/Jenkinsfile)
-  - [`GitLab->deployer-ci.yml`](https://gitlab.com/johalduran/portfolio_John_Duran/-/blob/dev/ci_gitlab/deployer-ci.yml?ref_type=heads)
+  - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/github.png" width="18"> [`.github/workflows/deployer.yml`](.github/workflows/deployer.yml)
+  - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/jenkins.png" width="18"> [`jenkins/deployer/Jenkinsfile`](jenkins/deployer/Jenkinsfile)
+  - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/gitlab.png" width="18"> [`GitLab->deployer-ci.yml`](https://gitlab.com/johalduran/portfolio_John_Duran/-/blob/dev/ci_gitlab/deployer-ci.yml?ref_type=heads)
 - **Infrastructure Code** [`./app/terraform/`](./app/terraform/)
 - **Application Code** [`./app/src/`](./app/src/)
 
