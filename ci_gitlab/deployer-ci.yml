@@ -96,6 +96,7 @@ load_env_variables:
     - 'echo "ENVIRONMENT_UPPERCASE: ${ENVIRONMENT_UPPERCASE}"'
     - 'echo "ENVIRONMENT: ${ENVIRONMENT}"'
     - 'echo "TAG: ${TAG}"'
+    - 'while read line; do echo "$line" >> variables.env; done < app/asg-config.txt'
 
   artifacts:
     paths:
@@ -234,6 +235,37 @@ app_version_to_parameter_store:
       --value "${TAG}" \
       --type "String" \
       --overwrite
+
+  artifacts:
+    paths:
+      - variables.env  
+    reports:
+      dotenv: variables.env 
+  cache:
+    key: "docker-aws-cli-cache"
+    paths:
+      - ${BIN_DIR}/  
+    policy: pull-push  
+
+update_asg:
+  stage: update_asg
+  needs: [app_version_to_parameter_store]
+  before_script:
+  - export PATH="${BIN_DIR}:$PATH"
+  - source variables.env
+  script: 
+    - |
+      # sed -i 's/\r$//' app/asg-config.txt  
+      # set -o allexport  # Enable automatic exporting of variables
+      # source app/asg-config.txt  # Load variables
+      # set +o allexport  # Disable automatic exporting
+      # cat app/asg-config.txt >> $GITHUB_ENV  # Append variables to GITHUB_ENV 
+      aws autoscaling update-auto-scaling-group \
+      --auto-scaling-group-name ${ENVIRONMENT}-app_asg \
+      --min-size ${min_size} \
+      --max-size ${max_size} \
+      --desired-capacity ${desired_capacity}   
+
 
   artifacts:
     paths:
