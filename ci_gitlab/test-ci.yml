@@ -12,8 +12,9 @@ stages:
 set_variable_job:
   stage: set_variable
   script:
-    - VALUE=$(some_command_that_generates_value) # Run your command and capture the output
+    - VALUE=true # Run your command and capture the output
     - echo "EXPORT UPDATED=$VALUE" > variable.env # Export the variable to a .env file
+    - 'echo "Updated variable is: $VALUE"'
   artifacts:
     paths:
       - variable.env
@@ -24,6 +25,6 @@ use_variable_job:
     - set_variable_job
   script:
     - source variable.env # Source the .env file
-    - echo "Updated variable is: $UPDATED"
+    - 'echo "Updated variable is: $UPDATED"'
   rules:
     - if: '$UPDATED == "true"' # Or whatever condition you need
