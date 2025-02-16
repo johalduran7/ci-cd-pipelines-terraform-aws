@@ -96,6 +96,7 @@ load_env_variables:
     - 'echo "ENVIRONMENT_UPPERCASE: ${ENVIRONMENT_UPPERCASE}"'
     - 'echo "ENVIRONMENT: ${ENVIRONMENT}"'
     - 'echo "TAG: ${TAG}"'
+    - cat app/asg-config.txt
     - 'while read line; do echo "$line" >> variables.env; done < app/asg-config.txt'
 
   artifacts:
@@ -255,6 +256,7 @@ update_asg:
   - source variables.env
   script: 
     - |
+
       # sed -i 's/\r$//' app/asg-config.txt  
       # set -o allexport  # Enable automatic exporting of variables
       # source app/asg-config.txt  # Load variables
