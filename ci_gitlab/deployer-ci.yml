@@ -47,6 +47,7 @@ setup:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
+      - /usr/bin/jq
     policy: pull-push  # Save & restore cache across jobs
 
 
@@ -78,7 +79,8 @@ validate_version:
   cache:
     key: "docker-aws-cli-cache"
     paths:
-      - ${BIN_DIR}/  
+      - ${BIN_DIR}/ 
+      - /usr/bin/jq
     policy: pull-push  
 
 load_env_variables:
@@ -105,6 +107,7 @@ load_env_variables:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
+      - /usr/bin/jq
     policy: pull-push  
 
 validate_existing_ECR_tags:
@@ -157,6 +160,7 @@ validate_existing_ECR_tags:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
+      - /usr/bin/jq
     policy: pull-push  
 
 ECR_login:
@@ -188,6 +192,7 @@ ECR_login:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
+      - /usr/bin/jq
     policy: pull-push  
 
 build_and_push:
@@ -223,6 +228,7 @@ build_and_push:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
+      - /usr/bin/jq
     policy: pull-push  
 
 app_version_to_parameter_store:
@@ -254,6 +260,7 @@ app_version_to_parameter_store:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
+      - /usr/bin/jq
     policy: pull-push  
 
 update_asg:
@@ -290,4 +297,5 @@ update_asg:
     key: "docker-aws-cli-cache"
     paths:
       - ${BIN_DIR}/  
+      - /usr/bin/jq
     policy: pull-push  
