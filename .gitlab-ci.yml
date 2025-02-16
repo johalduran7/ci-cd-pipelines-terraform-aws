@@ -1,3 +1,4 @@
 include:
-  - local: "ci_gitlab/infra-ci.yml"   
+  #- local: "ci_gitlab/infra-ci.yml"   
   #- local: "ci_gitlab/deployer-ci.yml"     
+  - local: "ci_gitlab/test-ci.yml"  
