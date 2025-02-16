@@ -201,7 +201,6 @@ build_and_push:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
   script:
-    -  aws s3api list-buckets --region us-east-1 --query "Buckets[].Name"
     - 'echo "${AWS_REGISTRY_PASS}" | echo docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${aws_region}.amazonaws.com'
     - 'git fetch --tags'
     - 'git checkout ${TAG}'
