@@ -34,7 +34,6 @@ cache:
 
 
 setup:
-  #image: docker:latest
   stage: setup
   before_script:
     - apt-get update && apt-get install -y unzip curl jq 
@@ -49,8 +48,6 @@ setup:
     paths:
       - ${BIN_DIR}/  
     policy: pull-push  # Save & restore cache across jobs
-  
-
 
 
 validate_version:
@@ -96,8 +93,8 @@ load_env_variables:
     - 'echo "ENVIRONMENT_UPPERCASE: ${ENVIRONMENT_UPPERCASE}"'
     - 'echo "ENVIRONMENT: ${ENVIRONMENT}"'
     - 'echo "TAG: ${TAG}"'
-    - cat app/asg-config.txt
-    - 'while read line; do echo "$line" >> variables.env; done < app/asg-config.txt'
+    - 'cat app/asg-config.txt >> variables.env'
+    #- 'while read line; do echo "$line" >> variables.env; done < app/asg-config.txt'
 
   artifacts:
     paths:
@@ -164,7 +161,13 @@ validate_existing_ECR_tags:
 
 ECR_login:
   stage: ECR_login
-  needs: [validate_existing_ECR_tags]
+  needs: 
+    - job: validate_existing_ECR_tags
+      artifacts: true
+  rules:
+    - exists:
+        - variables.env
+    - if: '$tag_exists == "false"'
   before_script:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
