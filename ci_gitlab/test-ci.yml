@@ -10,7 +10,7 @@ stages:
   - set_variable_job
   - use_variable_job
 set_variable_job:
-  stage: set_variable
+  stage: set_variable_job
   script:
     - VALUE=true # Run your command and capture the output
     - echo "EXPORT UPDATED=$VALUE" > variable.env # Export the variable to a .env file
@@ -20,7 +20,7 @@ set_variable_job:
       - variable.env
 
 use_variable_job:
-  stage: use_variable
+  stage: use_variable_job
   needs:
     - set_variable_job
   script:
