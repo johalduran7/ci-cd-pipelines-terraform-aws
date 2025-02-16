@@ -12,8 +12,8 @@ This repository automates the provisioning and deployment of a Node.js applicati
   - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/github.png" width="18"> [`.github/workflows/deployer.yml`](.github/workflows/deployer.yml)
   - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/jenkins.png" width="18"> [`jenkins/deployer/Jenkinsfile`](jenkins/deployer/Jenkinsfile)
   - <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/gitlab.png" width="18"> [`GitLab->deployer-ci.yml`](https://gitlab.com/johalduran/portfolio_John_Duran/-/blob/dev/ci_gitlab/deployer-ci.yml?ref_type=heads)
-- **Infrastructure Code** [`./app/terraform/`](./app/terraform/)
-- **Application Code** [`./app/src/`](./app/src/)
+- **Infrastructure Code** <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/terraform.png" width="18"> [`./app/terraform/`](./app/terraform/)
+- **Application Code** <img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/nodejs.png" width="18"> [`./app/src/`](./app/src/)
 
 ---
 ## Terraform Pipeline (Infrastructure Provisioning)
