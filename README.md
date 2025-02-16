@@ -7,9 +7,11 @@ This repository automates the provisioning and deployment of a Node.js applicati
 - **Infrastructure Pipeline**
   - [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml)
   - [`jenkins/infrastructure/Jenkinsfile`](jenkins/infrastructure/Jenkinsfile)
+  - [`GitLab->infra-ci.yml`](https://gitlab.com/johalduran/portfolio_John_Duran/-/blob/dev/ci_gitlab/infra-ci.yml?ref_type=heads)
 - **Deployer Pipeline**
   - [`.github/workflows/deployer.yml`](.github/workflows/deployer.yml)
   - [`jenkins/deployer/Jenkinsfile`](jenkins/deployer/Jenkinsfile)
+  - [`GitLab->deployer-ci.yml`](https://gitlab.com/johalduran/portfolio_John_Duran/-/blob/dev/ci_gitlab/deployer-ci.yml?ref_type=heads)
 - **Infrastructure Code** [`./app/terraform/`](./app/terraform/)
 - **Application Code** [`./app/src/`](./app/src/)
 
