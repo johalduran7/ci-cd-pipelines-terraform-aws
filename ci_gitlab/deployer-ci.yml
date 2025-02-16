@@ -53,7 +53,7 @@ setup:
 
 build_and_push:
   image: docker:latest
-    services:
+  services:
     - docker:19-dind
   stage: build_and_push
   # needs: 
