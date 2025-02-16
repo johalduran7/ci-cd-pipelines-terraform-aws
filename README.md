@@ -2,7 +2,7 @@
 
 ## Overview
 This repository automates the provisioning and deployment of a Node.js application on AWS using Terraform, GitHub Actions, Jenkins, and GitLab.
-
+<img src="https://github.com/johalduran7/portfolio_John_Duran/blob/master/resources/gitlab.png" width="20">
 ### Repository Structure
 - **Infrastructure Pipeline**
   - [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml)
