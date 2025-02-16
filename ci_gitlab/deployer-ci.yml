@@ -13,7 +13,7 @@ stages:
   - validate_existing_ECR_tags
   - ECR_login
   - build_and_push
-  # - app_version_to_parameter_store
+  - app_version_to_parameter_store
   # - update_asg
 
 
@@ -201,8 +201,7 @@ build_and_push:
   - export PATH="${BIN_DIR}:$PATH"
   - source variables.env
   script:
-    - 'echo "${AWS_REGISTRY_PASS}"'
-    - 'echo "${AWS_REGISTRY_PASS}" | echo docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${aws_region}.amazonaws.com'
+    - 'echo "${AWS_REGISTRY_PASS}" | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.${aws_region}.amazonaws.com'
     - 'git fetch --tags'
     - 'git checkout ${TAG}'
     - cd app/src/
@@ -221,3 +220,28 @@ build_and_push:
       - ${BIN_DIR}/  
     policy: pull-push  
 
+app_version_to_parameter_store:
+  stage: app_version_to_parameter_store
+  needs: [build_and_push]
+  before_script:
+  - export PATH="${BIN_DIR}:$PATH"
+  - source variables.env
+  script: 
+    - |
+      aws ssm put-parameter \
+      --name "/app/${ENVIRONMENT}/app_version" \
+      --region ${aws_region} \
+      --value "${TAG}" \
+      --type "String" \
+      --overwrite
+
+  artifacts:
+    paths:
+      - variables.env  
+    reports:
+      dotenv: variables.env 
+  cache:
+    key: "docker-aws-cli-cache"
+    paths:
+      - ${BIN_DIR}/  
+    policy: pull-push  
