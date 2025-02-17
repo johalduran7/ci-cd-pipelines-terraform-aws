@@ -28,10 +28,13 @@ use_variable_job:
 final_stage_job:
   stage: final_stage
   needs:
-    - set_variable_job
+    - use_variable_job
   # before_script:
   #   - source variable.env  # Load persisted variable
 
   script:
     - env
     - 'echo "Updated variable is: ${UPDATED}"' # Verify
+  
+  rules:
+    when: always
