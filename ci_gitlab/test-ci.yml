@@ -10,8 +10,6 @@ set_variable_job:
   artifacts:
     paths:
       - variable.env
-    reports:
-      dotenv: variable.env 
 
 use_variable_job:
   stage: use_variable
