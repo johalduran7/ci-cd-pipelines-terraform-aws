@@ -7,6 +7,7 @@ set_variable_job:
   script:
     - VALUE=false # Or the result of your command
     - 'echo "EXPORT UPDATED=${VALUE}" > variable.env'
+    - env
   artifacts:
     paths:
       - variable.env
@@ -19,9 +20,8 @@ use_variable_job:
     - source variable.env  # Load persisted variable
 
   script:
+    - envs
     - 'echo "Updated variable is: ${UPDATED}"' # Verify
-  rules:
-    #- if: '$CI_COMMIT_BRANCH != "master"' # Add other rules as needed
-    - if: '$UPDATED == "true"' # Check the variable AFTER sourcing it
-      when: always # Crucial: Always evaluate this rule
-    #- when: never # This is necessary so that if the condition is not met, the job is not triggered
+#  rules:
+#    - if: '$UPDATED == "true"' # Check the variable AFTER sourcing it
+#      when: always # Crucial: Always evaluate this rule
