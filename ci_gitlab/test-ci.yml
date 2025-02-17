@@ -13,6 +13,8 @@ set_variable_job:
   artifacts:
     paths:
       - variable.env
+  allow_failure: true # Allow this job to fail without failing the pipeline
+
 
 use_variable_job:
   stage: use_variable
