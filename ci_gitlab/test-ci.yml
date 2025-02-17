@@ -37,4 +37,4 @@ final_stage_job:
     - 'echo "Updated variable is: ${UPDATED}"' # Verify
   
   rules:
-    when: always
+    - when: always
