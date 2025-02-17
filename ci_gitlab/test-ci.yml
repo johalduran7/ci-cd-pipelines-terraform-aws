@@ -26,6 +26,8 @@ use_variable_job:
   script:
     - env
     - 'echo "Updated variable is: ${UPDATED}"' # Verify
+  when: on_success  # Runs only if the previous stage succeeds
+
 
 final_stage_job:
   stage: final_stage
