@@ -5,21 +5,25 @@ stages:
 set_variable_job:
   stage: set_variable
   script:
-    - VALUE=true # Or the result of your command
+    - VALUE=false # Or the result of your command
     - echo "EXPORT UPDATED=${VALUE}" > variable.env
   artifacts:
     paths:
       - variable.env
+    reports:
+      dotenv: variable.env 
 
 use_variable_job:
   stage: use_variable
   needs:
     - set_variable_job
+  before_script:
+    - source variable.env  # Load persisted variable
+
   script:
-    - source variable.env  # Source the .env file *first*
     - 'echo "Updated variable is: ${UPDATED}"' # Verify
   rules:
-    - if: '$CI_COMMIT_BRANCH != "master"' # Add other rules as needed
+    #- if: '$CI_COMMIT_BRANCH != "master"' # Add other rules as needed
     - if: '$UPDATED == "true"' # Check the variable AFTER sourcing it
       when: always # Crucial: Always evaluate this rule
     - when: never # This is necessary so that if the condition is not met, the job is not triggered
