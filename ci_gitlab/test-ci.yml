@@ -1,6 +1,7 @@
 stages:
   - set_variable
   - use_variable
+  - final_stage
 
 set_variable_job:
   stage: set_variable
@@ -8,6 +9,7 @@ set_variable_job:
     - VALUE=false # Or the result of your command
     - 'echo "EXPORT UPDATED=${VALUE}" > variable.env'
     - env
+    - 'exit 1'
   artifacts:
     paths:
       - variable.env
@@ -22,6 +24,14 @@ use_variable_job:
   script:
     - env
     - 'echo "Updated variable is: ${UPDATED}"' # Verify
-#  rules:
-#    - if: '$UPDATED == "true"' # Check the variable AFTER sourcing it
-#      when: always # Crucial: Always evaluate this rule
+
+final_stage_job:
+  stage: final_stage
+  needs:
+    - set_variable_job
+  # before_script:
+  #   - source variable.env  # Load persisted variable
+
+  script:
+    - env
+    - 'echo "Updated variable is: ${UPDATED}"' # Verify
