@@ -16,11 +16,11 @@ use_variable_job:
   stage: use_variable
   needs:
     - set_variable_job
-  before_script:
-    - source variable.env  # Load persisted variable
+  # before_script:
+  #   - source variable.env  # Load persisted variable
 
   script:
-    - envs
+    - env
     - 'echo "Updated variable is: ${UPDATED}"' # Verify
 #  rules:
 #    - if: '$UPDATED == "true"' # Check the variable AFTER sourcing it
