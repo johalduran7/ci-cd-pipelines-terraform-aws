@@ -24,4 +24,4 @@ use_variable_job:
     #- if: '$CI_COMMIT_BRANCH != "master"' # Add other rules as needed
     - if: '$UPDATED == "true"' # Check the variable AFTER sourcing it
       when: always # Crucial: Always evaluate this rule
-    - when: never # This is necessary so that if the condition is not met, the job is not triggered
+    #- when: never # This is necessary so that if the condition is not met, the job is not triggered
