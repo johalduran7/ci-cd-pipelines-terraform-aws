@@ -18,8 +18,8 @@ set_variable_job:
 
 use_variable_job:
   stage: use_variable
-  needs:
-    - set_variable_job
+  # needs:
+  #   - set_variable_job
   # before_script:
   #   - source variable.env  # Load persisted variable
 
