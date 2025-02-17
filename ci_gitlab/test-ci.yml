@@ -1,29 +1,25 @@
-workflow:
-  rules:
-    - if: '$CI_COMMIT_BRANCH != "master"'
-      when: always
-    - when: never
-
 stages:
-  - set_variable  # Stage name
-  - use_variable  # Stage name
+  - set_variable
+  - use_variable
 
-set_variable_job: # Job name
-  stage: set_variable # Correct stage association
+set_variable_job:
+  stage: set_variable
   script:
-    - VALUE=true
+    - VALUE=true # Or the result of your command
     - echo "EXPORT UPDATED=${VALUE}" > variable.env
-    - 'echo "Updated variable is: ${VALUE}"'
   artifacts:
     paths:
       - variable.env
 
-use_variable_job: # Job name
-  stage: use_variable # Correct stage association
+use_variable_job:
+  stage: use_variable
   needs:
     - set_variable_job
   script:
-    - source variable.env
-    - 'echo "Updated variable is: ${UPDATED}"'
+    - source variable.env  # Source the .env file *first*
+    - 'echo "Updated variable is: ${UPDATED}"' # Verify
   rules:
-    - if: '${UPDATED} == "true"'
+    - if: '$CI_COMMIT_BRANCH != "master"' # Add other rules as needed
+    - if: '$UPDATED == "true"' # Check the variable AFTER sourcing it
+      when: always # Crucial: Always evaluate this rule
+    - when: never # This is necessary so that if the condition is not met, the job is not triggered
