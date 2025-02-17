@@ -26,4 +26,4 @@ use_variable_job: # Job name
     - source variable.env
     - 'echo "Updated variable is: ${UPDATED}"'
   rules:
-    - if: '$UPDATED == "true"'
+    - if: '${UPDATED} == "true"'
