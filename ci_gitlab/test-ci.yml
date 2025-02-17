@@ -6,7 +6,7 @@ set_variable_job:
   stage: set_variable
   script:
     - VALUE=false # Or the result of your command
-    - echo "EXPORT UPDATED=${VALUE}" > variable.env
+    - 'echo "EXPORT UPDATED=${VALUE}" > variable.env'
   artifacts:
     paths:
       - variable.env
