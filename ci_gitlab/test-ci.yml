@@ -1,30 +1,29 @@
 workflow:
   rules:
-    - if: '$CI_COMMIT_BRANCH != "master"'  # Exclude master branch
-      #changes:
-      #  - app/infra_version.txt  # Trigger only if this file changes
+    - if: '$CI_COMMIT_BRANCH != "master"'
       when: always
-    - when: never  # Prevents the pipeline from running otherwise
+    - when: never
 
 stages:
-  - set_variable_job
-  - use_variable_job
-set_variable_job:
-  stage: set_variable_job
+  - set_variable  # Stage name
+  - use_variable  # Stage name
+
+set_variable_job: # Job name
+  stage: set_variable # Correct stage association
   script:
-    - VALUE=true # Run your command and capture the output
-    - echo "EXPORT UPDATED=${VALUE}" > variable.env # Export the variable to a .env file
+    - VALUE=true
+    - echo "EXPORT UPDATED=${VALUE}" > variable.env
     - 'echo "Updated variable is: ${VALUE}"'
   artifacts:
     paths:
       - variable.env
 
-use_variable_job:
-  stage: use_variable_job
+use_variable_job: # Job name
+  stage: use_variable # Correct stage association
   needs:
     - set_variable_job
   script:
-    - source variable.env # Source the .env file
+    - source variable.env
     - 'echo "Updated variable is: ${UPDATED}"'
   rules:
-    - if: '$UPDATED == "true"' # Or whatever condition you need
+    - if: '$UPDATED == "true"'
