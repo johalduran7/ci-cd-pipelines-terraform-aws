@@ -227,7 +227,8 @@ pipeline {
 
 
         }
-        stage('Build and push') {
+
+        stage('ECR Login preparation') {
             when {
                 expression { return tag_exists == "false" }
             }
@@ -283,31 +284,7 @@ pipeline {
                                     --cache-dir=/kaniko/cache
                                 """,
                                 returnStdout: true
-                            ).trim()
-
-
-                            // def outputBuild = sh (
-                            //     script: """
-                            //     git checkout "${TAG}"
-                            //     cd app/src/
-                            //     docker build -t ${ECR_REPO_NAME}:${VERSION} .
-                            //     """,
-                            //     returnStdout: true
-                            // ).trim()
-
-                            // def outputTag = sh (
-                            //     script: """
-                            //     docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
-                            //     """,
-                            //     returnStdout: true
-                            // ).trim()
-
-                            // def outputPush = sh (
-                            //     script: """
-                            //     docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
-                            //     """,
-                            //     returnStdout: true
-                            // ).trim()                            
+                            ).trim()                   
                             
                     }
                 
@@ -315,6 +292,114 @@ pipeline {
             }
 
         }
+        stage('Build and push') {
+            agent {
+                docker {
+                    image 'gcr.io/kaniko-project/executor:latest'
+                    args '--entrypoint=""' // Avoids issues with default entrypoint
+                }
+            }
+            steps {
+                script {
+                    sh '''
+                    echo "Running Kaniko to build and push image..."
+                    /kaniko/executor \
+                        --dockerfile ./app/src/Dockerfile \
+                        --destination $ECR_REGISTRY/$ECR_REPO_NAME:${VERSION} \
+                        --verbosity debug
+                    '''
+                }
+            }
+        }
+
+        // stage('Build and push') {
+        //     when {
+        //         expression { return tag_exists == "false" }
+        //     }
+        //     steps {
+        //         script {
+        //             // Checkout repository
+        //             checkout scm
+
+        //             // Get the current infrastructure version
+        //             echo "aws_region = ${envVars['aws_region']}"
+        //             aws_region="${envVars['aws_region']}"
+        //             println("aws_region: ${aws_region}")
+        //             withCredentials([[ 
+        //                 $class: 'AmazonWebServicesCredentialsBinding',
+        //                 credentialsId: 'AWS_CREDENTIALS_ID',
+        //                 accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+        //                 secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        //                 ]
+        //                 ]){
+                            
+        //                     def outputECR_login = sh (
+        //                         script: """
+                                
+        //                         aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com
+                                
+        //                         """,
+        //                         returnStdout: true
+        //                     ).trim()
+        //                     println("Output ECR_login:${outputECR_login} ")
+        //                     //expected output: Login Succeeded
+                            
+        //                     def outputRegistry = sh (
+        //                         script: """
+        //                         ECR_REGISTRY="\$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com"
+        //                         echo "\$ECR_REGISTRY"
+        //                         """,
+        //                         returnStdout: true
+        //                     ).trim()
+        //                     ECR_REGISTRY=outputRegistry
+        //                     //expoected output: 948586925757.dkr.ecr.us-east-1.amazonaws.com
+        //                     println("ECR_REGISTRY: ${ECR_REGISTRY}")
+
+        //                     def outputBuildTagPush = sh (
+        //                         script: """
+        //                         git checkout "${TAG}"
+                                
+        //                         # Run Kaniko executor directly (since it's installed in the agent)
+        //                         /kaniko-executor \
+        //                             --context=dir:///app/src/ \
+        //                             --dockerfile=/app/src/Dockerfile \
+        //                             --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
+        //                             --cache=true \
+        //                             --cache-dir=/kaniko/cache
+        //                         """,
+        //                         returnStdout: true
+        //                     ).trim()
+
+
+        //                     // def outputBuild = sh (
+        //                     //     script: """
+        //                     //     git checkout "${TAG}"
+        //                     //     cd app/src/
+        //                     //     docker build -t ${ECR_REPO_NAME}:${VERSION} .
+        //                     //     """,
+        //                     //     returnStdout: true
+        //                     // ).trim()
+
+        //                     // def outputTag = sh (
+        //                     //     script: """
+        //                     //     docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+        //                     //     """,
+        //                     //     returnStdout: true
+        //                     // ).trim()
+
+        //                     // def outputPush = sh (
+        //                     //     script: """
+        //                     //     docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+        //                     //     """,
+        //                     //     returnStdout: true
+        //                     // ).trim()                            
+                            
+        //             }
+                
+        //         }
+        //     }
+
+        // }
 
         stage('App_version to Parameter Store') {
             steps {
