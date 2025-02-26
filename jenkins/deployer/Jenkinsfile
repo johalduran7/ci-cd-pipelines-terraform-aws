@@ -10,15 +10,19 @@ def tag_exists = ''
 def ECR_REGISTRY = ''
 def asgVars = [:]
 pipeline {
-    agent {
-        label 'ecs_fargate_slaves_default'
-    }
+    // agent {
+    //     label 'ecs_fargate_slaves_default'
+    // }
+    agent none
     tools {
         terraform 'Terraform 1.9.5 amd64'
     }
 
     stages {
         stage('Detect Branch') {
+            agent {
+                label 'ecs_fargate_slaves_default' 
+            }
             steps {
                 script {
                     sh 'printenv'
@@ -57,6 +61,9 @@ pipeline {
             }
         }
         stage('Read .env File') {
+            agent {
+                label 'ecs_fargate_slaves_default' 
+            }
             steps {
                 script {
                     // Read the .env file
@@ -99,6 +106,9 @@ pipeline {
             }
         }  
         stage('Print Variables') {
+            agent {
+                label 'ecs_fargate_slaves_default' 
+            }
             steps {
                 script {
                     // Use the dynamically created variables from the global map
@@ -114,6 +124,9 @@ pipeline {
             }
         }
         stage('Validate Version') {
+            agent {
+                label 'ecs_fargate_slaves_default' 
+            }
             steps {
                 script {
                     // Checkout repository
@@ -158,6 +171,9 @@ pipeline {
             }
         }
         stage('Validate Existing ECR tags') {
+            agent {
+                label 'ecs_fargate_slaves_default' 
+            }
             steps {
                 script {
                     // Checkout repository
@@ -405,6 +421,9 @@ pipeline {
         }
 
         stage('App_version to Parameter Store') {
+            agent {
+                label 'ecs_fargate_slaves_default' 
+            }
             steps {
                 script {
                     // Checkout repository
@@ -445,6 +464,9 @@ pipeline {
         }        
 
         stage('Update ASG') {
+            agent {
+                label 'ecs_fargate_slaves_default' 
+            }
             steps {
                 script {
                     // Checkout repository
