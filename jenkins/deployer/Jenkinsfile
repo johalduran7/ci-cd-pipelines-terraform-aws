@@ -358,11 +358,11 @@ pipeline {
                             def outputBuildTagPush = sh (
                                 script: """
                                 git checkout "${TAG}"
-                                
+                                cd app/src/
                                 # Run Kaniko executor directly (since it's installed in the agent)
                                 /kaniko/executor \
-                                    --context=dir:///app/src/ \
-                                    --dockerfile=/app/src/Dockerfile \
+                                    --context=dir://$(pwd) \
+                                    --dockerfile=$(pwd)/Dockerfile \
                                     --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
                                     --cache=true \
                                     --cache-dir=/kaniko/cache
