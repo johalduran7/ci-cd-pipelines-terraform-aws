@@ -249,15 +249,15 @@ pipeline {
                         ]
                         ]){
                             
-                            def outputECR_login = sh (
-                                script: """
+                            // def outputECR_login = sh (
+                            //     script: """
                                 
-                                aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com
+                            //     aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${aws_region}.amazonaws.com
                                 
-                                """,
-                                returnStdout: true
-                            ).trim()
-                            println("Output ECR_login:${outputECR_login} ")
+                            //     """,
+                            //     returnStdout: true
+                            // ).trim()
+                            // println("Output ECR_login:${outputECR_login} ")
                             //expected output: Login Succeeded
                             
                             def outputRegistry = sh (
