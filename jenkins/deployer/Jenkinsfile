@@ -10,19 +10,15 @@ def tag_exists = ''
 def ECR_REGISTRY = ''
 def asgVars = [:]
 pipeline {
-    // agent {
-    //     label 'ecs_fargate_slaves_default'
-    // }
-    agent none
+    agent {
+        label 'ecs_fargate_slaves_default'
+    }
     tools {
         terraform 'Terraform 1.9.5 amd64'
     }
 
     stages {
         stage('Detect Branch') {
-            agent {
-                label 'ecs_fargate_slaves_default' 
-            }
             steps {
                 script {
                     sh 'printenv'
@@ -61,9 +57,6 @@ pipeline {
             }
         }
         stage('Read .env File') {
-            agent {
-                label 'ecs_fargate_slaves_default' 
-            }
             steps {
                 script {
                     // Read the .env file
@@ -106,9 +99,6 @@ pipeline {
             }
         }  
         stage('Print Variables') {
-            agent {
-                label 'ecs_fargate_slaves_default' 
-            }
             steps {
                 script {
                     // Use the dynamically created variables from the global map
@@ -124,9 +114,6 @@ pipeline {
             }
         }
         stage('Validate Version') {
-            agent {
-                label 'ecs_fargate_slaves_default' 
-            }
             steps {
                 script {
                     // Checkout repository
@@ -171,9 +158,6 @@ pipeline {
             }
         }
         stage('Validate Existing ECR tags') {
-            agent {
-                label 'ecs_fargate_slaves_default' 
-            }
             steps {
                 script {
                     // Checkout repository
@@ -332,9 +316,6 @@ pipeline {
             when {
                 expression { return tag_exists == "false" }
             }
-            agent {
-                label 'master' // This label must match the ECS Fargate agent in Jenkins
-            }
             steps {
                 script {
                     // Checkout repository
@@ -374,44 +355,44 @@ pipeline {
                             //expoected output: 948586925757.dkr.ecr.us-east-1.amazonaws.com
                             println("ECR_REGISTRY: ${ECR_REGISTRY}")
 
-                            // def outputBuildTagPush = sh (
+                            def outputBuildTagPush = sh (
+                                script: """
+                                git checkout "${TAG}"
+                                
+                                # Run Kaniko executor directly (since it's installed in the agent)
+                                /kaniko-executor \
+                                    --context=dir:///app/src/ \
+                                    --dockerfile=/app/src/Dockerfile \
+                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
+                                    --cache=true \
+                                    --cache-dir=/kaniko/cache
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+
+                            // def outputBuild = sh (
                             //     script: """
                             //     git checkout "${TAG}"
-                                
-                            //     # Run Kaniko executor directly (since it's installed in the agent)
-                            //     /kaniko-executor \
-                            //         --context=dir:///app/src/ \
-                            //         --dockerfile=/app/src/Dockerfile \
-                            //         --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
-                            //         --cache=true \
-                            //         --cache-dir=/kaniko/cache
+                            //     cd app/src/
+                            //     docker build -t ${ECR_REPO_NAME}:${VERSION} .
                             //     """,
                             //     returnStdout: true
                             // ).trim()
 
+                            // def outputTag = sh (
+                            //     script: """
+                            //     docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                            //     """,
+                            //     returnStdout: true
+                            // ).trim()
 
-                            def outputBuild = sh (
-                                script: """
-                                git checkout "${TAG}"
-                                cd app/src/
-                                docker build -t ${ECR_REPO_NAME}:${VERSION} .
-                                """,
-                                returnStdout: true
-                            ).trim()
-
-                            def outputTag = sh (
-                                script: """
-                                docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
-                                """,
-                                returnStdout: true
-                            ).trim()
-
-                            def outputPush = sh (
-                                script: """
-                                docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
-                                """,
-                                returnStdout: true
-                            ).trim()                            
+                            // def outputPush = sh (
+                            //     script: """
+                            //     docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                            //     """,
+                            //     returnStdout: true
+                            // ).trim()                            
                             
                     }
                 
@@ -421,9 +402,6 @@ pipeline {
         }
 
         stage('App_version to Parameter Store') {
-            agent {
-                label 'ecs_fargate_slaves_default' 
-            }
             steps {
                 script {
                     // Checkout repository
@@ -464,9 +442,6 @@ pipeline {
         }        
 
         stage('Update ASG') {
-            agent {
-                label 'ecs_fargate_slaves_default' 
-            }
             steps {
                 script {
                     // Checkout repository
