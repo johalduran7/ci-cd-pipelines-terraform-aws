@@ -269,22 +269,7 @@ pipeline {
                             ).trim()
                             ECR_REGISTRY=outputRegistry
                             //expoected output: 948586925757.dkr.ecr.us-east-1.amazonaws.com
-                            println("ECR_REGISTRY: ${ECR_REGISTRY}")
-
-                            def outputBuildTagPush = sh (
-                                script: """
-                                git checkout "${TAG}"
-                                
-                                # Run Kaniko executor directly (since it's installed in the agent)
-                                /kaniko-executor \
-                                    --context=dir:///app/src/ \
-                                    --dockerfile=/app/src/Dockerfile \
-                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
-                                    --cache=true \
-                                    --cache-dir=/kaniko/cache
-                                """,
-                                returnStdout: true
-                            ).trim()                   
+                            println("ECR_REGISTRY: ${ECR_REGISTRY}")               
                             
                     }
                 
