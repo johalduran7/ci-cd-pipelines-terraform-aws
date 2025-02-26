@@ -358,44 +358,44 @@ pipeline {
                             //expoected output: 948586925757.dkr.ecr.us-east-1.amazonaws.com
                             println("ECR_REGISTRY: ${ECR_REGISTRY}")
 
-                            def outputBuildTagPush = sh (
+                            // def outputBuildTagPush = sh (
+                            //     script: """
+                            //     git checkout "${TAG}"
+                                
+                            //     # Run Kaniko executor directly (since it's installed in the agent)
+                            //     /kaniko-executor \
+                            //         --context=dir:///app/src/ \
+                            //         --dockerfile=/app/src/Dockerfile \
+                            //         --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
+                            //         --cache=true \
+                            //         --cache-dir=/kaniko/cache
+                            //     """,
+                            //     returnStdout: true
+                            // ).trim()
+
+
+                            def outputBuild = sh (
                                 script: """
                                 git checkout "${TAG}"
-                                
-                                # Run Kaniko executor directly (since it's installed in the agent)
-                                /kaniko-executor \
-                                    --context=dir:///app/src/ \
-                                    --dockerfile=/app/src/Dockerfile \
-                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
-                                    --cache=true \
-                                    --cache-dir=/kaniko/cache
+                                cd app/src/
+                                docker build -t ${ECR_REPO_NAME}:${VERSION} .
                                 """,
                                 returnStdout: true
                             ).trim()
 
+                            def outputTag = sh (
+                                script: """
+                                docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                                """,
+                                returnStdout: true
+                            ).trim()
 
-                            // def outputBuild = sh (
-                            //     script: """
-                            //     git checkout "${TAG}"
-                            //     cd app/src/
-                            //     docker build -t ${ECR_REPO_NAME}:${VERSION} .
-                            //     """,
-                            //     returnStdout: true
-                            // ).trim()
-
-                            // def outputTag = sh (
-                            //     script: """
-                            //     docker tag ${ECR_REPO_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
-                            //     """,
-                            //     returnStdout: true
-                            // ).trim()
-
-                            // def outputPush = sh (
-                            //     script: """
-                            //     docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
-                            //     """,
-                            //     returnStdout: true
-                            // ).trim()                            
+                            def outputPush = sh (
+                                script: """
+                                docker push ${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                                """,
+                                returnStdout: true
+                            ).trim()                            
                             
                     }
                 
