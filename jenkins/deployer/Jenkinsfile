@@ -273,16 +273,18 @@ pipeline {
                             def outputBuildTagPush = sh (
                                 script: """
                                 git checkout "${TAG}"
-                                docker run --rm \
-                                    -v ./app/src/:/workspace \
-                                    -v /tmp:/kaniko/cache \
-                                    gcr.io/kaniko-project/executor:latest \
-                                    --context=dir:///workspace \
-                                    --dockerfile=Dockerfile \
-                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}
+                                
+                                # Run Kaniko executor directly (since it's installed in the agent)
+                                /kaniko-executor \
+                                    --context=dir:///app/src/ \
+                                    --dockerfile=/app/src/Dockerfile \
+                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
+                                    --cache=true \
+                                    --cache-dir=/kaniko/cache
                                 """,
                                 returnStdout: true
-                            ).trim()   
+                            ).trim()
+
 
                             // def outputBuild = sh (
                             //     script: """
