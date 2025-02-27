@@ -368,6 +368,7 @@ pipeline {
                                     --cache-repo=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
                                     --cache-dir=/kaniko/cache
                                     --cache-copy-layers=false
+                                    --no-push-cache
 
                                 """,
                                 returnStdout: true
