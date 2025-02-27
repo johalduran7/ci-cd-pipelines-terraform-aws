@@ -365,6 +365,7 @@ pipeline {
                                     --dockerfile=\$(pwd)/Dockerfile \
                                     --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
                                     --cache=true \
+                                    --cache-repo=${ECR_REGISTRY}/${ECR_REPO_NAME}-cache \
                                     --cache-dir=/kaniko/cache
                                 """,
                                 returnStdout: true
