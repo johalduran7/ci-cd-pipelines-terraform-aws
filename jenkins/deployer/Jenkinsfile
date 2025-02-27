@@ -358,6 +358,7 @@ pipeline {
                             def outputBuildTagPush = sh (
                                 script: """
                                 git checkout "${TAG}"
+                                echo "PWD before kaniko:" \$(pwd)
                                 cd app/src/
                                 # Run Kaniko executor directly (since it's installed in the agent)
                                 /kaniko/executor \
