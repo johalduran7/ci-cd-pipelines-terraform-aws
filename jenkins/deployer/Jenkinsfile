@@ -362,11 +362,9 @@ pipeline {
                                 cd app/src/
                                 # Run Kaniko executor directly (since it's installed in the agent)
                                 /kaniko/executor \
-                                    --context=dir://\$(pwd) \
+                                    --context=dir://\$(pwd)/ \
                                     --dockerfile=\$(pwd)/Dockerfile \
-                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} 
-                                    
-
+                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION}                              
                                 """,
                                 returnStdout: true
                             ).trim()
