@@ -363,8 +363,7 @@ pipeline {
                                 /kaniko/executor \
                                     --context=dir://\$(pwd) \
                                     --dockerfile=\$(pwd)/Dockerfile \
-                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
-                                    --no-cache
+                                    --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} 
 
                                 """,
                                 returnStdout: true
