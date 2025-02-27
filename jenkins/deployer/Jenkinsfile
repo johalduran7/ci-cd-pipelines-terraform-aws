@@ -360,7 +360,7 @@ pipeline {
                                 git checkout "${TAG}"
                                 cd app/src/
                                 # Run Kaniko executor directly (since it's installed in the agent)
-                                sudo /kaniko/executor \
+                                /kaniko/executor \
                                     --context=dir://\$(pwd) \
                                     --dockerfile=\$(pwd)/Dockerfile \
                                     --destination=${ECR_REGISTRY}/${ECR_REPO_NAME}:${VERSION} \
